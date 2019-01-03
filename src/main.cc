@@ -11,3 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+#include "worker.h"
+#include <iostream>
+
+int main(int argc, char **argv) {
+
+  std::cout << " yo!\n";
+  return 0;
+}
+
