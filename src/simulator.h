@@ -12,15 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "event.h"
+#include <functional>
+#include <map>
+#include <memory>
+#include <queue>
+
 namespace axe {
 namespace simulation {
 
-class Scheduler {
+class Simulator {
 public:
-  Scheduler() {}
+  void init() {
+    // TODO(sxd) : register handler for every event
+  }
 
 private:
+  std::map<int, std::function<void(Event event)>> handler_map;
+  std::priority_queue<Event> pq;
 };
 
-}  // namespace simulation
-}  // namespace axe
+} // namespace simulation
+} // namespace axe

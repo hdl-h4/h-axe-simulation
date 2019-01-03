@@ -37,5 +37,5 @@ private:
   std::vector<std::shared_ptr<Precedence>> precedences;
 };
 
-}  // namespace simulation
-}  // namespace axe
+} // namespace simulation
+} // namespace axe

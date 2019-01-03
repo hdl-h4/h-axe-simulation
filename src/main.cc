@@ -17,7 +17,6 @@
 
 int main(int argc, char **argv) {
 
-  std::cout << " yo!\n";
+  std::cout << "simulator!!!\n";
   return 0;
 }
-
