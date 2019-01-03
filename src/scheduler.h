@@ -16,13 +16,11 @@ namespace axe {
 namespace simulation {
 
 class Scheduler {
-  public:
-    Scheduler() {}
+public:
+  Scheduler() {}
 
+private:
+};
 
-  private:
-
-}
-
-}
-}
+}  // namespace simulation
+}  // namespace axe

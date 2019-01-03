@@ -11,20 +11,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include <vector>
 #include "task.h"
-
+#include <vector>
 
 namespace axe {
 namespace simulation {
 
 class Job {
-  public:
-    Job() {}
+public:
+  Job() {}
 
-  private:
-    
+private:
 };
 
-}
-}
+}  // namespace simulation
+}  // namespace axe

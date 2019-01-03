@@ -15,5 +15,5 @@
 namespace axe {
 namespace simulation {
 
-}
-}
+}  // namespace simulation
+}  // namespace axe

@@ -17,8 +17,8 @@
 namespace axe {
 namespace simulation {
 
-enum resource {cpu = 1, memory, network, disk};
-enum dependency {syn = 1, asyn};
+enum resource { cpu = 1, memory, network, disk };
+enum dependency { syn = 1, asyn };
 
 class Task;
 
@@ -28,15 +28,14 @@ struct Precedence {
 };
 
 class Task {
-  public:
-    Task() {}
+public:
+  Task() {}
 
-  private:
-    int resource;
-    int duration;
-    std::vector<std::shared_ptr<Precedence>> precedences;
-
+private:
+  int resource;
+  int duration;
+  std::vector<std::shared_ptr<Precedence>> precedences;
 };
 
-}
-}
+}  // namespace simulation
+}  // namespace axe
