@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
 #include <stdint.h>
 
 namespace axe {
@@ -27,44 +29,44 @@ enum EventType { TASK_FINISH = 0, NEW_TASK, NEW_JOB };
 
 class Event {
 public:
-  Event(int eventType, int time, int priority, int job_id, int task_id,
+  Event(int event_type, int time, int priority, int job_id, int task_id,
         int work_id)
-      : eventType(eventType), time(time), priority(priority), job_id(job_id),
-        task_id(task_id), work_id(work_id) {}
+      : event_type_(event_type), time_(time), priority_(priority), job_id_(job_id),
+        task_id_(task_id), work_id_(work_id) {}
 
-  int getEventType() const { return eventType; }
-  int getTime() const { return time; }
-  void setTime(int time) { time = time; }
-  int getPriority() const { return priority; }
-  void setPriority(int priority) { priority = priority; }
-  int getJobId() const { return job_id; }
-  void setJobId(int job_id) { job_id = job_id; }
-  int getTaskId() const { return task_id; }
-  void setTaskId(int task_id) { task_id = task_id; }
-  int getWorkId() const { return work_id; }
+  int GetEventType() const { return event_type_; }
+  int GetTime() const { return time_; }
+  void SetTime(int time) { time_ = time; }
+  int GetPriority() const { return priority_; }
+  void SetPriority(int priority) { priority_ = priority; }
+  int GetJobId() const { return job_id_; }
+  void SetJobId(int job_id) { job_id_ = job_id; }
+  int GetTaskId() const { return task_id_; }
+  void SetTaskId(int task_id) { task_id_ = task_id; }
+  int GetWorkId() const { return work_id_; }
 
   bool operator<(const Event &rhs) const {
-    if (time < rhs.getTime())
+    if (time_ < rhs.GetTime())
       return true;
-    else if (time > rhs.getTime())
+    else if (time_ > rhs.GetTime())
       return false;
     else {
-      if (eventType < rhs.getEventType())
+      if (event_type_ < rhs.GetEventType())
         return true;
-      else if (eventType > rhs.getEventType())
+      else if (event_type_ > rhs.GetEventType())
         return false;
       else
-        return priority < rhs.priority;
+        return priority_ < rhs.GetPriority();
     }
   }
 
 private:
-  int eventType;
-  int time;
-  int priority;
-  int job_id;
-  int task_id;
-  int work_id;
+  int event_type_;
+  int time_;
+  int priority_;
+  int job_id_;
+  int task_id_;
+  int work_id_;
 };
 
 } // namespace simulation

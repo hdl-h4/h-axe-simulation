@@ -21,4 +21,3 @@ add_executable(Simulation src/main.cc)
 target_link_libraries(Simulation ${AXE_EXTERNAL_LIB})
 set_property(TARGET Simulation PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD})
 set_property(TARGET Simulation PROPERTY RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
-

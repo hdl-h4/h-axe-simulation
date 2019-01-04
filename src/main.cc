@@ -12,11 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "worker.h"
+#pragma once
+
+#include "simulator.h"
 #include <iostream>
+
+namespace axe{
+namespace simulation{
 
 int main(int argc, char **argv) {
 
   std::cout << "simulator!!!\n";
+  Simulator simulator;
+  
   return 0;
 }
+
+}
+}
+

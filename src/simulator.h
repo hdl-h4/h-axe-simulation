@@ -12,24 +12,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "event.h"
+#pragma once
+
 #include <functional>
 #include <map>
 #include <memory>
 #include <queue>
+#include <vector>
+#include <string>
+
+#include "event.h"
+#include "scheduler.h"
+#include "job_manager.h"
 
 namespace axe {
 namespace simulation {
 
 class Simulator {
 public:
-  void init() {
-    // TODO(sxd) : register handler for every event
+  void Init() {
+    // TODO(SXD): read the configuration file and new JMs and Scheduler
+    // read the configuration file and parse into WS and JS
+    std::string workers_desc;
+    std::vector<std::string> jobs_desc;
+    auto scheduler = std::make_shared<Scheduler> (workers_desc);
+    auto jms = std::vector<std::shared_ptr<JobManager>>();
+    for(const auto& job_desc : jobs_desc) {
+      jms.push_back(std::make_shared<JobManager>(job_desc));
+    }
+  }
+
+  void Serve() {
+    //TODO(SXD): process the event in pq one by one according to the priority order
+  }
+
+  void Dispatch(const std::shared_ptr<Event> event) {
+    //TODO(SXD): send the event to different components to handle
   }
 
 private:
-  std::map<int, std::function<void(Event event)>> handler_map;
-  std::priority_queue<Event> pq;
+  std::map<int, std::function<void(Event event)>> handler_map_;
+  std::priority_queue<Event> pq_;
 };
 
 } // namespace simulation
