@@ -14,25 +14,34 @@
 
 #pragma once
 
-#include <memory>
 #include <vector>
 #include <string>
+#include <queue>
+#include <memory>
+#include "event.h"
+#include "worker.h"
 
-namespace axe {
-namespace simulation {
+namespace axe{
+namespace simulation{
 
-enum resource { cpu = 1, memory, network, disk };
-
-class Task {
+class Scheduler {
 public:
-  Task() {}
+  Scheduler(const std::string& workers_desc, const std::shared_ptr<std::priority_queue<Event>>& pq) {
+    pq_ = pq;
+    SetWorkers(workers_desc);
+  }
 
+  void Handle(const int& event_type, const Event& event) {
+    //TODO(SXD): handle function for Scheduler
+  }
+  void SetWorkers(const std::string& workers_desc) {
+    //TODO(LBY): generate the workers picture
+  }
+  
 private:
-  int resource_;
-  int duration_;
-  std::vector<std::shared_ptr<Task>> precedences_;
-  std::vector<std::shared_ptr<std::string>> locality_;
+  std::vector<Worker> workers_;
+  std::shared_ptr<std::priority_queue<Event>> pq_;
 };
 
-} // namespace simulation
-} // namespace axe
+}  //namespace simulation
+}  //namespace axe
