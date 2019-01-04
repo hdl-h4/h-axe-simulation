@@ -12,8 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//#include "sharded_task.h"
+
 namespace axe {
 namespace simulation {
+
+class Worker {
+private:
+  int cpu_;
+  int memory_;
+  int disk_;
+  int net_;
+};
 
 }  // namespace simulation
 }  // namespace axe
