@@ -14,16 +14,28 @@
 
 #pragma once
 
-namespace axe {
-namespace simulation {
+#include <vector>
+#include "job.h"
+#include "event.h"
 
-class Worker {
+namespace axe{
+namespace simulation{
+
+class JobManager {
+public:
+  JobManager(const std::string& job_desc) {
+    SetJob(job_desc);
+  }
+
+  void Handle(const int& event_type, const Event& event) {
+    //TODO(SXD): handle function for JM
+  }
+  void SetJob(const std::string& job_desc) {
+    //TODO(LBY): generate the (physical) job picture
+  }
 private:
-  int cpu_;
-  int memory_;
-  int disk_;
-  int net_;
+  Job job_;
 };
 
-} // namespace simulation
-} // namespace axe
+}  //namespace simulation
+}  //namespace axe
