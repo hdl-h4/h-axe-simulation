@@ -34,29 +34,30 @@ public:
       : event_type_(event_type), time_(time), priority_(priority), job_id_(job_id),
         task_id_(task_id), work_id_(work_id) {}
 
-  int getEventType() const { return event_type_; }
-  int getTime() const { return time_; }
-  void setTime(int time) { time_ = time; }
-  int getPriority() const { return priority_; }
-  void setPriority(int priority) { priority_ = priority; }
-  int getJobId() const { return job_id_; }
-  void setJobId(int job_id) { job_id_ = job_id; }
-  int getTaskId() const { return task_id_; }
-  void setTaskId(int task_id) { task_id_ = task_id; }
-  int getWorkId() const { return work_id_; }
+  
+  int GetEventType() const { return event_type_; }
+  int GetTime() const { return time_; }
+  void SetTime(int time) { time_ = time; }
+  int GetPriority() const { return priority_; }
+  void SetPriority(int priority) { priority_ = priority; }
+  int GetJobId() const { return job_id_; }
+  void SetJobId(int job_id) { job_id_ = job_id; }
+  int GetTaskId() const { return task_id_; }
+  void SetTaskId(int task_id) { task_id_ = task_id; }
+  int GetWorkId() const { return work_id_; }
 
   bool operator<(const Event &rhs) const {
-    if (time_ < rhs.getTime())
+    if (time_ < rhs.GetTime())
       return true;
-    else if (time_ > rhs.getTime())
+    else if (time_ > rhs.GetTime())
       return false;
     else {
-      if (event_type_ < rhs.getEventType())
+      if (event_type_ < rhs.GetEventType())
         return true;
-      else if (event_type_ > rhs.getEventType())
+      else if (event_type_ > rhs.GetEventType())
         return false;
       else
-        return priority_ < rhs.getPriority();
+        return priority_ < rhs.GetPriority();
     }
   }
 

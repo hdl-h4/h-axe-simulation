@@ -24,25 +24,11 @@
 namespace axe{
 namespace simulation{
 
-class Scheduler {
+class EventHandler {
 public:
-  Scheduler(const std::string& workers_desc, const std::shared_ptr<std::priority_queue<Event>>& pq) {
-    pq_ = pq;
-    SetWorkers(workers_desc);
-  }
 
-
-  void Handle(const int& event_type, const std::shared_ptr<Event> event) {
-    //TODO(SXD): handle function for Scheduler
-  }
-  void SetWorkers(const std::string& workers_desc) {
-    //TODO(LBY): generate the workers picture
-  }
-
-
-private:
-  std::vector<Worker> workers_;
-  std::shared_ptr<std::priority_queue<Event>> pq_;
+  virtual void Handle(const int& event_type, const std::shared_ptr<Event> event) = 0;
+  
 };
 
 }  //namespace simulation

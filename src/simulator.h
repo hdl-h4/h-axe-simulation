@@ -46,8 +46,8 @@ public:
     //TODO(SXD): process the event in pq one by one according to the priority order
   }
 
-  void Dispatch(Event event) {
-
+  void Dispatch(const std::shared_ptr<Event> event) {
+    //TODO(SXD): send the event to different components to handle
   }
 
 private:
