@@ -15,42 +15,49 @@
 #pragma once
 
 #include <functional>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <queue>
-#include <vector>
 #include <string>
-#include <iostream>
+#include <vector>
 
 #include "event.h"
-#include "event_queue.h"
-#include "scheduler.h"
+#include "job.h"
 #include "job_manager.h"
+#include "scheduler.h"
+#include "worker.h"
 
 namespace axe {
 namespace simulation {
 
+using nlohmann::json;
+
 class Simulator {
 public:
-  void Init() {
+  Simulator() = default;
+  explicit Simulator(const json &j) { from_json(j, *this); }
+
+  void Init(const json &j) {
     // TODO(SXD): read the configuration file and new JMs and Scheduler
     // read the configuration file and parse into WS and JS
-    std::string workers_desc;
-    std::vector<std::string> jobs_desc;
-    scheduler_ = std::make_shared<Scheduler> (workers_desc);
-    for(const auto& job_desc : jobs_desc) {
-      jms_.push_back(std::make_shared<JobManager>(job_desc));
+
+    scheduler_ = std::make_shared<Scheduler>(j);
+    for (const auto &job : jobs_) {
+      jms_.push_back(std::make_shared<JobManager>(job));
     }
-    
-    for(const auto& jm : jms_) {
+    for (const auto &jm : jms_) {
       event_queue.Push(std::static_pointer_cast<Event>(
-        std::make_shared<NewJobEvent>(NEW_JOB, jm->GetJob()->GetArriveTime(), 0, SCHEDULER, jm->GetJob())));
+          std::make_shared<NewJobEvent>(NEW_JOB,
+                                        jm->GetJob().GetSubmissionTime(), 0,
+                                        SCHEDULER, jm->GetJob())));
     }
   }
 
   void Serve() {
-    //TODO(SXD): process the event in pq one by one according to the priority order
-    while(!event_queue.Empty()) {
+    // TODO(SXD): process the event in pq one by one according to the priority
+    // order
+    while (!event_queue.Empty()) {
       auto event = event_queue.Top();
       global_clock_ = event_queue.Top()->GetTime();
       Dispatch(event);
@@ -60,20 +67,26 @@ public:
   }
 
   void Dispatch(const std::shared_ptr<Event> event) {
-    //TODO(SXD): send the event to different components to handle
+    // TODO(SXD): send the event to different components to handle
     int event_principal = event->GetEventPrincipal();
-    if(event_principal == SCHEDULER) {
+    if (event_principal == SCHEDULER) {
       scheduler_->Handle(event);
     } else {
       jms_[event_principal]->Handle(event);
     }
   }
 
+  friend void from_json(const json &j, Simulator &sim) {
+    j.at("job").get_to(sim.jobs_);
+  }
+
 private:
   double global_clock_;
+  std::vector<Job> jobs_;
   std::map<int, std::function<void(Event event)>> handler_map_;
+  std::priority_queue<Event> pq_;
   std::shared_ptr<Scheduler> scheduler_;
-  std::vector<std::shared_ptr<JobManager>> jms_; 
+  std::vector<std::shared_ptr<JobManager>> jms_;
 };
 
 } // namespace simulation

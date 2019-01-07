@@ -14,57 +14,57 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
-#include <queue>
-#include <memory>
 #include <map>
+#include <memory>
+#include <queue>
+#include <string>
+#include <vector>
+
 #include "event.h"
-#include "worker.h"
 #include "event_handler.h"
 #include "event_queue.h"
+#include "worker.h"
 
-namespace axe{
-namespace simulation{
+#include "nlohmann/json.hpp"
 
-class Scheduler : public EventHandler{
+namespace axe {
+namespace simulation {
+
+using nlohmann::json;
+
+class Scheduler : public EventHandler {
 
 public:
-  Scheduler() {
-    RegisterHandler();
-  }
+  Scheduler() { RegisterHandler(); }
 
-  Scheduler(const std::string& workers_desc) {
-    SetWorkers(workers_desc);
-    RegisterHandler();
-  }
+  inline auto &GetWorkers() const { return workers_; }
 
   void RegisterHandler() {
-    handler_map_.insert({NEW_JOB, [=](const std::shared_ptr<Event> event){
-      //Job admission control
-    }});
-    handler_map_.insert({JOB_FINISH, [=](const std::shared_ptr<Event> event){
-      
-    }});
-    handler_map_.insert({NEW_TASK_REQ, [=](const std::shared_ptr<Event> event){
-      //Job admission control
-    }});
+    handler_map_.insert({NEW_JOB, [=](const std::shared_ptr<Event> event) {
+                           // Job admission control
+                         }});
+    handler_map_.insert({JOB_FINISH, [=](const std::shared_ptr<Event> event) {
+
+                         }});
+    handler_map_.insert({NEW_TASK_REQ, [=](const std::shared_ptr<Event> event) {
+                           // Job admission control
+                         }});
   }
 
   void Handle(const std::shared_ptr<Event> event) {
-    //TODO(SXD): handle function for Scheduler
+    // TODO(SXD): handle function for Scheduler
     handler_map_[event->GetEventType()](event);
   }
 
-  void SetWorkers(const std::string& workers_desc) {
-    //TODO(LBY): generate the workers picture
+  friend void from_json(const json &j, Scheduler &sim) {
+    j.at("worker").get_to(sim.workers_);
   }
-
 
 private:
   std::vector<Worker> workers_;
-  std::map<int, std::function<void(const std::shared_ptr<Event> event)>> handler_map_;
+  std::map<int, std::function<void(const std::shared_ptr<Event> event)>>
+      handler_map_;
 };
 
-}  //namespace simulation
-}  //namespace axe
+} // namespace simulation
+} // namespace axe

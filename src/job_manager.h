@@ -14,49 +14,57 @@
 
 #pragma once
 
-#include <vector>
-#include <memory>
-#include "job.h"
 #include "event.h"
 #include "event_handler.h"
 #include "event_queue.h"
+#include "job.h"
 
-namespace axe{
-namespace simulation{
+#include <map>
+#include <memory>
+#include <unordered_map>
+#include <vector>
+
+namespace axe {
+namespace simulation {
 
 class JobManager : public EventHandler {
 public:
-  JobManager() {
-    RegisterHandler();
-  }
-
-  JobManager(const std::string& job_desc) {
-    SetJob(job_desc);
-    RegisterHandler();
-  }
+  JobManager(const Job &job) : job_(job) { RegisterHandler(); }
 
   void RegisterHandler() {
-    handler_map_.insert({TASK_REQ_FINISH, [=](const std::shared_ptr<Event> event){
-      
-    }});
+    handler_map_.insert(
+        {TASK_REQ_FINISH, [=](const std::shared_ptr<Event> event) {
+
+         }});
   }
 
   void Handle(const std::shared_ptr<Event> event) {
-    //TODO(SXD): handle function for JM
+    // TODO(SXD): handle function for JM
     handler_map_[event->GetEventType()](event);
   }
-  
-  void SetJob(const std::string& job_desc) {
-    //TODO(LBY): generate the (physical) job picture
-    
+
+  inline auto &GetJob() const { return job_; }
+
+  void BuildDependencies() {
+    for (auto &task : job_.GetTasks()) {
+      for (auto child : task.GetChildren()) {
+        if (child.second == Dependency::Sync) {
+          dep_counter_[child.first] += task.GetParallelism();
+        } else {
+          ++dep_counter_[child.first];
+        }
+      }
+    }
   }
 
-  std::shared_ptr<Job> GetJob() const {return job_;}
-
 private:
-  std::shared_ptr<Job> job_;
-  std::map<int, std::function<void(const std::shared_ptr<Event> event)>> handler_map_;
+  std::map<int, std::function<void(const std::shared_ptr<Event> event)>>
+      handler_map_;
+  Job job_;
+  std::unordered_map<int, std::vector<Task>> id_to_sharded_task_;
+  std::unordered_map<int, int> dep_counter_;
+  std::map<std::pair<int, int>, int> dep_finish_counter_;
 };
 
-}  //namespace simulation
-}  //namespace axe
+} // namespace simulation
+} // namespace axe

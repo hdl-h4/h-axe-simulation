@@ -14,26 +14,38 @@
 
 #pragma once
 
+#include "nlohmann/json.hpp"
 #include "task.h"
+
 #include <vector>
 
 namespace axe {
 namespace simulation {
 
+using nlohmann::json;
+
 class Job {
 public:
-  Job();
-  Job(int job_id, double arrive_time) : job_id_(job_id), arrive_time_(arrive_time) {}
-  int GetJobID() const {return job_id_;}
-  void SetJobID(int job_id) {job_id_ = job_id;}
-  double GetArriveTime() const {return arrive_time_;}
-  void SetArriveTime(double arrive_time) {arrive_time_ = arrive_time;}
+  Job() = default;
+
+  inline const auto &GetTasks() const { return tasks_; }
+  inline const auto &GetId() const { return id_; }
+  inline const auto &GetSubmissionTime() const { return submission_time_; }
+
+  friend void from_json(const json &j, Job &job) {
+    j.at("id").get_to(job.id_);
+    j.at("submissiontime").get_to(job.submission_time_);
+    auto pos = j.find("tasks");
+    if (pos != j.end()) {
+      pos->get_to(job.tasks_);
+    }
+  }
 
 private:
   std::vector<Task> tasks_;
-  int job_id_;
-  double arrive_time_;
+  int id_;
+  double submission_time_;
 };
 
-}  // namespace simulation
-}  // namespace axe
+} // namespace simulation
+} // namespace axe

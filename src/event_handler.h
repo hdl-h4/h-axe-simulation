@@ -14,22 +14,20 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
-#include <queue>
-#include <memory>
 #include "event.h"
 #include "worker.h"
+#include <memory>
+#include <queue>
+#include <string>
+#include <vector>
 
-namespace axe{
-namespace simulation{
+namespace axe {
+namespace simulation {
 
 class EventHandler {
 public:
-
   virtual void Handle(const std::shared_ptr<Event> event) = 0;
-
 };
 
-}  //namespace simulation
-}  //namespace axe
+} // namespace simulation
+} // namespace axe
