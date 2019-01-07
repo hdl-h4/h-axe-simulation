@@ -34,6 +34,7 @@ public:
       : event_type_(event_type), time_(time), priority_(priority), job_id_(job_id),
         task_id_(task_id), work_id_(work_id) {}
 
+  
   int GetEventType() const { return event_type_; }
   int GetTime() const { return time_; }
   void SetTime(int time) { time_ = time; }

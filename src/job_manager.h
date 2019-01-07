@@ -28,9 +28,11 @@ public:
     SetJob(job_desc);
   }
 
+
   void Handle(const int& event_type, const std::shared_ptr<Event> event) {
     //TODO(SXD): handle function for JM
   }
+  
   void SetJob(const std::string& job_desc) {
     //TODO(LBY): generate the (physical) job picture
   }

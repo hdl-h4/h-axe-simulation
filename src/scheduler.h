@@ -31,12 +31,14 @@ public:
     SetWorkers(workers_desc);
   }
 
+
   void Handle(const int& event_type, const std::shared_ptr<Event> event) {
     //TODO(SXD): handle function for Scheduler
   }
   void SetWorkers(const std::string& workers_desc) {
     //TODO(LBY): generate the workers picture
   }
+
 
 private:
   std::vector<Worker> workers_;
