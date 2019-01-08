@@ -14,26 +14,31 @@
 
 #pragma once
 
-#include "task.h"
+#include <functional>
+#include <map>
+#include <memory>
+#include <queue>
 #include <vector>
+#include <string>
+
+#include "event.h"
 
 namespace axe {
 namespace simulation {
 
-class Job {
+class EventQueue {
 public:
-  Job();
-  Job(int job_id, double arrive_time) : job_id_(job_id), arrive_time_(arrive_time) {}
-  int GetJobID() const {return job_id_;}
-  void SetJobID(int job_id) {job_id_ = job_id;}
-  double GetArriveTime() const {return arrive_time_;}
-  void SetArriveTime(double arrive_time) {arrive_time_ = arrive_time;}
+  std::shared_ptr<Event> Top() const {return pq_.top();}
+  void Pop() {pq_.pop();}
+  void Push(std::shared_ptr<Event> event) {pq_.push(event);}
+  bool Empty() const {return pq_.empty();}
 
 private:
-  std::vector<Task> tasks_;
-  int job_id_;
-  double arrive_time_;
+  std::priority_queue<std::shared_ptr<Event>> pq_;
+  
 };
 
-}  // namespace simulation
-}  // namespace axe
+EventQueue event_queue;
+
+} // namespace simulation
+} // namespace axe

@@ -18,26 +18,44 @@
 #include <memory>
 #include "job.h"
 #include "event.h"
+#include "event_handler.h"
+#include "event_queue.h"
 
 namespace axe{
 namespace simulation{
 
-class JobManager {
+class JobManager : public EventHandler {
 public:
-  JobManager(const std::string& job_desc) {
-    SetJob(job_desc);
+  JobManager() {
+    RegisterHandler();
   }
 
+  JobManager(const std::string& job_desc) {
+    SetJob(job_desc);
+    RegisterHandler();
+  }
 
-  void Handle(const int& event_type, const std::shared_ptr<Event> event) {
+  void RegisterHandler() {
+    handler_map_.insert({TASK_REQ_FINISH, [=](const std::shared_ptr<Event> event){
+      
+    }});
+  }
+
+  void Handle(const std::shared_ptr<Event> event) {
     //TODO(SXD): handle function for JM
+    handler_map_[event->GetEventType()](event);
   }
   
   void SetJob(const std::string& job_desc) {
     //TODO(LBY): generate the (physical) job picture
+    
   }
+
+  std::shared_ptr<Job> GetJob() const {return job_;}
+
 private:
-  Job job_;
+  std::shared_ptr<Job> job_;
+  std::map<int, std::function<void(const std::shared_ptr<Event> event)>> handler_map_;
 };
 
 }  //namespace simulation

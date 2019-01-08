@@ -20,8 +20,10 @@
 #include <queue>
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "event.h"
+#include "event_queue.h"
 #include "scheduler.h"
 #include "job_manager.h"
 
@@ -35,24 +37,43 @@ public:
     // read the configuration file and parse into WS and JS
     std::string workers_desc;
     std::vector<std::string> jobs_desc;
-    auto scheduler = std::make_shared<Scheduler> (workers_desc);
-    auto jms = std::vector<std::shared_ptr<JobManager>>();
+    scheduler_ = std::make_shared<Scheduler> (workers_desc);
     for(const auto& job_desc : jobs_desc) {
-      jms.push_back(std::make_shared<JobManager>(job_desc));
+      jms_.push_back(std::make_shared<JobManager>(job_desc));
+    }
+    
+    for(const auto& jm : jms_) {
+      event_queue.Push(std::static_pointer_cast<Event>(
+        std::make_shared<NewJobEvent>(NEW_JOB, jm->GetJob()->GetArriveTime(), 0, SCHEDULER, jm->GetJob())));
     }
   }
 
   void Serve() {
     //TODO(SXD): process the event in pq one by one according to the priority order
+    while(!event_queue.Empty()) {
+      auto event = event_queue.Top();
+      global_clock_ = event_queue.Top()->GetTime();
+      Dispatch(event);
+      event_queue.Pop();
+    }
+    std::cout << "simulator server over." << std::endl;
   }
 
   void Dispatch(const std::shared_ptr<Event> event) {
     //TODO(SXD): send the event to different components to handle
+    int event_principal = event->GetEventPrincipal();
+    if(event_principal == SCHEDULER) {
+      scheduler_->Handle(event);
+    } else {
+      jms_[event_principal]->Handle(event);
+    }
   }
 
 private:
+  double global_clock_;
   std::map<int, std::function<void(Event event)>> handler_map_;
-  std::priority_queue<Event> pq_;
+  std::shared_ptr<Scheduler> scheduler_;
+  std::vector<std::shared_ptr<JobManager>> jms_; 
 };
 
 } // namespace simulation

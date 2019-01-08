@@ -18,23 +18,44 @@
 #include <string>
 #include <queue>
 #include <memory>
+#include <map>
 #include "event.h"
 #include "worker.h"
+#include "event_handler.h"
+#include "event_queue.h"
 
 namespace axe{
 namespace simulation{
 
-class Scheduler {
+class Scheduler : public EventHandler{
+
 public:
-  Scheduler(const std::string& workers_desc, const std::shared_ptr<std::priority_queue<Event>>& pq) {
-    pq_ = pq;
+  Scheduler() {
+    RegisterHandler();
+  }
+
+  Scheduler(const std::string& workers_desc) {
     SetWorkers(workers_desc);
+    RegisterHandler();
   }
 
+  void RegisterHandler() {
+    handler_map_.insert({NEW_JOB, [=](const std::shared_ptr<Event> event){
+      //Job admission control
+    }});
+    handler_map_.insert({JOB_FINISH, [=](const std::shared_ptr<Event> event){
+      
+    }});
+    handler_map_.insert({NEW_TASK_REQ, [=](const std::shared_ptr<Event> event){
+      //Job admission control
+    }});
+  }
 
-  void Handle(const int& event_type, const std::shared_ptr<Event> event) {
+  void Handle(const std::shared_ptr<Event> event) {
     //TODO(SXD): handle function for Scheduler
+    handler_map_[event->GetEventType()](event);
   }
+
   void SetWorkers(const std::string& workers_desc) {
     //TODO(LBY): generate the workers picture
   }
@@ -42,7 +63,7 @@ public:
 
 private:
   std::vector<Worker> workers_;
-  std::shared_ptr<std::priority_queue<Event>> pq_;
+  std::map<int, std::function<void(const std::shared_ptr<Event> event)>> handler_map_;
 };
 
 }  //namespace simulation
