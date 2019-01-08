@@ -12,16 +12,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "simulator.h"
+#include <fstream>
 #include <iostream>
+#include <string>
 
-int main(int argc, char **argv) {
+#include "glog/logging.h"
+#include "simulator.h"
 
-  std::cout << "start simulation...\n";
-  axe::simulation::Simulator simulator;
-  simulator.Init();
-  simulator.Serve();
-  
-  return 0;
+using json = nlohmann::json;
+
+json ReadJsonFromFile(const std::string &file) {
+  std::ifstream in(file, std::ios::in);
+  CHECK(in.is_open()) << "Cannot open json file " << file;
+  std::string ret;
+  in.seekg(0, std::ios::end);
+  ret.resize(in.tellg());
+  in.seekg(0, std::ios::beg);
+  in.read(&ret[0], ret.size());
+  return json::parse(ret);
 }
 
+int main(int argc, char **argv) {
+  google::InitGoogleLogging(argv[0]);
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
+
+  std::cout << "start simulation...\n";
+  axe::simulation::Simulator simulator(ReadJsonFromFile(argv[1]));
+  simulator.Init(ReadJsonFromFile(argv[2]));
+  simulator.Serve();
+
+  google::FlushLogFiles(google::INFO);
+  gflags::ShutDownCommandLineFlags();
+  return 0;
+}

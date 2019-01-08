@@ -14,21 +14,23 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <memory>
 #include "job.h"
+#include <memory>
+#include <stdint.h>
 
 namespace axe {
 namespace simulation {
 
-enum EventType {  TASK_REQ_FINISH = 0,  // SCH tells JM the task req is finished, for JM
-                  RESOURCE_AVAILABLE,   // SCH tells himself there is resource avaliable after a task finished, for SCH
-                  JOB_FINISH,           // JM tells SCH the job is finished, for SCH
-                  NEW_TASK_REQ,         // JM sends the task req to SCH, for SCH
-                  NEW_JOB,              // JM sends SCH the new job, for SCH
-                  RUN_TASK_REQ,         // worker begins to run the task req, for SCH
-                  JOB_ADMISSION         // SCH accepts the job, for JM
-                };
+enum EventType {
+  TASK_REQ_FINISH = 0, // SCH tells JM the task req is finished, for JM
+  RESOURCE_AVAILABLE,  // SCH tells himself there is resource avaliable after a
+                       // task finished, for SCH
+  JOB_FINISH,          // JM tells SCH the job is finished, for SCH
+  NEW_TASK_REQ,        // JM sends the task req to SCH, for SCH
+  NEW_JOB,             // JM sends SCH the new job, for SCH
+  RUN_TASK_REQ,        // worker begins to run the task req, for SCH
+  JOB_ADMISSION        // SCH accepts the job, for JM
+};
 
 const int SCHEDULER = -1;
 
@@ -41,15 +43,16 @@ const int SCHEDULER = -1;
 class Event {
 public:
   Event(int event_type, double time, int priority, int event_principal)
-      : event_type_(event_type), time_(time), priority_(priority), event_principal_(event_principal) {}
-  
+      : event_type_(event_type), time_(time), priority_(priority),
+        event_principal_(event_principal) {}
+
   int GetEventType() const { return event_type_; }
   int GetEventPrincipal() const { return event_principal_; }
   double GetTime() const { return time_; }
   void SetTime(double time) { time_ = time; }
   int GetPriority() const { return priority_; }
   void SetPriority(int priority) { priority_ = priority; }
-  
+
   bool operator<(const Event &rhs) const {
     if (time_ < rhs.GetTime())
       return true;
@@ -70,18 +73,18 @@ private:
   int event_principal_;
   double time_;
   int priority_;
-
 };
 
-class NewJobEvent : public Event{
-  public:
-    NewJobEvent(int event_type, double time, int priority, int event_principal, std::shared_ptr<Job> job)
-      :Event(event_type, time, priority, event_principal), job_(job) {}
+class NewJobEvent : public Event {
+public:
+  NewJobEvent(int event_type, double time, int priority, int event_principal,
+              const Job &job)
+      : Event(event_type, time, priority, event_principal), job_(job) {}
 
-    std::shared_ptr<Job> GetJob() const {return job_;}
+  inline auto &GetJob() const { return job_; }
 
-  private:
-    std::shared_ptr<Job> job_;
+private:
+  Job job_;
 };
 
 } // namespace simulation

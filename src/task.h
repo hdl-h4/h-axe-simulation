@@ -14,23 +14,51 @@
 
 #pragma once
 
+#include "nlohmann/json.hpp"
+
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace axe {
 namespace simulation {
 
-enum resource { cpu = 1, memory, network, disk };
+using nlohmann::json;
+
+enum Resource { cpu = 1, memory, network, disk };
+enum Dependency { Sync = 1, AsyncComm };
 
 class Task {
 public:
   Task() {}
 
+  inline const auto GetId() const { return id_; }
+  inline const auto GetParallelism() const { return parallelism_; }
+  inline const auto &GetChildren() const { return children_; }
+  inline const auto GetResource() const { return resource_; }
+  inline const auto GetUsage() const { return usage_; }
+  inline const auto GetDuration() const { return duration_; }
+  inline const auto &GetLocality() const { return locality_; }
+
+  friend void from_json(const json &j, Task &task) {
+    j.at("id").get_to(task.id_);
+    j.at("resource").get_to(task.resource_);
+    j.at("usage").get_to(task.usage_);
+    j.at("duration").get_to(task.duration_);
+    j.at("parallelism").get_to(task.parallelism_);
+    auto pos = j.find("partasks");
+    if (pos != j.end()) {
+      pos->get_to(task.children_);
+    }
+  }
+
 private:
-  int resource_;
+  int id_;
+  Resource resource_;
+  int usage_;
   int duration_;
-  std::vector<std::shared_ptr<Task>> precedences_;
+  int parallelism_;
+  std::vector<std::pair<int, Dependency>> children_;
   std::vector<std::shared_ptr<std::string>> locality_;
 };
 

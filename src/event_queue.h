@@ -18,8 +18,8 @@
 #include <map>
 #include <memory>
 #include <queue>
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "event.h"
 
@@ -28,14 +28,13 @@ namespace simulation {
 
 class EventQueue {
 public:
-  std::shared_ptr<Event> Top() const {return pq_.top();}
-  void Pop() {pq_.pop();}
-  void Push(std::shared_ptr<Event> event) {pq_.push(event);}
-  bool Empty() const {return pq_.empty();}
+  std::shared_ptr<Event> Top() const { return pq_.top(); }
+  void Pop() { pq_.pop(); }
+  void Push(std::shared_ptr<Event> event) { pq_.push(event); }
+  bool Empty() const { return pq_.empty(); }
 
 private:
   std::priority_queue<std::shared_ptr<Event>> pq_;
-  
 };
 
 EventQueue event_queue;
