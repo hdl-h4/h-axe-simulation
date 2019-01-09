@@ -31,6 +31,11 @@ public:
   std::shared_ptr<Event> Top() const { return pq_.top(); }
   void Pop() { pq_.pop(); }
   void Push(std::shared_ptr<Event> event) { pq_.push(event); }
+  void Push(std::vector<std::shared_ptr<Event>> event_vector) {
+    for (const auto &e : event_vector) {
+      pq_.push(e);
+    }
+  }
   bool Empty() const { return pq_.empty(); }
 
 private:
@@ -38,6 +43,7 @@ private:
 };
 
 EventQueue event_queue;
+double global_clock;
 
 } // namespace simulation
 } // namespace axe

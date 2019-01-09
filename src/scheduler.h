@@ -39,21 +39,37 @@ public:
 
   inline auto &GetWorkers() const { return workers_; }
 
-  void RegisterHandler() {
-    handler_map_.insert({NEW_JOB, [=](const std::shared_ptr<Event> event) {
-                           // Job admission control
-                         }});
-    handler_map_.insert({JOB_FINISH, [=](const std::shared_ptr<Event> event) {
-
-                         }});
-    handler_map_.insert({NEW_TASK_REQ, [=](const std::shared_ptr<Event> event) {
-                           // Job admission control
-                         }});
-  }
-
   void Handle(const std::shared_ptr<Event> event) {
     // TODO(SXD): handle function for Scheduler
     handler_map_[event->GetEventType()](event);
+  }
+
+  void RegisterHandler() {
+    handler_map_.insert({NEW_JOB,
+                         [=](const std::shared_ptr<Event> event)
+                             -> std::vector<std::shared_ptr<Event>> {
+                           // Job admission control
+                           std::vector<std::shared_ptr<Event>> event_vector;
+                           return event_vector;
+                         }});
+    handler_map_.insert({JOB_FINISH,
+                         [=](const std::shared_ptr<Event> event)
+                             -> std::vector<std::shared_ptr<Event>> {
+                           std::vector<std::shared_ptr<Event>> event_vector;
+                           return event_vector;
+                         }});
+    handler_map_.insert({NEW_TASK_REQ,
+                         [=](const std::shared_ptr<Event> event)
+                             -> std::vector<std::shared_ptr<Event>> {
+                           std::vector<std::shared_ptr<Event>> event_vector;
+                           return event_vector;
+                         }});
+  }
+
+  std::vector<std::shared_ptr<Event>>
+  Handle(const std::shared_ptr<Event> event) {
+    // TODO(SXD): handle function for Scheduler
+    return handler_map_[event->GetEventType()](event);
   }
 
   friend void from_json(const json &j, Scheduler &sim) {
@@ -62,7 +78,8 @@ public:
 
 private:
   std::vector<Worker> workers_;
-  std::map<int, std::function<void(const std::shared_ptr<Event> event)>>
+  std::map<int, std::function<std::vector<std::shared_ptr<Event>>(
+                    const std::shared_ptr<Event> event)>>
       handler_map_;
 };
 

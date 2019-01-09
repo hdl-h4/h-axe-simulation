@@ -32,15 +32,18 @@ public:
   JobManager(const Job &job) : job_(job) { RegisterHandler(); }
 
   void RegisterHandler() {
-    handler_map_.insert(
-        {TASK_REQ_FINISH, [=](const std::shared_ptr<Event> event) {
-
-         }});
+    handler_map_.insert({TASK_REQ_FINISH,
+                         [=](const std::shared_ptr<Event> event)
+                             -> std::vector<std::shared_ptr<Event>> {
+                           std::vector<std::shared_ptr<Event>> event_vector;
+                           return event_vector;
+                         }});
   }
 
-  void Handle(const std::shared_ptr<Event> event) {
+  std::vector<std::shared_ptr<Event>>
+  Handle(const std::shared_ptr<Event> event) {
     // TODO(SXD): handle function for JM
-    handler_map_[event->GetEventType()](event);
+    return handler_map_[event->GetEventType()](event);
   }
 
   inline auto &GetJob() const { return job_; }
@@ -58,7 +61,8 @@ public:
   }
 
 private:
-  std::map<int, std::function<void(const std::shared_ptr<Event> event)>>
+  std::map<int, std::function<std::vector<std::shared_ptr<Event>>(
+                    const std::shared_ptr<Event> event)>>
       handler_map_;
   Job job_;
   std::unordered_map<int, std::vector<Task>> id_to_sharded_task_;
