@@ -16,6 +16,7 @@
 
 #include "nlohmann/json.hpp"
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
@@ -26,39 +27,51 @@ namespace simulation {
 using nlohmann::json;
 
 enum Resource { cpu = 1, memory, network, disk };
-enum Dependency { Sync = 1, AsyncComm };
 
-class Task {
+class ShardTask {
 public:
-  Task() {}
+  ShardTask() {}
 
-  inline const auto GetId() const { return id_; }
-  inline const auto GetParallelism() const { return parallelism_; }
+  inline const auto GetTaskId() const { return task_id_; }
+  inline const auto GetShardId() const { return shard_id_; }
   inline const auto &GetChildren() const { return children_; }
   inline const auto GetResource() const { return resource_; }
-  inline const auto GetUsage() const { return usage_; }
+  inline const auto GetReq() const { return req_; }
   inline const auto GetDuration() const { return duration_; }
   inline const auto &GetLocality() const { return locality_; }
 
-  friend void from_json(const json &j, Task &task) {
-    j.at("id").get_to(task.id_);
+  friend void from_json(const json &j, ShardTask &task) {
+    j.at("taskid").get_to(task.task_id_);
+    j.at("shardid").get_to(task.shard_id_);
     j.at("resource").get_to(task.resource_);
-    j.at("usage").get_to(task.usage_);
+    j.at("request").get_to(task.req_);
     j.at("duration").get_to(task.duration_);
-    j.at("parallelism").get_to(task.parallelism_);
-    auto pos = j.find("partasks");
+    auto pos = j.find("children");
     if (pos != j.end()) {
       pos->get_to(task.children_);
     }
   }
 
+  void Print() {
+    std::cout << "task_id : " << task_id_ << '\n';
+    std::cout << "shard_id : " << shard_id_ << '\n';
+    std::cout << "resource : " << resource_ << '\n';
+    std::cout << "request : " << req_ << '\n';
+    std::cout << "duration : " << duration_ << '\n';
+    std::cout << "children : ";
+    for (auto &child : children_) {
+      std::cout << "{" << child.first << ", " << child.second << "}, ";
+    }
+    std::cout << '\n';
+  }
+
 private:
-  int id_;
+  int task_id_;
+  int shard_id_;
   Resource resource_;
-  int usage_;
+  int req_;
   int duration_;
-  int parallelism_;
-  std::vector<std::pair<int, Dependency>> children_;
+  std::vector<std::pair<int, int>> children_;
   std::vector<std::shared_ptr<std::string>> locality_;
 };
 

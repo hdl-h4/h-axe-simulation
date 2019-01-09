@@ -15,8 +15,9 @@
 #pragma once
 
 #include "nlohmann/json.hpp"
-#include "task.h"
+#include "sub_graph.h"
 
+#include <iostream>
 #include <vector>
 
 namespace axe {
@@ -28,21 +29,30 @@ class Job {
 public:
   Job() = default;
 
-  inline const auto &GetTasks() const { return tasks_; }
+  inline const auto &GetSubGraphs() const { return subgraphs_; }
   inline const auto &GetId() const { return id_; }
   inline const auto &GetSubmissionTime() const { return submission_time_; }
 
   friend void from_json(const json &j, Job &job) {
     j.at("id").get_to(job.id_);
     j.at("submissiontime").get_to(job.submission_time_);
-    auto pos = j.find("tasks");
+    auto pos = j.find("subgraph");
     if (pos != j.end()) {
-      pos->get_to(job.tasks_);
+      pos->get_to(job.subgraphs_);
+    }
+  }
+
+  // for debug
+  void Print() {
+    std::cout << "job id : " << id_ << '\n';
+    std::cout << "submission time : " << submission_time_ << '\n';
+    for (auto &sg : subgraphs_) {
+      sg.Print();
     }
   }
 
 private:
-  std::vector<Task> tasks_;
+  std::vector<SubGraph> subgraphs_;
   int id_;
   double submission_time_;
 };

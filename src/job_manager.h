@@ -18,6 +18,7 @@
 #include "event_handler.h"
 #include "event_queue.h"
 #include "job.h"
+#include "shard_task.h"
 
 #include <map>
 #include <memory>
@@ -29,7 +30,10 @@ namespace simulation {
 
 class JobManager : public EventHandler {
 public:
-  JobManager(const Job &job) : job_(job) { RegisterHandler(); }
+  JobManager(const Job &job) : job_(job) {
+    RegisterHandler();
+    BuildDependencies();
+  }
 
   void RegisterHandler() {
     handler_map_.insert({TASK_REQ_FINISH,
@@ -49,12 +53,13 @@ public:
   inline auto &GetJob() const { return job_; }
 
   void BuildDependencies() {
-    for (auto &task : job_.GetTasks()) {
-      for (auto child : task.GetChildren()) {
-        if (child.second == Dependency::Sync) {
-          dep_counter_[child.first] += task.GetParallelism();
-        } else {
-          ++dep_counter_[child.first];
+    for (int i = 0; i < job_.GetSubGraphs().size(); ++i) {
+      auto &sg = job_.GetSubGraphs().at(i);
+      for (auto &st : sg.GetShardTasks()) {
+        shard_task_to_subgraph_[std::make_pair(st.GetTaskId(),
+                                               st.GetShardId())] = i;
+        for (auto &child : st.GetChildren()) {
+          dep_counter_[child]++;
         }
       }
     }
@@ -65,8 +70,8 @@ private:
                     const std::shared_ptr<Event> event)>>
       handler_map_;
   Job job_;
-  std::unordered_map<int, std::vector<Task>> id_to_sharded_task_;
-  std::unordered_map<int, int> dep_counter_;
+  std::map<std::pair<int, int>, int> shard_task_to_subgraph_;
+  std::map<std::pair<int, int>, int> dep_counter_;
   std::map<std::pair<int, int>, int> dep_finish_counter_;
 };
 

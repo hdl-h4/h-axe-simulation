@@ -40,6 +40,8 @@ int main(int argc, char **argv) {
   axe::simulation::Simulator simulator(ReadJsonFromFile(argv[1]));
   simulator.Init(ReadJsonFromFile(argv[2]));
   simulator.Serve();
+  // simulator.Print();
+  std::cout << "simulation end";
 
   google::FlushLogFiles(google::INFO);
   gflags::ShutDownCommandLineFlags();

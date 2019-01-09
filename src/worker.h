@@ -26,13 +26,15 @@ public:
   Worker() = default;
 
   friend void from_json(const json &j, Worker &worker) {
+    j.at("id").get_to(worker.id_);
     j.at("cpu").get_to(worker.cpu_);
     j.at("memory").get_to(worker.memory_);
     j.at("disk").get_to(worker.disk_);
-    j.at("net").get_to(worker.net_);
+    j.at("network").get_to(worker.net_);
   }
 
 private:
+  int id_;
   int cpu_;
   int memory_;
   int disk_;
