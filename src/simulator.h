@@ -83,8 +83,6 @@ public:
 
 private:
   std::vector<Job> jobs_;
-  std::map<int, std::function<void(Event event)>> handler_map_;
-  std::priority_queue<Event> pq_;
   std::shared_ptr<Scheduler> scheduler_;
   std::vector<std::shared_ptr<JobManager>> jms_;
 };

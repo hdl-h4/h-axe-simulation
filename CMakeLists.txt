@@ -30,9 +30,9 @@ include_directories(${glog_INCLUDE_DIR})
 set(JSON_VERSION "3.4.0")
 set(THIRDPARTY_DIR ${PROJECT_BINARY_DIR}/third_party)
 
-if (NOT "${JSON_INCLUDE_DIR}" STREQUAL "")
+if (NOT "${JSON_INCLUDE_DIR}" STREQUAL "JSON_INCLUDE_DIR-NOTFOUND")
   file(TO_CMAKE_PATH ${JSON_INCLUDE_DIR} _json_path)
-elseif()
+else()
   file(TO_CMAKE_PATH ${THIRDPARTY_DIR} _json_path)
 endif()
 
