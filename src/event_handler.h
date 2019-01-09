@@ -26,7 +26,8 @@ namespace simulation {
 
 class EventHandler {
 public:
-  virtual void Handle(const std::shared_ptr<Event> event) = 0;
+  virtual std::vector<std::shared_ptr<Event>>
+  Handle(const std::shared_ptr<Event> event) = 0;
 };
 
 } // namespace simulation

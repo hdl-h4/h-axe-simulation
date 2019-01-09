@@ -59,20 +59,21 @@ public:
     // order
     while (!event_queue.Empty()) {
       auto event = event_queue.Top();
-      global_clock_ = event_queue.Top()->GetTime();
-      Dispatch(event);
+      global_clock = event->GetTime();
       event_queue.Pop();
+      event_queue.Push(Dispatch(event));
     }
     std::cout << "simulator server over." << std::endl;
   }
 
-  void Dispatch(const std::shared_ptr<Event> event) {
+  std::vector<std::shared_ptr<Event>>
+  Dispatch(const std::shared_ptr<Event> event) {
     // TODO(SXD): send the event to different components to handle
     int event_principal = event->GetEventPrincipal();
     if (event_principal == SCHEDULER) {
-      scheduler_->Handle(event);
+      return scheduler_->Handle(event);
     } else {
-      jms_[event_principal]->Handle(event);
+      return jms_[event_principal]->Handle(event);
     }
   }
 
@@ -81,7 +82,6 @@ public:
   }
 
 private:
-  double global_clock_;
   std::vector<Job> jobs_;
   std::map<int, std::function<void(Event event)>> handler_map_;
   std::priority_queue<Event> pq_;
