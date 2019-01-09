@@ -77,6 +77,13 @@ public:
     }
   }
 
+  // for debug
+  void Print() {
+    for (auto &job : jobs_) {
+      job.Print();
+    }
+  }
+
   friend void from_json(const json &j, Simulator &sim) {
     j.at("job").get_to(sim.jobs_);
     j.at("worker").get_to(workers);
