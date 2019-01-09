@@ -42,7 +42,7 @@ public:
     // TODO(SXD): read the configuration file and new JMs and Scheduler
     // read the configuration file and parse into WS and JS
 
-    scheduler_ = std::make_shared<Scheduler>(j);
+    scheduler_ = std::make_shared<Scheduler>();
     for (const auto &job : jobs_) {
       jms_.push_back(std::make_shared<JobManager>(job));
     }
@@ -86,6 +86,7 @@ public:
 
   friend void from_json(const json &j, Simulator &sim) {
     j.at("job").get_to(sim.jobs_);
+    j.at("worker").get_to(workers);
   }
 
 private:

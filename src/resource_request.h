@@ -14,35 +14,27 @@
 
 #pragma once
 
-#include "nlohmann/json.hpp"
+#include "resource.h"
 #include <vector>
 
 namespace axe {
 namespace simulation {
 
-using nlohmann::json;
-
-class Worker {
+class ResourceRequest {
 public:
-  Worker() = default;
-
-  friend void from_json(const json &j, Worker &worker) {
-    j.at("id").get_to(worker.id_);
-    j.at("cpu").get_to(worker.cpu_);
-    j.at("memory").get_to(worker.memory_);
-    j.at("disk").get_to(worker.disk_);
-    j.at("network").get_to(worker.net_);
-  }
+  ResourceRequest(int job_id, std::vector<int> data_locality,
+                  ResourcePack resource)
+      : job_id_(job_id), data_locality_(data_locality), resource_(resource) {}
+  inline const int GetJobID() const { return job_id_; }
+  inline const auto &GetDataLocality() const { return data_locality_; }
+  inline const auto &GetResource() const { return resource_; }
 
 private:
-  int id_;
-  int cpu_;
-  int memory_;
-  int disk_;
-  int net_;
+  int job_id_;
+  int subgraph_id_;
+  std::vector<int> data_locality_;
+  ResourcePack resource_;
 };
-
-std::vector<Worker> workers;
 
 } // namespace simulation
 } // namespace axe

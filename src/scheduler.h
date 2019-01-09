@@ -37,13 +37,33 @@ class Scheduler : public EventHandler {
 public:
   Scheduler() { RegisterHandler(); }
 
-  inline auto &GetWorkers() const { return workers_; }
-
   void RegisterHandler() {
-    handler_map_.insert({NEW_JOB,
+    handler_map_.insert(
+        {NEW_JOB,
+         [=](const std::shared_ptr<Event> event)
+             -> std::vector<std::shared_ptr<Event>> {
+           // Job admission control
+           std::vector<std::shared_ptr<Event>> event_vector;
+           std::shared_ptr<NewJobEvent> new_job_event =
+               std::static_pointer_cast<NewJobEvent>(event);
+           bool permit = AdmissionPermit(new_job_event->GetJob());
+           if (permit) {
+             event_vector.push_back(std::static_pointer_cast<Event>(
+                 std::make_shared<JobAdmissionEvent>(
+                     JobAdmissionEvent(JOB_ADMISSION, global_clock, 0,
+                                       new_job_event->GetJob().GetId(),
+                                       new_job_event->GetJob().GetId()))));
+           } else {
+             double time = event_queue.Top()->GetTime();
+             new_job_event->SetTime(time);
+             event_vector.push_back(
+                 std::static_pointer_cast<Event>(new_job_event));
+           }
+           return event_vector;
+         }});
+    handler_map_.insert({NEW_TASK_REQ,
                          [=](const std::shared_ptr<Event> event)
                              -> std::vector<std::shared_ptr<Event>> {
-                           // Job admission control
                            std::vector<std::shared_ptr<Event>> event_vector;
                            return event_vector;
                          }});
@@ -53,12 +73,16 @@ public:
                            std::vector<std::shared_ptr<Event>> event_vector;
                            return event_vector;
                          }});
-    handler_map_.insert({NEW_TASK_REQ,
-                         [=](const std::shared_ptr<Event> event)
-                             -> std::vector<std::shared_ptr<Event>> {
-                           std::vector<std::shared_ptr<Event>> event_vector;
-                           return event_vector;
-                         }});
+  }
+
+  bool AdmissionPermit(const Job &job) {
+    // TODO(SXD): decide the admission of the job
+    return true;
+  }
+
+  int AssignReqToWorker(const ResourceRequest &req) {
+    // TODO(SXD): decide which worker to go to
+    return -1;
   }
 
   std::vector<std::shared_ptr<Event>>
@@ -67,12 +91,7 @@ public:
     return handler_map_[event->GetEventType()](event);
   }
 
-  friend void from_json(const json &j, Scheduler &sim) {
-    j.at("worker").get_to(sim.workers_);
-  }
-
 private:
-  std::vector<Worker> workers_;
   std::map<int, std::function<std::vector<std::shared_ptr<Event>>(
                     const std::shared_ptr<Event> event)>>
       handler_map_;
