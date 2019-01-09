@@ -37,8 +37,6 @@ class Scheduler : public EventHandler {
 public:
   Scheduler() { RegisterHandler(); }
 
-  inline auto &GetWorkers() const { return workers_; }
-
   void RegisterHandler() {
     handler_map_.insert({NEW_JOB,
                          [=](const std::shared_ptr<Event> event)
@@ -67,12 +65,7 @@ public:
     return handler_map_[event->GetEventType()](event);
   }
 
-  friend void from_json(const json &j, Scheduler &sim) {
-    j.at("worker").get_to(sim.workers_);
-  }
-
 private:
-  std::vector<Worker> workers_;
   std::map<int, std::function<std::vector<std::shared_ptr<Event>>(
                     const std::shared_ptr<Event> event)>>
       handler_map_;

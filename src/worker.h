@@ -15,6 +15,7 @@
 #pragma once
 
 #include "nlohmann/json.hpp"
+#include <vector>
 
 namespace axe {
 namespace simulation {
@@ -38,6 +39,8 @@ private:
   int disk_;
   int net_;
 };
+
+std::vector<Worker> workers;
 
 } // namespace simulation
 } // namespace axe
