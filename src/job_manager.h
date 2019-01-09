@@ -18,6 +18,7 @@
 #include "event_handler.h"
 #include "event_queue.h"
 #include "job.h"
+#include "resource_request.h"
 
 #include <map>
 #include <memory>
@@ -32,12 +33,40 @@ public:
   JobManager(const Job &job) : job_(job) { RegisterHandler(); }
 
   void RegisterHandler() {
-    handler_map_.insert({TASK_REQ_FINISH,
+
+    handler_map_.insert(
+        {JOB_ADMISSION,
+         [=](const std::shared_ptr<Event> event)
+             -> std::vector<std::shared_ptr<Event>> {
+           std::vector<std::shared_ptr<Event>> event_vector;
+           for (const auto &req : GenerateResourceRequest()) {
+             event_vector.push_back(std::static_pointer_cast<Event>(
+                 std::make_shared<NewTaskReqEvent>(NewTaskReqEvent(
+                     NEW_TASK_REQ, global_clock, 0, SCHEDULER, req))));
+           }
+           return event_vector;
+         }});
+
+    handler_map_.insert({ASSIGN_DECISION,
                          [=](const std::shared_ptr<Event> event)
                              -> std::vector<std::shared_ptr<Event>> {
                            std::vector<std::shared_ptr<Event>> event_vector;
                            return event_vector;
                          }});
+
+    handler_map_.insert({TASK_FINISH,
+                         [=](const std::shared_ptr<Event> event)
+                             -> std::vector<std::shared_ptr<Event>> {
+                           std::vector<std::shared_ptr<Event>> event_vector;
+                           return event_vector;
+                         }});
+  }
+
+  std::vector<ResourceRequest> GenerateResourceRequest() {
+    // TODO(SXD): generate the resource request from the physical task graph
+    std::vector<ResourceRequest> req_vector;
+
+    return req_vector;
   }
 
   std::vector<std::shared_ptr<Event>>
