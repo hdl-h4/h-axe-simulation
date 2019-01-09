@@ -39,11 +39,6 @@ public:
 
   inline auto &GetWorkers() const { return workers_; }
 
-  void Handle(const std::shared_ptr<Event> event) {
-    // TODO(SXD): handle function for Scheduler
-    handler_map_[event->GetEventType()](event);
-  }
-
   void RegisterHandler() {
     handler_map_.insert({NEW_JOB,
                          [=](const std::shared_ptr<Event> event)
