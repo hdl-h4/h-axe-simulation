@@ -15,6 +15,7 @@
 #pragma once
 
 #include "job.h"
+#include "resource_request.h"
 #include <memory>
 #include <stdint.h>
 
@@ -22,14 +23,12 @@ namespace axe {
 namespace simulation {
 
 enum EventType {
-  TASK_REQ_FINISH = 0, // SCH tells JM the task req is finished, for JM
-  RESOURCE_AVAILABLE,  // SCH tells himself there is resource avaliable after a
-                       // task finished, for SCH
-  JOB_FINISH,          // JM tells SCH the job is finished, for SCH
-  NEW_TASK_REQ,        // JM sends the task req to SCH, for SCH
-  NEW_JOB,             // JM sends SCH the new job, for SCH
-  RUN_TASK_REQ,        // worker begins to run the task req, for SCH
-  JOB_ADMISSION        // SCH accepts the job, for JM
+  TASK_FINISH = 0, // SCH tells JM the task req is finished, for JM
+  JOB_FINISH,      // JM tells SCH the job is finished, for SCH
+  JOB_ADMISSION,   // SCH accepts the job, for JM
+  ASSIGN_DECISION, // SCH tells the JM about the scheduling decision, for JM
+  NEW_TASK_REQ,    // JM sends the task req to SCH, for SCH
+  NEW_JOB,         // JM sends SCH the new job, for SCH
 };
 
 const int SCHEDULER = -1;
@@ -46,12 +45,11 @@ public:
       : event_type_(event_type), time_(time), priority_(priority),
         event_principal_(event_principal) {}
 
-  int GetEventType() const { return event_type_; }
-  int GetEventPrincipal() const { return event_principal_; }
-  double GetTime() const { return time_; }
+  inline int GetEventType() const { return event_type_; }
+  inline int GetEventPrincipal() const { return event_principal_; }
+  inline double GetTime() const { return time_; }
+  inline int GetPriority() const { return priority_; }
   void SetTime(double time) { time_ = time; }
-  int GetPriority() const { return priority_; }
-  void SetPriority(int priority) { priority_ = priority; }
 
   bool operator<(const Event &rhs) const {
     if (time_ < rhs.GetTime())
@@ -85,6 +83,28 @@ public:
 
 private:
   Job job_;
+};
+
+class JobAdmissionEvent : public Event {
+public:
+  JobAdmissionEvent(int event_type, double time, int priority,
+                    int event_principal, int job_id)
+      : Event(event_type, time, priority, event_principal), job_id_(job_id) {}
+
+private:
+  int job_id_;
+};
+
+class NewTaskReqEvent : public Event {
+public:
+  NewTaskReqEvent(int event_type, double time, int priority,
+                  int event_principal, const ResourceRequest &req)
+      : Event(event_type, time, priority, event_principal), req_(req) {}
+
+  inline auto &GetReq() const { return req_; }
+
+private:
+  ResourceRequest req_;
 };
 
 } // namespace simulation
