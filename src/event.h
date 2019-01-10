@@ -24,6 +24,8 @@ namespace simulation {
 
 enum EventType {
   TASK_FINISH = 0,    // SCH tells JM the task req is finished, for JM
+  RESOURCE_AVAILABLE, // JM tells SCH there are avaliable resources on workers,
+                      // for SCH
   JOB_FINISH,         // JM tells SCH the job is finished, for SCH
   JOB_ADMISSION,      // SCH accepts the job, for JM
   PLACEMENT_DECISION, // SCH tells the JM about the scheduling decision, for JM
@@ -117,6 +119,17 @@ public:
 private:
   int worker_id_;
   int subgraph_id_;
+};
+
+class ResourceAvailableEvent : public Event {
+public:
+  ResourceAvailableEvent(int event_type, double time, int priority,
+                         int event_principal, int worker_id)
+      : Event(event_type, time, priority, event_principal),
+        worker_id_(worker_id) {}
+
+private:
+  int worker_id_;
 };
 
 } // namespace simulation

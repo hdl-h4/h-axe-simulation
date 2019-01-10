@@ -22,6 +22,7 @@ namespace simulation {
 
 class ResourceRequest {
 public:
+  ResourceRequest() = default;
   ResourceRequest(int job_id, int subgraph_id, std::vector<int> data_locality,
                   ResourcePack resource)
       : job_id_(job_id), subgraph_id_(subgraph_id),

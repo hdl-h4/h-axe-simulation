@@ -11,7 +11,7 @@ message(STATUS "Found gflags:")
 message(STATUS "  (Headers)       ${gflags_INCLUDE_DIR}")
 message(STATUS "  (Library)       ${gflags_LIBRARIES}")
 
-include_directories(${gflags_INCLUDE_DIR})
+include_directories(${gflags_INCLUDE_DIR} )
 
 ### glog
 find_path(glog_INCLUDE_DIR NAMES glog/logging.h)
@@ -60,9 +60,9 @@ else()
 endif()
 
 
-include_directories("include")
+include_directories(${PROJECT_SOURCE_DIR}/src)
 
-add_executable(Simulation src/main.cc)
+add_executable(Simulation src/main.cc src/algorithm_book.cc src/algorithm/task_placement.cc)
 target_link_libraries(Simulation ${glog_LIBRARY} ${gflags_LIBRARIES})
 set_property(TARGET Simulation PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD})
 set_property(TARGET Simulation PROPERTY RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})

@@ -14,33 +14,17 @@
 
 #pragma once
 
-#include "event.h"
-#include "worker.h"
-#include <memory>
+#include <map>
+#include <queue>
 #include <vector>
+
+#include "resource_request.h"
 
 namespace axe {
 namespace simulation {
 
-class EventHandler {
-public:
-  std::vector<std::shared_ptr<Event>>
-  Handle(const std::shared_ptr<Event> event) {
-    return handler_map_[event->GetEventType()](event);
-  }
-
-  void RegisterHandler(int handler_id,
-                       std::function<std::vector<std::shared_ptr<Event>>(
-                           const std::shared_ptr<Event> event)>
-                           handler) {
-    handler_map_.insert({handler_id, handler});
-  }
-
-protected:
-  std::map<int, std::function<std::vector<std::shared_ptr<Event>>(
-                    const std::shared_ptr<Event> event)>>
-      handler_map_;
-};
+std::vector<std::pair<int, ResourceRequest>>
+FIFO(std::multimap<double, ResourceRequest> &req_queue);
 
 } // namespace simulation
 } // namespace axe

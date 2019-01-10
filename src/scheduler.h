@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 
+#include "algorithm_book.h"
 #include "event.h"
 #include "event_handler.h"
 #include "event_queue.h"
@@ -35,84 +36,80 @@ using nlohmann::json;
 class Scheduler : public EventHandler {
 
 public:
-  Scheduler() { RegisterHandler(); }
-
-  void RegisterHandler() {
-    handler_map_.insert(
-        {NEW_JOB,
-         [=](const std::shared_ptr<Event> event)
-             -> std::vector<std::shared_ptr<Event>> {
-           // Job admission control
-           std::vector<std::shared_ptr<Event>> event_vector;
-           std::shared_ptr<NewJobEvent> new_job_event =
-               std::static_pointer_cast<NewJobEvent>(event);
-           bool permit = AdmissionPermit(new_job_event->GetJob());
-           if (permit) {
-             event_vector.push_back(std::static_pointer_cast<Event>(
-                 std::make_shared<JobAdmissionEvent>(
-                     JobAdmissionEvent(JOB_ADMISSION, global_clock, 0,
-                                       new_job_event->GetJob().GetId(),
-                                       new_job_event->GetJob().GetId()))));
-           } else {
-             double time = event_queue.Top()->GetTime();
-             new_job_event->SetTime(time);
-             event_vector.push_back(
-                 std::static_pointer_cast<Event>(new_job_event));
-           }
-           return event_vector;
-         }});
-    handler_map_.insert(
-        {NEW_TASK_REQ,
-         [=](const std::shared_ptr<Event> event)
-             -> std::vector<std::shared_ptr<Event>> {
-           // Assign the task on workers
-           std::vector<std::shared_ptr<Event>> event_vector;
-           std::shared_ptr<NewTaskReqEvent> new_task_req_event =
-               std::static_pointer_cast<NewTaskReqEvent>(event);
-           int worker_id = AssignReqToWorker(new_task_req_event->GetReq());
-           if (worker_id != -1) {
-             event_vector.push_back(std::static_pointer_cast<Event>(
-                 std::make_shared<PlacementDecisionEvent>(
-                     PlacementDecisionEvent(
-                         PLACEMENT_DECISION, global_clock, 0,
-                         new_task_req_event->GetReq().GetJobID(), worker_id,
-                         new_task_req_event->GetReq().GetSubGraphID()))));
-           } else {
-             double time = event_queue.Top()->GetTime();
-             new_task_req_event->SetTime(time);
-             event_vector.push_back(
-                 std::static_pointer_cast<Event>(new_task_req_event));
-           }
-           return event_vector;
-         }});
-    handler_map_.insert({JOB_FINISH,
-                         [=](const std::shared_ptr<Event> event)
-                             -> std::vector<std::shared_ptr<Event>> {
-                           std::vector<std::shared_ptr<Event>> event_vector;
-                           return event_vector;
-                         }});
+  Scheduler() {
+    RegisterHandlers();
+    std::cout << "Register Handlers over\n";
   }
 
-  bool AdmissionPermit(const Job &job) {
-    // TODO(SXD): decide the admission of the job
-    return true;
+  void RegisterHandlers() {
+    RegisterHandler(
+        NEW_JOB,
+        [=](const std::shared_ptr<Event> event)
+            -> std::vector<std::shared_ptr<Event>> {
+          // Job admission control
+          std::vector<std::shared_ptr<Event>> event_vector;
+          std::shared_ptr<NewJobEvent> new_job_event =
+              std::static_pointer_cast<NewJobEvent>(event);
+
+          event_vector.push_back(std::make_shared<JobAdmissionEvent>(
+              JobAdmissionEvent(JOB_ADMISSION, global_clock, 0,
+                                new_job_event->GetJob().GetId(),
+                                new_job_event->GetJob().GetId())));
+
+          return event_vector;
+        });
+    RegisterHandler(
+        NEW_TASK_REQ,
+        [=](const std::shared_ptr<Event> event)
+            -> std::vector<std::shared_ptr<Event>> {
+          // Assign the task on workers
+          std::vector<std::shared_ptr<Event>> event_vector;
+          std::shared_ptr<NewTaskReqEvent> new_task_req_event =
+              std::static_pointer_cast<NewTaskReqEvent>(event);
+          req_queue_.insert(
+              {new_task_req_event->GetTime(), new_task_req_event->GetReq()});
+          std::vector<std::pair<int, ResourceRequest>> decision_vector =
+              AssignReqToWorker();
+          for (const auto &decision : decision_vector) {
+            event_vector.push_back(std::make_shared<PlacementDecisionEvent>(
+                PlacementDecisionEvent(PLACEMENT_DECISION, global_clock, 0,
+                                       decision.second.GetJobID(),
+                                       decision.first,
+                                       decision.second.GetSubGraphID())));
+          }
+          return event_vector;
+        });
+    RegisterHandler(
+        RESOURCE_AVAILABLE,
+        [=](const std::shared_ptr<Event> event)
+            -> std::vector<std::shared_ptr<Event>> {
+          std::vector<std::shared_ptr<Event>> event_vector;
+          std::vector<std::pair<int, ResourceRequest>> decision_vector =
+              AssignReqToWorker();
+          for (const auto &decision : decision_vector) {
+            event_vector.push_back(std::make_shared<PlacementDecisionEvent>(
+                PlacementDecisionEvent(PLACEMENT_DECISION, global_clock, 0,
+                                       decision.second.GetJobID(),
+                                       decision.first,
+                                       decision.second.GetSubGraphID())));
+          }
+          return event_vector;
+        });
+    RegisterHandler(JOB_FINISH,
+                    [=](const std::shared_ptr<Event> event)
+                        -> std::vector<std::shared_ptr<Event>> {
+                      std::vector<std::shared_ptr<Event>> event_vector;
+
+                      return event_vector;
+                    });
   }
 
-  int AssignReqToWorker(const ResourceRequest &req) {
-    // TODO(SXD): decide which worker to go to
-    return -1;
-  }
-
-  std::vector<std::shared_ptr<Event>>
-  Handle(const std::shared_ptr<Event> event) {
-    // TODO(SXD): handle function for Scheduler
-    return handler_map_[event->GetEventType()](event);
+  std::vector<std::pair<int, ResourceRequest>> AssignReqToWorker() {
+    return AlgorithmBook::GetTaskPlacement()(req_queue_);
   }
 
 private:
-  std::map<int, std::function<std::vector<std::shared_ptr<Event>>(
-                    const std::shared_ptr<Event> event)>>
-      handler_map_;
+  std::multimap<double, ResourceRequest> req_queue_;
 };
 
 } // namespace simulation
