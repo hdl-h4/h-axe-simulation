@@ -23,12 +23,12 @@ namespace axe {
 namespace simulation {
 
 enum EventType {
-  TASK_FINISH = 0, // SCH tells JM the task req is finished, for JM
-  JOB_FINISH,      // JM tells SCH the job is finished, for SCH
-  JOB_ADMISSION,   // SCH accepts the job, for JM
-  ASSIGN_DECISION, // SCH tells the JM about the scheduling decision, for JM
-  NEW_TASK_REQ,    // JM sends the task req to SCH, for SCH
-  NEW_JOB,         // JM sends SCH the new job, for SCH
+  TASK_FINISH = 0,    // SCH tells JM the task req is finished, for JM
+  JOB_FINISH,         // JM tells SCH the job is finished, for SCH
+  JOB_ADMISSION,      // SCH accepts the job, for JM
+  PLACEMENT_DECISION, // SCH tells the JM about the scheduling decision, for JM
+  NEW_TASK_REQ,       // JM sends the task req to SCH, for SCH
+  NEW_JOB,            // JM sends SCH the new job, for SCH
 };
 
 const int SCHEDULER = -1;
@@ -105,6 +105,18 @@ public:
 
 private:
   ResourceRequest req_;
+};
+
+class PlacementDecisionEvent : public Event {
+public:
+  PlacementDecisionEvent(int event_type, double time, int priority,
+                         int event_principal, int worker_id, int subgraph_id)
+      : Event(event_type, time, priority, event_principal),
+        worker_id_(worker_id), subgraph_id_(subgraph_id) {}
+
+private:
+  int worker_id_;
+  int subgraph_id_;
 };
 
 } // namespace simulation

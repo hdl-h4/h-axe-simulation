@@ -61,12 +61,30 @@ public:
            }
            return event_vector;
          }});
-    handler_map_.insert({NEW_TASK_REQ,
-                         [=](const std::shared_ptr<Event> event)
-                             -> std::vector<std::shared_ptr<Event>> {
-                           std::vector<std::shared_ptr<Event>> event_vector;
-                           return event_vector;
-                         }});
+    handler_map_.insert(
+        {NEW_TASK_REQ,
+         [=](const std::shared_ptr<Event> event)
+             -> std::vector<std::shared_ptr<Event>> {
+           // Assign the task on workers
+           std::vector<std::shared_ptr<Event>> event_vector;
+           std::shared_ptr<NewTaskReqEvent> new_task_req_event =
+               std::static_pointer_cast<NewTaskReqEvent>(event);
+           int worker_id = AssignReqToWorker(new_task_req_event->GetReq());
+           if (worker_id != -1) {
+             event_vector.push_back(std::static_pointer_cast<Event>(
+                 std::make_shared<PlacementDecisionEvent>(
+                     PlacementDecisionEvent(
+                         PLACEMENT_DECISION, global_clock, 0,
+                         new_task_req_event->GetReq().GetJobID(), worker_id,
+                         new_task_req_event->GetReq().GetSubGraphID()))));
+           } else {
+             double time = event_queue.Top()->GetTime();
+             new_task_req_event->SetTime(time);
+             event_vector.push_back(
+                 std::static_pointer_cast<Event>(new_task_req_event));
+           }
+           return event_vector;
+         }});
     handler_map_.insert({JOB_FINISH,
                          [=](const std::shared_ptr<Event> event)
                              -> std::vector<std::shared_ptr<Event>> {
