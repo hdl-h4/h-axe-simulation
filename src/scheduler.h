@@ -24,6 +24,8 @@
 #include "event.h"
 #include "event_handler.h"
 #include "event_queue.h"
+#include "new_job_event.h"
+#include "new_task_req_event.h"
 #include "worker.h"
 
 #include "nlohmann/json.hpp"

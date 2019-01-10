@@ -14,11 +14,11 @@
 
 #pragma once
 
-#include "nlohmann/json.hpp"
-#include "sub_graph.h"
-
 #include <iostream>
 #include <vector>
+
+#include "nlohmann/json.hpp"
+#include "subgraph.h"
 
 namespace axe {
 namespace simulation {
@@ -29,9 +29,12 @@ class Job {
 public:
   Job() = default;
 
-  inline const auto &GetSubGraphs() const { return subgraphs_; }
-  inline const auto &GetId() const { return id_; }
-  inline const auto &GetSubmissionTime() const { return submission_time_; }
+  inline auto &GetSubGraphs() const { return subgraphs_; }
+  inline auto GetId() const { return id_; }
+  inline auto GetSubmissionTime() const { return submission_time_; }
+  inline void SetWorkerId(int subgraph_id, int worker_id) {
+    subgraphs_.at(subgraph_id).SetWorkerId(worker_id);
+  }
 
   friend void from_json(const json &j, Job &job) {
     j.at("id").get_to(job.id_);

@@ -14,10 +14,11 @@
 
 #pragma once
 
-#include "event.h"
-#include "worker.h"
 #include <memory>
 #include <vector>
+
+#include "event.h"
+#include "worker.h"
 
 namespace axe {
 namespace simulation {

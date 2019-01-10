@@ -14,31 +14,24 @@
 
 #pragma once
 
-#include <vector>
-
-#include "resource.h"
+#include "event.h"
 
 namespace axe {
 namespace simulation {
 
-class ResourceRequest {
+class PlacementDecisionEvent : public Event {
 public:
-  ResourceRequest() {}
-  ResourceRequest(int job_id, int subgraph_id, std::vector<int> data_locality,
-                  ResourcePack resource)
-      : job_id_(job_id), subgraph_id_(subgraph_id),
-        data_locality_(data_locality), resource_(resource) {}
+  PlacementDecisionEvent(int event_type, double time, int priority,
+                         int event_principal, int worker_id, int subgraph_id)
+      : Event(event_type, time, priority, event_principal),
+        worker_id_(worker_id), subgraph_id_(subgraph_id) {}
 
-  inline const int GetJobID() const { return job_id_; }
-  inline const int GetSubGraphID() const { return subgraph_id_; }
-  inline const auto &GetDataLocality() const { return data_locality_; }
-  inline const auto &GetResource() const { return resource_; }
+  inline auto GetWorkerId() const { return worker_id_; }
+  inline auto GetSubGraphId() const { return subgraph_id_; }
 
 private:
-  int job_id_;
+  int worker_id_;
   int subgraph_id_;
-  std::vector<int> data_locality_;
-  ResourcePack resource_;
 };
 
 } // namespace simulation
