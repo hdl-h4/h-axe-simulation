@@ -18,9 +18,8 @@
 #include "event_handler.h"
 #include "event_queue.h"
 #include "job.h"
-#include "shard_task.h"
 #include "resource_request.h"
-
+#include "shard_task.h"
 
 #include <map>
 #include <memory>
@@ -52,7 +51,7 @@ public:
            return event_vector;
          }});
 
-    handler_map_.insert({ASSIGN_DECISION,
+    handler_map_.insert({PLACEMENT_DECISION,
                          [=](const std::shared_ptr<Event> event)
                              -> std::vector<std::shared_ptr<Event>> {
                            std::vector<std::shared_ptr<Event>> event_vector;
