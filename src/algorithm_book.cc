@@ -12,35 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
-
-#include "event.h"
-#include "worker.h"
+#include "algorithm_book.h"
+#include "resource_request.h"
+#include <functional>
+#include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace axe {
 namespace simulation {
 
-class EventHandler {
-public:
-  std::vector<std::shared_ptr<Event>>
-  Handle(const std::shared_ptr<Event> event) {
-    return handler_map_[event->GetEventType()](event);
-  }
-
-  void RegisterHandler(int handler_id,
-                       std::function<std::vector<std::shared_ptr<Event>>(
-                           const std::shared_ptr<Event> event)>
-                           handler) {
-    handler_map_.insert({handler_id, handler});
-  }
-
-protected:
-  std::map<int, std::function<std::vector<std::shared_ptr<Event>>(
-                    const std::shared_ptr<Event> event)>>
-      handler_map_;
-};
+std::string AlgorithmBook::task_placement = "";
+std::map<std::string,
+         std::function<std::vector<std::pair<int, ResourceRequest>>(
+             std::multimap<double, ResourceRequest> &)>>
+    AlgorithmBook::task_placement_book = {};
 
 } // namespace simulation
 } // namespace axe

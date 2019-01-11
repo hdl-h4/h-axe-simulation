@@ -95,9 +95,6 @@ public:
   }
 
 private:
-  std::map<int, std::function<std::vector<std::shared_ptr<Event>>(
-                    const std::shared_ptr<Event> event)>>
-      handler_map_;
   Job job_;
   std::map<std::pair<int, int>, int> shard_task_to_subgraph_;
   std::map<std::pair<int, int>, int> dep_counter_;

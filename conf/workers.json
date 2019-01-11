@@ -1,0 +1,11 @@
+{
+  "worker" : [
+    {
+      "id" : 0,
+      "cpu" : 5,
+      "memory" : 5,
+      "disk" : 5,
+      "network" : 5  
+    }
+  ]
+}

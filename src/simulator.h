@@ -38,11 +38,12 @@ public:
   Simulator() = default;
   explicit Simulator(const json &j) { from_json(j, *this); }
 
-  void Init(const json &j) {
+  void Init() {
     // TODO(SXD): read the configuration file and new JMs and Scheduler
     // read the configuration file and parse into WS and JS
 
     scheduler_ = std::make_shared<Scheduler>();
+    /*
     for (const auto &job : jobs_) {
       jms_.push_back(std::make_shared<JobManager>(job));
     }
@@ -52,6 +53,7 @@ public:
                                         jm->GetJob().GetSubmissionTime(), 0,
                                         SCHEDULER, jm->GetJob())));
     }
+    */
   }
 
   void Serve() {
@@ -86,7 +88,6 @@ public:
 
   friend void from_json(const json &j, Simulator &sim) {
     j.at("job").get_to(sim.jobs_);
-    j.at("worker").get_to(workers);
   }
 
 private:

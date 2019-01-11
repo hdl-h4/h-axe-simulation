@@ -16,8 +16,12 @@
 #include <iostream>
 #include <string>
 
+#include "algorithm/task_placement.h"
+#include "algorithm_book.h"
 #include "glog/logging.h"
+#include "nlohmann/json.hpp"
 #include "simulator.h"
+#include "worker.h"
 
 using json = nlohmann::json;
 
@@ -32,16 +36,31 @@ json ReadJsonFromFile(const std::string &file) {
   return json::parse(ret);
 }
 
+void SetAlgorithm(const json &j) {
+  std::cout << "set alg\n";
+  std::string task_placement_str;
+  j.at("TaskPlacement").get_to(task_placement_str);
+  axe::simulation::AlgorithmBook::Init(task_placement_str);
+}
+
+void SetWorkers(const json &j) {
+  std::cout << "set workers\n";
+  j.at("worker").get_to(axe::simulation::workers);
+}
+
 int main(int argc, char **argv) {
   google::InitGoogleLogging(argv[0]);
   gflags::ParseCommandLineFlags(&argc, &argv, true);
+  LOG(INFO) << "start simulation...";
 
   std::cout << "start simulation...\n";
+  SetWorkers(ReadJsonFromFile(argv[2]));
+  SetAlgorithm(ReadJsonFromFile(argv[3]));
   axe::simulation::Simulator simulator(ReadJsonFromFile(argv[1]));
-  simulator.Init(ReadJsonFromFile(argv[2]));
-  simulator.Serve();
+  simulator.Init();
+  // simulator.Serve();
   // simulator.Print();
-  std::cout << "simulation end";
+  std::cout << "simulation end\n";
 
   google::FlushLogFiles(google::INFO);
   gflags::ShutDownCommandLineFlags();
