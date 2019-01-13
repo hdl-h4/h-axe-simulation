@@ -14,14 +14,14 @@
 
 #pragma once
 
+#include "event/event.h"
 #include <functional>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <queue>
 #include <string>
 #include <vector>
-
-#include "event.h"
 
 namespace axe {
 namespace simulation {

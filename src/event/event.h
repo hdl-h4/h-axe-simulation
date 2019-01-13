@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <map>
 #include <memory>
 #include <stdint.h>
 
@@ -30,6 +31,15 @@ enum EventType {
   NEW_TASK_REQ,       // JM sends the task req to SCH, for SCH
   NEW_JOB,            // JM sends SCH the new job, for SCH
 };
+
+std::map<int, std::string> event_map = {
+    {TASK_FINISH, "TASK FINISH"},
+    {RESOURCE_AVAILABLE, "RESOURCE AVAILABLE"},
+    {JOB_FINISH, "JOB FINISH"},
+    {JOB_ADMISSION, "JOB ADMISSION"},
+    {PLACEMENT_DECISION, "PLACEMENT DECISION"},
+    {NEW_TASK_REQ, "NEW TASK REQ"},
+    {NEW_JOB, "NEW JOB"}};
 
 const int SCHEDULER = -1;
 const int JOB_MANAGER = 0;

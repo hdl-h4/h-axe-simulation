@@ -22,8 +22,8 @@
 #include <string>
 #include <vector>
 
-#include "event.h"
-#include "job.h"
+#include "event/event.h"
+#include "job/job.h"
 #include "job_manager.h"
 #include "scheduler.h"
 #include "worker.h"
@@ -43,22 +43,18 @@ public:
     // read the configuration file and parse into WS and JS
 
     scheduler_ = std::make_shared<Scheduler>();
-    /*
-    int size = 0;
+
+    int size = jobs_.size();
+
     for (const auto &job : jobs_) {
-      size = job.GetId() > size ? job.GetId() : size;
+      jms_.push_back(std::make_shared<JobManager>(job));
     }
-    jms_.resize(size + 1);
-    for (const auto &job : jobs_) {
-      jms_.at(job.GetId()) = std::make_shared<JobManager>(job);
-    }
+
     for (const auto &jm : jms_) {
-      event_queue.Push(std::static_pointer_cast<Event>(
-          std::make_shared<NewJobEvent>(NEW_JOB,
-                                        jm->GetJob().GetSubmissionTime(), 0,
-                                        SCHEDULER, jm->GetJob())));
+      event_queue.Push(std::make_shared<NewJobEvent>(
+          NEW_JOB, jm->GetJob().GetSubmissionTime(), 0, SCHEDULER,
+          jm->GetJob()));
     }
-    */
   }
 
   void Serve() {
@@ -66,6 +62,7 @@ public:
     // order
     while (!event_queue.Empty()) {
       auto event = event_queue.Top();
+      DLOG(INFO) << "event type: " << event_map[event->GetEventType()];
       global_clock = event->GetTime();
       event_queue.Pop();
       event_queue.Push(Dispatch(event));

@@ -17,7 +17,7 @@
 #include <memory>
 #include <vector>
 
-#include "event.h"
+#include "event/event.h"
 #include "worker.h"
 
 namespace axe {

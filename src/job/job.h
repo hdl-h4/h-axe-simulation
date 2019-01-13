@@ -47,8 +47,8 @@ public:
 
   // for debug
   void Print() {
-    std::cout << "job id : " << id_ << '\n';
-    std::cout << "submission time : " << submission_time_ << '\n';
+    DLOG(INFO) << "job id : " << id_;
+    DLOG(INFO) << "submission time : " << submission_time_;
     for (auto &sg : subgraphs_) {
       sg.Print();
     }

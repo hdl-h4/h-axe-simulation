@@ -19,17 +19,17 @@
 #include <unordered_map>
 #include <vector>
 
+#include "event/job_admission_event.h"
+#include "event/new_task_req_event.h"
+#include "event/placement_decision_event.h"
+#include "event/resource_available_event.h"
+#include "event/task_finish_event.h"
 #include "event_handler.h"
 #include "event_queue.h"
-#include "job.h"
-#include "job_admission_event.h"
-#include "new_task_req_event.h"
-#include "placement_decision_event.h"
-#include "resource.h"
-#include "resource_available_event.h"
-#include "resource_request.h"
-#include "shard_task.h"
-#include "task_finish_event.h"
+#include "job/job.h"
+#include "job/shard_task.h"
+#include "resource/resource.h"
+#include "resource/resource_request.h"
 
 namespace axe {
 namespace simulation {

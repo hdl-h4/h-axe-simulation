@@ -16,8 +16,8 @@
 
 #include <vector>
 
-#include "resource.h"
-#include "shard_task.h"
+#include "job/shard_task.h"
+#include "resource/resource.h"
 
 #include "nlohmann/json.hpp"
 
@@ -103,6 +103,13 @@ public:
         return false;
       }
     }
+  }
+
+  void Print() {
+    DLOG(INFO) << "cpu: " << cpu_;
+    DLOG(INFO) << "mem: " << memory_;
+    DLOG(INFO) << "disk: " << disk_;
+    DLOG(INFO) << "net: " << net_;
   }
 
 private:

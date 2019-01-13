@@ -12,25 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+#include <functional>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
 
-#include "event.h"
-#include "resource_request.h"
+#include "algorithm_book.h"
+#include "resource/resource_request.h"
 
 namespace axe {
 namespace simulation {
 
-class NewTaskReqEvent : public Event {
-public:
-  NewTaskReqEvent(int event_type, double time, int priority,
-                  int event_principal, const ResourceRequest &req)
-      : Event(event_type, time, priority, event_principal), req_(req) {}
-
-  inline auto &GetReq() const { return req_; }
-
-private:
-  ResourceRequest req_;
-};
+std::string AlgorithmBook::task_placement = "";
+std::map<std::string,
+         std::function<std::vector<std::pair<int, ResourceRequest>>(
+             std::multimap<double, ResourceRequest> &)>>
+    AlgorithmBook::task_placement_book = {};
 
 } // namespace simulation
 } // namespace axe

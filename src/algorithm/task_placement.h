@@ -18,7 +18,7 @@
 #include <queue>
 #include <vector>
 
-#include "resource_request.h"
+#include "resource/resource_request.h"
 
 namespace axe {
 namespace simulation {
