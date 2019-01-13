@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include "job.h"
-#include "resource_request.h"
 #include <memory>
 #include <stdint.h>
 
@@ -34,6 +32,7 @@ enum EventType {
 };
 
 const int SCHEDULER = -1;
+const int JOB_MANAGER = 0;
 
 /**
  * It is actually not elegant design because
@@ -73,63 +72,6 @@ private:
   int event_principal_;
   double time_;
   int priority_;
-};
-
-class NewJobEvent : public Event {
-public:
-  NewJobEvent(int event_type, double time, int priority, int event_principal,
-              const Job &job)
-      : Event(event_type, time, priority, event_principal), job_(job) {}
-
-  inline auto &GetJob() const { return job_; }
-
-private:
-  Job job_;
-};
-
-class JobAdmissionEvent : public Event {
-public:
-  JobAdmissionEvent(int event_type, double time, int priority,
-                    int event_principal, int job_id)
-      : Event(event_type, time, priority, event_principal), job_id_(job_id) {}
-
-private:
-  int job_id_;
-};
-
-class NewTaskReqEvent : public Event {
-public:
-  NewTaskReqEvent(int event_type, double time, int priority,
-                  int event_principal, const ResourceRequest &req)
-      : Event(event_type, time, priority, event_principal), req_(req) {}
-
-  inline auto &GetReq() const { return req_; }
-
-private:
-  ResourceRequest req_;
-};
-
-class PlacementDecisionEvent : public Event {
-public:
-  PlacementDecisionEvent(int event_type, double time, int priority,
-                         int event_principal, int worker_id, int subgraph_id)
-      : Event(event_type, time, priority, event_principal),
-        worker_id_(worker_id), subgraph_id_(subgraph_id) {}
-
-private:
-  int worker_id_;
-  int subgraph_id_;
-};
-
-class ResourceAvailableEvent : public Event {
-public:
-  ResourceAvailableEvent(int event_type, double time, int priority,
-                         int event_principal, int worker_id)
-      : Event(event_type, time, priority, event_principal),
-        worker_id_(worker_id) {}
-
-private:
-  int worker_id_;
 };
 
 } // namespace simulation

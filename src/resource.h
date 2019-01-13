@@ -18,10 +18,14 @@ namespace axe {
 namespace simulation {
 
 struct ResourcePack {
-  int cpu;
-  int mem;
-  int disk;
-  int network;
+  ResourcePack() {}
+  ResourcePack(int cpu, int memory, int disk, int network)
+      : cpu(cpu), memory(memory), disk(disk), network(network) {}
+
+  double cpu;
+  double memory;
+  double disk;
+  double network;
 };
 } // namespace simulation
 } // namespace axe

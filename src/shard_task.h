@@ -14,37 +14,38 @@
 
 #pragma once
 
-#include "nlohmann/json.hpp"
-
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "nlohmann/json.hpp"
 
 namespace axe {
 namespace simulation {
 
 using nlohmann::json;
 
-enum Resource { cpu = 1, memory, network, disk };
+enum ResourceType { cpu = 1, memory, network, disk };
 
 class ShardTask {
 public:
   ShardTask() {}
 
-  inline const auto GetTaskId() const { return task_id_; }
-  inline const auto GetShardId() const { return shard_id_; }
-  inline const auto &GetChildren() const { return children_; }
-  inline const auto GetResource() const { return resource_; }
-  inline const auto GetReq() const { return req_; }
-  inline const auto GetDuration() const { return duration_; }
-  inline const auto &GetLocality() const { return locality_; }
+  inline auto GetTaskId() const { return task_id_; }
+  inline auto GetShardId() const { return shard_id_; }
+  inline auto &GetChildren() const { return children_; }
+  inline auto GetResource() const { return resource_; }
+  inline auto GetReq() const { return req_; }
+  inline auto GetDuration() const { return duration_; }
+  inline auto GetMemory() const { return memory_; }
 
   friend void from_json(const json &j, ShardTask &task) {
     j.at("taskid").get_to(task.task_id_);
     j.at("shardid").get_to(task.shard_id_);
     j.at("resource").get_to(task.resource_);
     j.at("request").get_to(task.req_);
+    j.at("memory").get_to(task.memory_);
     j.at("duration").get_to(task.duration_);
     auto pos = j.find("children");
     if (pos != j.end()) {
@@ -58,6 +59,7 @@ public:
     std::cout << "resource : " << resource_ << '\n';
     std::cout << "request : " << req_ << '\n';
     std::cout << "duration : " << duration_ << '\n';
+    std::cout << "memory : " << memory_ << '\n';
     std::cout << "children : ";
     for (auto &child : children_) {
       std::cout << "{" << child.first << ", " << child.second << "}, ";
@@ -66,13 +68,13 @@ public:
   }
 
 private:
-  int task_id_;
+  int task_id_ = -1;
   int shard_id_;
-  Resource resource_;
+  ResourceType resource_;
+  int memory_;
   int req_;
   int duration_;
   std::vector<std::pair<int, int>> children_;
-  std::vector<std::shared_ptr<std::string>> locality_;
 };
 
 } // namespace simulation

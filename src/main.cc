@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
   SetAlgorithm(ReadJsonFromFile(argv[3]));
   axe::simulation::Simulator simulator(ReadJsonFromFile(argv[1]));
   simulator.Init();
-  // simulator.Serve();
+  simulator.Serve();
   // simulator.Print();
   std::cout << "simulation end\n";
 

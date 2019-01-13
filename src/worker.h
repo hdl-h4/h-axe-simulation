@@ -14,8 +14,12 @@
 
 #pragma once
 
-#include "nlohmann/json.hpp"
 #include <vector>
+
+#include "resource.h"
+#include "shard_task.h"
+
+#include "nlohmann/json.hpp"
 
 namespace axe {
 namespace simulation {
@@ -27,22 +31,95 @@ public:
   Worker() = default;
 
   friend void from_json(const json &j, Worker &worker) {
-    j.at("id").get_to(worker.id_);
     j.at("cpu").get_to(worker.cpu_);
     j.at("memory").get_to(worker.memory_);
     j.at("disk").get_to(worker.disk_);
     j.at("network").get_to(worker.net_);
   }
 
+  inline auto GetRemainResourcePack() const {
+    return ResourcePack(cpu_ - cpu_counter_, memory_ - memory_counter_,
+                        disk_ - disk_counter_, net_ - net_counter_);
+  }
+
+  // task finish
+  std::vector<ShardTask> TaskFinish(const ShardTask &task) {
+    std::vector<ShardTask> tasks;
+    if (task.GetResource() == ResourceType::cpu) {
+      cpu_counter_ -= task.GetReq();
+      while (cpu_queue_.size() != 0 &&
+             cpu_queue_.at(0).GetReq() + cpu_counter_ < cpu_) {
+        tasks.push_back(cpu_queue_.at(0));
+        cpu_counter_ += cpu_queue_.at(0).GetReq();
+        cpu_queue_.erase(cpu_queue_.begin());
+      }
+    } else if (task.GetResource() == ResourceType::network) {
+      net_counter_ -= task.GetReq();
+      while (net_queue_.size() != 0 &&
+             net_queue_.at(0).GetReq() + net_counter_ < net_) {
+        tasks.push_back(net_queue_.at(0));
+        net_counter_ += net_queue_.at(0).GetReq();
+        net_queue_.erase(net_queue_.begin());
+      }
+    } else {
+      disk_counter_ -= task.GetReq();
+      while (disk_queue_.size() != 0 &&
+             disk_queue_.at(0).GetReq() + disk_counter_ < disk_) {
+        tasks.push_back(disk_queue_.at(0));
+        disk_counter_ += disk_queue_.at(0).GetReq();
+        disk_queue_.erase(disk_queue_.begin());
+      }
+    }
+    return tasks;
+  }
+
+  // subgraph finish
+  void SubGraphFinish(int mem) { memory_counter_ -= mem; }
+
+  // place new task, return true : task run; false : task waits in queue;
+  bool PlaceNewTask(ShardTask task) {
+    if (task.GetResource() == ResourceType::cpu) {
+      if (cpu_queue_.size() == 0 && cpu_counter_ + task.GetReq() < cpu_) {
+        cpu_counter_ += task.GetReq();
+        return true;
+      } else {
+        cpu_queue_.push_back(task);
+        return false;
+      }
+    } else if (task.GetResource() == ResourceType::network) {
+      if (net_queue_.size() == 0 && net_counter_ + task.GetReq() < net_) {
+        net_counter_ += task.GetReq();
+        return true;
+      } else {
+        net_queue_.push_back(task);
+        return false;
+      }
+    } else {
+      if (disk_queue_.size() == 0 && disk_counter_ + task.GetReq() < disk_) {
+        disk_counter_ += task.GetReq();
+        return true;
+      } else {
+        disk_queue_.push_back(task);
+        return false;
+      }
+    }
+  }
+
 private:
-  int id_;
-  int cpu_;
-  int memory_;
-  int disk_;
-  int net_;
+  double cpu_;
+  double memory_;
+  double disk_;
+  double net_;
+  double cpu_counter_ = 0;
+  double memory_counter_ = 0;
+  double disk_counter_ = 0;
+  double net_counter_ = 0;
+  std::vector<ShardTask> cpu_queue_;
+  std::vector<ShardTask> disk_queue_;
+  std::vector<ShardTask> net_queue_;
 };
 
 std::vector<Worker> workers;
 
-} // namespace simulation
-} // namespace axe
+} //  namespace simulation
+} //  namespace axe

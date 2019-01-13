@@ -44,8 +44,13 @@ public:
 
     scheduler_ = std::make_shared<Scheduler>();
     /*
+    int size = 0;
     for (const auto &job : jobs_) {
-      jms_.push_back(std::make_shared<JobManager>(job));
+      size = job.GetId() > size ? job.GetId() : size;
+    }
+    jms_.resize(size + 1);
+    for (const auto &job : jobs_) {
+      jms_.at(job.GetId()) = std::make_shared<JobManager>(job);
     }
     for (const auto &jm : jms_) {
       event_queue.Push(std::static_pointer_cast<Event>(
