@@ -44,7 +44,7 @@ public:
   void RegisterHandlers() {
     RegisterHandler(
         JOB_ADMISSION,
-        [=](const std::shared_ptr<Event> event)
+        [&](const std::shared_ptr<Event> event)
             -> std::vector<std::shared_ptr<Event>> {
           std::vector<std::shared_ptr<Event>> event_vector;
           for (const auto &req : GenerateResourceRequest(JOB_ADMISSION)) {
@@ -56,7 +56,7 @@ public:
         });
     RegisterHandler(
         PLACEMENT_DECISION,
-        [=](const std::shared_ptr<Event> event)
+        [&](const std::shared_ptr<Event> event)
             -> std::vector<std::shared_ptr<Event>> {
           std::vector<std::shared_ptr<Event>> event_vector;
 
@@ -84,7 +84,7 @@ public:
 
     RegisterHandler(
         TASK_FINISH,
-        [=](const std::shared_ptr<Event> event)
+        [&](const std::shared_ptr<Event> event)
             -> std::vector<std::shared_ptr<Event>> {
           std::vector<std::shared_ptr<Event>> event_vector;
 

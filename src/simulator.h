@@ -63,6 +63,8 @@ public:
     while (!event_queue.Empty()) {
       auto event = event_queue.Top();
       DLOG(INFO) << "event type: " << event_map[event->GetEventType()];
+      std::cout << "event type: " << event_map[event->GetEventType()]
+                << std::endl;
       global_clock = event->GetTime();
       event_queue.Pop();
       event_queue.Push(Dispatch(event));

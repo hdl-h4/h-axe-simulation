@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <iostream>
 #include <map>
 #include <queue>
 #include <vector>
 
+#include "glog/logging.h"
 #include "resource/resource_request.h"
 
 namespace axe {
@@ -23,7 +25,10 @@ namespace simulation {
 
 std::vector<std::pair<int, ResourceRequest>>
 FIFO(std::multimap<double, ResourceRequest> &req_queue) {
-  return {{0, (*req_queue.begin()).second}};
+  DLOG(INFO) << "task placement: FIFO";
+  ResourceRequest req = (*req_queue.begin()).second;
+  req_queue.erase(req_queue.begin());
+  return {{0, req}};
 }
 
 } // namespace simulation
