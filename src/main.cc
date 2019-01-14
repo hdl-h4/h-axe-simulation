@@ -63,6 +63,8 @@ void SetWorkers(const json &j) {
   PrintWorkers();
 }
 
+// start simulator to simulate a cluster
+
 int main(int argc, char **argv) {
   google::InitGoogleLogging(argv[0]);
   google::SetLogDestination(google::INFO, "log/SIMULATION.INFO");

@@ -43,13 +43,12 @@ public:
   void RegisterHandlers() {
     RegisterHandler(
         NEW_JOB,
-        [=](const std::shared_ptr<Event> event)
+        [&](const std::shared_ptr<Event> event)
             -> std::vector<std::shared_ptr<Event>> {
-          // Job admission control
           std::vector<std::shared_ptr<Event>> event_vector;
           std::shared_ptr<NewJobEvent> new_job_event =
               std::static_pointer_cast<NewJobEvent>(event);
-
+          DLOG(INFO) << "job id: " << new_job_event->GetJob().GetId();
           event_vector.push_back(std::make_shared<JobAdmissionEvent>(
               JobAdmissionEvent(JOB_ADMISSION, global_clock, 0,
                                 new_job_event->GetJob().GetId(),
@@ -59,12 +58,15 @@ public:
         });
     RegisterHandler(
         NEW_TASK_REQ,
-        [=](const std::shared_ptr<Event> event)
+        [&](const std::shared_ptr<Event> event)
             -> std::vector<std::shared_ptr<Event>> {
           // Assign the task on workers
           std::vector<std::shared_ptr<Event>> event_vector;
           std::shared_ptr<NewTaskReqEvent> new_task_req_event =
               std::static_pointer_cast<NewTaskReqEvent>(event);
+          DLOG(INFO) << "job id: " << new_task_req_event->GetReq().GetJobID()
+                     << " subgraph id: "
+                     << new_task_req_event->GetReq().GetSubGraphID();
           req_queue_.insert(
               {new_task_req_event->GetTime(), new_task_req_event->GetReq()});
           std::vector<std::pair<int, ResourceRequest>> decision_vector =
@@ -80,9 +82,11 @@ public:
         });
     RegisterHandler(
         RESOURCE_AVAILABLE,
-        [=](const std::shared_ptr<Event> event)
+        [&](const std::shared_ptr<Event> event)
             -> std::vector<std::shared_ptr<Event>> {
           std::vector<std::shared_ptr<Event>> event_vector;
+          if (req_queue_.size() == 0)
+            return event_vector;
           std::vector<std::pair<int, ResourceRequest>> decision_vector =
               AssignReqToWorker();
           for (const auto &decision : decision_vector) {
@@ -95,10 +99,9 @@ public:
           return event_vector;
         });
     RegisterHandler(JOB_FINISH,
-                    [=](const std::shared_ptr<Event> event)
+                    [&](const std::shared_ptr<Event> event)
                         -> std::vector<std::shared_ptr<Event>> {
                       std::vector<std::shared_ptr<Event>> event_vector;
-
                       return event_vector;
                     });
   }
