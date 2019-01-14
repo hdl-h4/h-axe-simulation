@@ -28,6 +28,20 @@ using nlohmann::json;
 
 enum ResourceType { cpu = 1, memory, network, disk };
 
+struct ShardTaskId {
+  int task_id_;
+  int shard_id_;
+  friend void from_json(const json &j, ShardTaskId &id) {
+    j.at("childtaskid").get_to(id.task_id_);
+    j.at("childshardid").get_to(id.shard_id_);
+  }
+  bool operator<(const ShardTaskId &x) const {
+    if (task_id_ != x.task_id_)
+      return task_id_ < x.task_id_;
+    return shard_id_ < x.shard_id_;
+  }
+};
+
 class ShardTask {
 public:
   ShardTask() {}
@@ -62,7 +76,7 @@ public:
     DLOG(INFO) << "memory : " << memory_;
     DLOG(INFO) << "children : ";
     for (auto &child : children_) {
-      DLOG(INFO) << "{" << child.first << ", " << child.second << "}, ";
+      DLOG(INFO) << "{" << child.task_id_ << ", " << child.shard_id_ << "}, ";
     }
   }
 
@@ -70,10 +84,10 @@ private:
   int task_id_ = -1;
   int shard_id_;
   ResourceType resource_;
-  int memory_;
-  int req_;
-  int duration_;
-  std::vector<std::pair<int, int>> children_;
+  double memory_;
+  double req_;
+  double duration_;
+  std::vector<ShardTaskId> children_;
 };
 
 } // namespace simulation

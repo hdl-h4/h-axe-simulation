@@ -52,19 +52,6 @@ void SetAlgorithm(const json &j) {
   PrintAlgorithm();
 }
 
-void PrintWorkers() {
-  for (int i = 0; i < axe::simulation::workers.size(); ++i) {
-    DLOG(INFO) << "Worker id: " << i << std::endl;
-    axe::simulation::workers[i].Print();
-  }
-}
-
-void SetWorkers(const json &j) {
-  DLOG(INFO) << "set workers";
-  j.at("worker").get_to(axe::simulation::workers);
-  PrintWorkers();
-}
-
 // start simulator to simulate a cluster
 
 int main(int argc, char **argv) {
@@ -72,9 +59,9 @@ int main(int argc, char **argv) {
   google::SetLogDestination(google::INFO, "log/SIMULATION.INFO");
   gflags::ParseCommandLineFlags(&argc, &argv, true);
   LOG(INFO) << "start simulation";
-  SetWorkers(ReadJsonFromFile(argv[1]));
-  SetAlgorithm(ReadJsonFromFile(argv[2]));
-  axe::simulation::Simulator simulator(ReadJsonFromFile(argv[3]));
+  axe::simulation::Simulator simulator(ReadJsonFromFile(argv[1]),
+                                       ReadJsonFromFile(argv[2]));
+  SetAlgorithm(ReadJsonFromFile(argv[3]));
   simulator.Init();
   simulator.Print();
   simulator.Serve();
