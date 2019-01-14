@@ -16,7 +16,7 @@
 
 #include <iostream>
 
-#include "resource.h"
+#include "resource/resource.h"
 #include "shard_task.h"
 
 namespace axe {
@@ -55,7 +55,7 @@ public:
   }
 
   void Print() {
-    std::cout << "worker id : " << worker_id_ << '\n';
+    DLOG(INFO) << "worker id : " << worker_id_;
     for (auto &st : shard_tasks_) {
       st.Print();
     }

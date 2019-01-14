@@ -12,22 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "algorithm_book.h"
-#include "resource_request.h"
-#include <functional>
-#include <map>
-#include <memory>
-#include <string>
-#include <vector>
+#pragma once
+
+#include "event.h"
+#include "job/shard_task.h"
 
 namespace axe {
 namespace simulation {
 
-std::string AlgorithmBook::task_placement = "";
-std::map<std::string,
-         std::function<std::vector<std::pair<int, ResourceRequest>>(
-             std::multimap<double, ResourceRequest> &)>>
-    AlgorithmBook::task_placement_book = {};
+class TaskFinishEvent : public Event {
+public:
+  TaskFinishEvent(int event_type, double time, int priority,
+                  int event_principal, const ShardTask &shard_task)
+      : Event(event_type, time, priority, event_principal),
+        shard_task_(shard_task) {}
+
+  inline auto &GetShardTask() const { return shard_task_; }
+
+private:
+  ShardTask shard_task_;
+};
 
 } // namespace simulation
 } // namespace axe

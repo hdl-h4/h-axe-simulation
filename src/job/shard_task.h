@@ -54,17 +54,16 @@ public:
   }
 
   void Print() {
-    std::cout << "task_id : " << task_id_ << '\n';
-    std::cout << "shard_id : " << shard_id_ << '\n';
-    std::cout << "resource : " << resource_ << '\n';
-    std::cout << "request : " << req_ << '\n';
-    std::cout << "duration : " << duration_ << '\n';
-    std::cout << "memory : " << memory_ << '\n';
-    std::cout << "children : ";
+    DLOG(INFO) << "task_id : " << task_id_;
+    DLOG(INFO) << "shard_id : " << shard_id_;
+    DLOG(INFO) << "resource : " << resource_;
+    DLOG(INFO) << "request : " << req_;
+    DLOG(INFO) << "duration : " << duration_;
+    DLOG(INFO) << "memory : " << memory_;
+    DLOG(INFO) << "children : ";
     for (auto &child : children_) {
-      std::cout << "{" << child.first << ", " << child.second << "}, ";
+      DLOG(INFO) << "{" << child.first << ", " << child.second << "}, ";
     }
-    std::cout << '\n';
   }
 
 private:

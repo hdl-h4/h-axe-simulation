@@ -21,9 +21,8 @@
 #include <string>
 #include <vector>
 
-#include "resource_request.h"
-
 #include "algorithm/task_placement.h"
+#include "resource/resource_request.h"
 
 namespace axe {
 namespace simulation {
@@ -39,6 +38,7 @@ public:
     task_placement_book = {{"FIFO", FIFO}};
   }
   static auto GetTaskPlacement() { return task_placement_book[task_placement]; }
+  static std::string GetTaskPlacementString() { return task_placement; }
   static void SetTaskPlacement(std::string str) { task_placement = str; }
 
 private:

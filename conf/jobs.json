@@ -1,7 +1,7 @@
 {
   "job" : [
     {
-	"id" : 1,
+	"id" : 0,
 	"submissiontime" : 0,
 	"subgraph" : [
 		{
@@ -11,6 +11,7 @@
           "shardid" : 0,
           "resource" : 4,
           "request" : 3,
+          "memory" : 1,
           "duration" : 3,
           "children" : [[2, 0]]
 				},			
@@ -19,6 +20,7 @@
           "shardid" : 0,
           "resource" : 3,
           "request" : 3,
+          "memory" : 1,
           "duration" : 3,
           "children" : [[4, 0], [4, 1]]
 				}			
@@ -31,6 +33,7 @@
           "shardid" : 1,
           "resource" : 4,
           "request" : 3,
+          "memory" : 1,
           "duration" : 3,
           "children" : [[2, 1]]
 				},
@@ -39,6 +42,7 @@
           "shardid" : 1,
           "resource" : 3,
           "request" : 3,
+          "memory" : 1,
           "duration" : 3,
           "children" : [[4, 0], [4, 1]]
         }
@@ -51,6 +55,7 @@
           "shardid" : 0,
           "resource" : 4,
           "request" : 3,
+          "memory" : 1,
           "duration" : 3,
           "children" : [[3, 0]]
 				},
@@ -59,6 +64,7 @@
           "shardid" : 0,
           "resource" : 3,
           "request" : 3,
+          "memory" : 1,
           "duration" : 3,
           "children" : [[5, 0], [5, 1]]
         }
@@ -71,6 +77,7 @@
           "shardid" : 1,
           "resource" : 4,
           "request" : 3,
+          "memory" : 1,
           "duration" : 3,
           "children" : [[3, 1]]
 				},
@@ -79,6 +86,7 @@
           "shardid" : 1,
           "resource" : 3,
           "request" : 3,
+          "memory" : 1,
           "duration" : 3,
           "children" : [[5, 0], [5, 1]]
         }
@@ -91,6 +99,7 @@
           "shardid" : 0,
           "resource" : 1,
           "request" : 3,
+          "memory" : 1,
           "duration" : 3,
           "children" : [[6, 0]]
 				},
@@ -99,6 +108,7 @@
           "shardid" : 0,
           "resource" : 1,
           "request" : 3,
+          "memory" : 1,
           "duration" : 3,
           "children" : [[6, 0]]
         },
@@ -107,6 +117,7 @@
           "shardid" : 0,
           "resource" : 4,
           "request" : 5,
+          "memory" : 1,
           "duration" : 4,
           "children" : []
         }
@@ -119,6 +130,7 @@
           "shardid" : 1,
           "resource" : 1,
           "request" : 3,
+          "memory" : 1,
           "duration" : 3,
           "children" : [[6, 1]]
 				},
@@ -127,6 +139,7 @@
           "shardid" : 1,
           "resource" : 1,
           "request" : 3,
+          "memory" : 1,
           "duration" : 3,
           "children" : [[6, 1]]
         },
@@ -135,6 +148,7 @@
           "shardid" : 1,
           "resource" : 4,
           "request" : 5,
+          "memory" : 1,
           "duration" : 4,
           "children" : []
         }
