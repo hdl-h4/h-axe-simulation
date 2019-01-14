@@ -51,7 +51,5 @@ private:
       pq_;
 };
 
-double global_clock;
-
 } // namespace simulation
 } // namespace axe

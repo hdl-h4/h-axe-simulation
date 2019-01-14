@@ -30,6 +30,8 @@
 #include "scheduler.h"
 #include "worker.h"
 
+#include <iostream>
+
 namespace axe {
 namespace simulation {
 
@@ -38,18 +40,22 @@ using nlohmann::json;
 class Simulator {
 public:
   Simulator() = default;
-  explicit Simulator(const json &j) { from_json(j, *this); }
+  explicit Simulator(const json &workers_json, const json &jobs_json) {
+    workers_ = std::make_shared<std::vector<Worker>>();
+    from_json(workers_json, *this);
+    from_json(jobs_json, *this);
+  }
 
   void Init() {
     // TODO(SXD): read the configuration file and new JMs and Scheduler
     // read the configuration file and parse into WS and JS
 
-    scheduler_ = std::make_shared<Scheduler>();
+    scheduler_ = std::make_shared<Scheduler>(workers_);
 
     int size = jobs_.size();
 
     for (const auto &job : jobs_) {
-      jms_.push_back(std::make_shared<JobManager>(job));
+      jms_.push_back(std::make_shared<JobManager>(job, workers_));
     }
 
     for (const auto &jm : jms_) {
@@ -65,7 +71,6 @@ public:
     while (!event_queue_.Empty()) {
       auto event = event_queue_.Top();
       DLOG(INFO) << "event type: " << event_map[event->GetEventType()];
-      global_clock = event->GetTime();
       event_queue_.Pop();
       event_queue_.Push(Dispatch(event));
     }
@@ -90,7 +95,11 @@ public:
   }
 
   friend void from_json(const json &j, Simulator &sim) {
-    j.at("job").get_to(sim.jobs_);
+    if (j.find("worker") != j.end()) {
+      j.at("worker").get_to(*(sim.workers_));
+    } else if (j.find("job") != j.end()) {
+      j.at("job").get_to(sim.jobs_);
+    }
   }
 
 private:
@@ -98,6 +107,7 @@ private:
   std::shared_ptr<Scheduler> scheduler_;
   std::vector<std::shared_ptr<JobManager>> jms_;
   EventQueue event_queue_;
+  std::shared_ptr<std::vector<Worker>> workers_;
 };
 
 } // namespace simulation

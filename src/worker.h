@@ -21,6 +21,8 @@
 
 #include "nlohmann/json.hpp"
 
+#include <iostream>
+
 namespace axe {
 namespace simulation {
 
@@ -77,7 +79,7 @@ public:
   void SubGraphFinish(double mem) { memory_counter_ -= mem; }
 
   // place new task, return true : task run; false : task waits in queue;
-  bool PlaceNewTask(ShardTask task) {
+  bool PlaceNewTask(const ShardTask &task) {
     if (task.GetResource() == ResourceType::cpu) {
       if (cpu_queue_.size() == 0 && cpu_counter_ + task.GetReq() < cpu_) {
         cpu_counter_ += task.GetReq();
@@ -125,8 +127,6 @@ private:
   std::vector<ShardTask> disk_queue_;
   std::vector<ShardTask> net_queue_;
 };
-
-std::vector<Worker> workers;
 
 } //  namespace simulation
 } //  namespace axe
