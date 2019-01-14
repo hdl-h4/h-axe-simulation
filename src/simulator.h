@@ -22,6 +22,8 @@
 #include <string>
 #include <vector>
 
+#include "glog/logging.h"
+
 #include "event/event.h"
 #include "job/job.h"
 #include "job_manager.h"
@@ -70,8 +72,7 @@ public:
     std::cout << "simulator server over." << std::endl;
   }
 
-  std::vector<std::shared_ptr<Event>>
-  Dispatch(const std::shared_ptr<Event> event) {
+  std::vector<std::shared_ptr<Event>> Dispatch(std::shared_ptr<Event> event) {
     // TODO(SXD): send the event to different components to handle
     int event_principal = event->GetEventPrincipal();
     if (event_principal == SCHEDULER) {

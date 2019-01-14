@@ -16,6 +16,8 @@
 #include <iostream>
 #include <string>
 
+#include "glog/logging.h"
+
 #include "algorithm/algorithm_book.h"
 #include "algorithm/task_placement.h"
 #include "glog/logging.h"

@@ -19,7 +19,7 @@ namespace simulation {
 
 struct ResourcePack {
   ResourcePack() {}
-  ResourcePack(int cpu, int memory, int disk, int network)
+  ResourcePack(double cpu, double memory, double disk, double network)
       : cpu(cpu), memory(memory), disk(disk), network(network) {}
 
   double cpu;

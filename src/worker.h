@@ -74,7 +74,7 @@ public:
   }
 
   // subgraph finish
-  void SubGraphFinish(int mem) { memory_counter_ -= mem; }
+  void SubGraphFinish(double mem) { memory_counter_ -= mem; }
 
   // place new task, return true : task run; false : task waits in queue;
   bool PlaceNewTask(ShardTask task) {

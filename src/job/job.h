@@ -17,6 +17,8 @@
 #include <iostream>
 #include <vector>
 
+#include "glog/logging.h"
+
 #include "nlohmann/json.hpp"
 #include "subgraph.h"
 
@@ -29,7 +31,7 @@ class Job {
 public:
   Job() = default;
 
-  inline auto &GetSubGraphs() const { return subgraphs_; }
+  inline const auto &GetSubGraphs() const { return subgraphs_; }
   inline auto GetId() const { return id_; }
   inline auto GetSubmissionTime() const { return submission_time_; }
   inline void SetWorkerId(int subgraph_id, int worker_id) {
