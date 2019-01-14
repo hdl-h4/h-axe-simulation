@@ -51,7 +51,7 @@ public:
     }
 
     for (const auto &jm : jms_) {
-      event_queue.Push(std::make_shared<NewJobEvent>(
+      event_queue_.Push(std::make_shared<NewJobEvent>(
           NEW_JOB, jm->GetJob().GetSubmissionTime(), 0, SCHEDULER,
           jm->GetJob()));
     }
@@ -60,14 +60,12 @@ public:
   void Serve() {
     // TODO(SXD): process the event in pq one by one according to the priority
     // order
-    while (!event_queue.Empty()) {
-      auto event = event_queue.Top();
+    while (!event_queue_.Empty()) {
+      auto event = event_queue_.Top();
       DLOG(INFO) << "event type: " << event_map[event->GetEventType()];
-      std::cout << "event type: " << event_map[event->GetEventType()]
-                << std::endl;
       global_clock = event->GetTime();
-      event_queue.Pop();
-      event_queue.Push(Dispatch(event));
+      event_queue_.Pop();
+      event_queue_.Push(Dispatch(event));
     }
     std::cout << "simulator server over." << std::endl;
   }
@@ -98,6 +96,7 @@ private:
   std::vector<Job> jobs_;
   std::shared_ptr<Scheduler> scheduler_;
   std::vector<std::shared_ptr<JobManager>> jms_;
+  EventQueue event_queue_;
 };
 
 } // namespace simulation

@@ -26,6 +26,13 @@
 namespace axe {
 namespace simulation {
 
+struct cmp {
+  bool operator()(const std::shared_ptr<Event> &lhs,
+                  const std::shared_ptr<Event> &rhs) {
+    return (*lhs) < (*rhs);
+  }
+};
+
 class EventQueue {
 public:
   std::shared_ptr<Event> Top() const { return pq_.top(); }
@@ -39,10 +46,11 @@ public:
   bool Empty() const { return pq_.empty(); }
 
 private:
-  std::priority_queue<std::shared_ptr<Event>> pq_;
+  std::priority_queue<std::shared_ptr<Event>,
+                      std::vector<std::shared_ptr<Event>>, cmp>
+      pq_;
 };
 
-EventQueue event_queue;
 double global_clock;
 
 } // namespace simulation
