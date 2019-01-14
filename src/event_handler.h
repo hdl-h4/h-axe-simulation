@@ -25,21 +25,20 @@ namespace simulation {
 
 class EventHandler {
 public:
-  std::vector<std::shared_ptr<Event>>
-  Handle(const std::shared_ptr<Event> event) {
+  std::vector<std::shared_ptr<Event>> Handle(std::shared_ptr<Event> event) {
     return handler_map_[event->GetEventType()](event);
   }
 
-  void RegisterHandler(int handler_id,
-                       std::function<std::vector<std::shared_ptr<Event>>(
-                           const std::shared_ptr<Event> event)>
-                           handler) {
+  void RegisterHandler(
+      int handler_id,
+      std::function<std::vector<std::shared_ptr<Event>>(std::shared_ptr<Event>)>
+          handler) {
     handler_map_.insert({handler_id, handler});
   }
 
 protected:
   std::map<int, std::function<std::vector<std::shared_ptr<Event>>(
-                    const std::shared_ptr<Event> event)>>
+                    std::shared_ptr<Event>)>>
       handler_map_;
 };
 

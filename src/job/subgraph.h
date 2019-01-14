@@ -16,6 +16,8 @@
 
 #include <iostream>
 
+#include "glog/logging.h"
+
 #include "resource/resource.h"
 #include "shard_task.h"
 
@@ -26,11 +28,11 @@ class SubGraph {
 public:
   SubGraph() = default;
 
-  inline auto &GetShardTasks() const { return shard_tasks_; }
-  inline auto GetResourcePack() const { return resource_pack_; }
+  inline const auto &GetShardTasks() const { return shard_tasks_; }
+  inline const auto &GetResourcePack() const { return resource_pack_; }
   inline auto GetWorkerId() const { return worker_id_; }
   inline void SetWorkerId(int worker_id) { worker_id_ = worker_id; }
-  inline auto &GetDataLocality() const { return data_locality_; }
+  inline const auto &GetDataLocality() const { return data_locality_; }
   inline auto GetMemory() const { return memory_; }
 
   friend void from_json(const json &j, SubGraph &sg) {

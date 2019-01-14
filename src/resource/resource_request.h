@@ -29,8 +29,8 @@ public:
       : job_id_(job_id), subgraph_id_(subgraph_id),
         data_locality_(data_locality), resource_(resource) {}
 
-  inline const int GetJobID() const { return job_id_; }
-  inline const int GetSubGraphID() const { return subgraph_id_; }
+  inline int GetJobID() const { return job_id_; }
+  inline int GetSubGraphID() const { return subgraph_id_; }
   inline const auto &GetDataLocality() const { return data_locality_; }
   inline const auto &GetResource() const { return resource_; }
 
