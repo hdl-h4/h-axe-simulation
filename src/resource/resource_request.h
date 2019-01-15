@@ -14,9 +14,8 @@
 
 #pragma once
 
-#include <vector>
-
 #include "resource.h"
+#include <vector>
 
 namespace axe {
 namespace simulation {

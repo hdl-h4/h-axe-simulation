@@ -14,14 +14,11 @@
 
 #pragma once
 
-#include <vector>
-
+#include "glog/logging.h"
 #include "job/shard_task.h"
-#include "resource/resource.h"
-
 #include "nlohmann/json.hpp"
-
-#include <iostream>
+#include "resource/resource.h"
+#include <vector>
 
 namespace axe {
 namespace simulation {

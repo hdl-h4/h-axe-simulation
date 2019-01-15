@@ -14,15 +14,15 @@
 
 #pragma once
 
+#include "algorithm/task_placement.h"
+#include "resource/resource_request.h"
+#include "worker.h"
 #include <functional>
 #include <map>
 #include <memory>
 #include <queue>
 #include <string>
 #include <vector>
-
-#include "algorithm/task_placement.h"
-#include "resource/resource_request.h"
 
 namespace axe {
 namespace simulation {
@@ -45,7 +45,8 @@ private:
   static std::string task_placement;
   static std::map<std::string,
                   std::function<std::vector<std::pair<int, ResourceRequest>>(
-                      std::multimap<double, ResourceRequest> &)>>
+                      std::multimap<double, ResourceRequest> &,
+                      std::shared_ptr<std::vector<Worker>>)>>
       task_placement_book;
 };
 

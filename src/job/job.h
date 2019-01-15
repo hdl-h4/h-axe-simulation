@@ -14,13 +14,11 @@
 
 #pragma once
 
-#include <iostream>
-#include <vector>
-
 #include "glog/logging.h"
-
 #include "nlohmann/json.hpp"
 #include "subgraph.h"
+#include <iostream>
+#include <vector>
 
 namespace axe {
 namespace simulation {
