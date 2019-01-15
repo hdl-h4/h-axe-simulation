@@ -14,12 +14,106 @@
 
 #pragma once
 
+#include <queue>
+
 #include "glog/logging.h"
 #include "resource/resource.h"
 #include "shard_task.h"
 
 namespace axe {
 namespace simulation {
+
+const double inf = 1e12;
+
+struct Edge {
+  double cap;
+  double flow;
+  int vertex;
+  int reverse;
+};
+
+struct Dinic {
+  std::vector<std::vector<Edge>> graph_;
+
+  std::vector<int> dist_;
+  std::vector<int> current_;
+  int source_;
+  int sink_;
+  int vertex_num_;
+  const double eps = 1e-6;
+
+  void AddEdge(int u, int v, double cap) {
+    int reverse_u = graph_.at(v).size();
+    int reverse_v = graph_.at(u).size();
+    graph_[u].push_back(Edge{cap, 0, v, reverse_u});
+    graph_[v].push_back(Edge{0, 0, u, reverse_v});
+  }
+
+  void Init(int vertex_num, int source, int sink) {
+    source_ = source;
+    sink_ = sink;
+    vertex_num_ = vertex_num;
+    graph_.resize(vertex_num);
+    dist_.resize(vertex_num);
+    current_.resize(vertex_num);
+  }
+
+  bool Bfs() {
+    std::queue<int> que;
+    que.push(source_);
+    for (int &dis : dist_) {
+      dis = -1;
+    }
+    dist_[source_] = 0;
+
+    while (!que.empty()) {
+      int u = que.front();
+      que.pop();
+      for (int i = 0; i < graph_.at(u).size(); ++i) {
+        const auto &edge = graph_.at(u).at(i);
+        int v = edge.vertex;
+        if (edge.cap > edge.flow && dist_[v] == -1) {
+          dist_[v] = dist_[u] + 1;
+          que.push(v);
+        }
+      }
+    }
+    return dist_[sink_] != -1;
+  }
+
+  double Dfs(int u, double max_flow) {
+    if (u == sink_ || fabs(max_flow) < eps) {
+      return max_flow;
+    }
+
+    double flo;
+    double ret = 0;
+
+    for (auto &i = current_[u]; i < graph_.at(u).size(); ++i) {
+      Edge &edge = graph_.at(u).at(i);
+      int v = edge.vertex;
+      Edge &reverse_edge = graph_.at(v).at(edge.reverse);
+      if (dist_[v] == dist_[u] + 1 &&
+          (flo = Dfs(v, std::min(max_flow, edge.cap - edge.flow))) > 0) {
+        max_flow -= flo;
+        edge.flow += flo;
+        reverse_edge.flow -= flo;
+        ret += flo;
+        if (max_flow == 0)
+          break;
+      }
+    }
+    return ret;
+  }
+
+  double GetMaxFlow() {
+    double ret = 0;
+    while (Bfs()) {
+      ret += Dfs(source_, inf);
+    }
+    return ret;
+  }
+};
 
 class SubGraph {
 public:
@@ -38,7 +132,36 @@ public:
     sg.memory_ = sg.GetMemoryCap();
   }
 
-  int GetMemoryCap() { return 0; }
+  double GetMemoryCap() {
+    int source = 0;
+    int sink = shard_tasks_.size() + 1;
+    std::map<ShardTaskId, int> shard_task_id;
+    for (int i = 0; i < shard_tasks_.size(); ++i) {
+      const auto &st = shard_tasks_.at(i);
+      shard_task_id[ShardTaskId{st.GetTaskId(), st.GetShardId()}] = i + 1;
+    }
+
+    Dinic dinic;
+    dinic.Init(sink + 1, sink, source);
+    int result = 0;
+    // add edge : u -> v
+    for (const auto &st : shard_tasks_) {
+      int u = shard_task_id[ShardTaskId{st.GetTaskId(), st.GetShardId()}];
+      if (st.GetMemory() > 0) {
+        result += st.GetMemory();
+        dinic.AddEdge(source, u, st.GetMemory());
+      } else {
+        dinic.AddEdge(u, sink, -st.GetMemory());
+      }
+
+      for (const auto &child : st.GetChildren()) {
+        int v = shard_task_id[child];
+        dinic.AddEdge(v, u, inf);
+      }
+    }
+    result -= dinic.GetMaxFlow();
+    return result;
+  }
 
   void SetResourcesReq() {
     for (auto &st : shard_tasks_) {
