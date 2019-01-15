@@ -8,9 +8,9 @@ import sys
 
 default_dirs = [
     'src',
+    'test',
 ]
 ignored_dirs = [
-    'test',
 ]
 
 axe_base_root = os.getenv('AXE_BASE_ROOT', '.')

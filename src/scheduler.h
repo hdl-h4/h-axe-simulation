@@ -25,8 +25,10 @@
 
 #include "algorithm/algorithm_book.h"
 #include "event/event.h"
+#include "event/job_admission_event.h"
 #include "event/new_job_event.h"
 #include "event/new_task_req_event.h"
+#include "event/placement_decision_event.h"
 #include "event_handler.h"
 #include "event_queue.h"
 #include "worker.h"
