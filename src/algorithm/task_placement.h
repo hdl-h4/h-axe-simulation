@@ -14,17 +14,18 @@
 
 #pragma once
 
+#include "resource/resource_request.h"
+#include "worker.h"
 #include <map>
 #include <queue>
 #include <vector>
-
-#include "resource/resource_request.h"
 
 namespace axe {
 namespace simulation {
 
 std::vector<std::pair<int, ResourceRequest>>
-FIFO(std::multimap<double, ResourceRequest> &req_queue);
+FIFO(std::multimap<double, ResourceRequest> &req_queue,
+     std::shared_ptr<std::vector<Worker>>);
 
 } // namespace simulation
 } // namespace axe

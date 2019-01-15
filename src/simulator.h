@@ -14,6 +14,12 @@
 
 #pragma once
 
+#include "event/event.h"
+#include "glog/logging.h"
+#include "job/job.h"
+#include "job_manager.h"
+#include "scheduler.h"
+#include "worker.h"
 #include <functional>
 #include <iostream>
 #include <map>
@@ -21,16 +27,6 @@
 #include <queue>
 #include <string>
 #include <vector>
-
-#include "glog/logging.h"
-
-#include "event/event.h"
-#include "job/job.h"
-#include "job_manager.h"
-#include "scheduler.h"
-#include "worker.h"
-
-#include <iostream>
 
 namespace axe {
 namespace simulation {
@@ -74,7 +70,6 @@ public:
       event_queue_.Pop();
       event_queue_.Push(Dispatch(event));
     }
-    std::cout << "simulator server over." << std::endl;
   }
 
   std::vector<std::shared_ptr<Event>> Dispatch(std::shared_ptr<Event> event) {

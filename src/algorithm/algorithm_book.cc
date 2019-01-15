@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "algorithm_book.h"
+#include "resource/resource_request.h"
 #include <functional>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
-
-#include "algorithm_book.h"
-#include "resource/resource_request.h"
 
 namespace axe {
 namespace simulation {
@@ -27,7 +26,8 @@ namespace simulation {
 std::string AlgorithmBook::task_placement = "";
 std::map<std::string,
          std::function<std::vector<std::pair<int, ResourceRequest>>(
-             std::multimap<double, ResourceRequest> &)>>
+             std::multimap<double, ResourceRequest> &,
+             std::shared_ptr<std::vector<Worker>>)>>
     AlgorithmBook::task_placement_book = {};
 
 } // namespace simulation

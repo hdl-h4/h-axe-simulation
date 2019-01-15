@@ -14,10 +14,7 @@
 
 #pragma once
 
-#include <iostream>
-
 #include "glog/logging.h"
-
 #include "resource/resource.h"
 #include "shard_task.h"
 

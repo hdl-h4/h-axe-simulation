@@ -12,19 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <iostream>
-#include <map>
-#include <queue>
-#include <vector>
-
+#include "task_placement.h"
 #include "glog/logging.h"
 #include "resource/resource_request.h"
+#include <iostream>
+#include <map>
+#include <memory>
+#include <queue>
+#include <vector>
 
 namespace axe {
 namespace simulation {
 
 std::vector<std::pair<int, ResourceRequest>>
-FIFO(std::multimap<double, ResourceRequest> &req_queue) {
+FIFO(std::multimap<double, ResourceRequest> &req_queue,
+     std::shared_ptr<std::vector<Worker>>) {
   DLOG(INFO) << "task placement: FIFO";
   ResourceRequest req = (*req_queue.begin()).second;
   req_queue.erase(req_queue.begin());

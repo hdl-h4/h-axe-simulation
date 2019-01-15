@@ -14,13 +14,6 @@
 
 #pragma once
 
-#include <map>
-#include <memory>
-#include <unordered_map>
-#include <vector>
-
-#include "glog/logging.h"
-
 #include "event/job_admission_event.h"
 #include "event/job_finish_event.h"
 #include "event/new_task_req_event.h"
@@ -29,13 +22,16 @@
 #include "event/task_finish_event.h"
 #include "event_handler.h"
 #include "event_queue.h"
+#include "glog/logging.h"
 #include "job/job.h"
 #include "job/shard_task.h"
 #include "resource/resource.h"
 #include "resource/resource_request.h"
 #include "worker.h"
-
-#include "glog/logging.h"
+#include <map>
+#include <memory>
+#include <unordered_map>
+#include <vector>
 
 namespace axe {
 namespace simulation {

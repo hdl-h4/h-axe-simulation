@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <fstream>
-#include <iostream>
-#include <string>
-
-#include "glog/logging.h"
-
 #include "algorithm/algorithm_book.h"
 #include "algorithm/task_placement.h"
 #include "glog/logging.h"
 #include "nlohmann/json.hpp"
 #include "simulator.h"
 #include "worker.h"
+#include <fstream>
+#include <string>
 
 using json = nlohmann::json;
 
