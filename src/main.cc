@@ -58,6 +58,9 @@ int main(int argc, char **argv) {
   google::InitGoogleLogging(argv[0]);
   google::SetLogDestination(google::INFO, "log/SIMULATION.INFO");
   gflags::ParseCommandLineFlags(&argc, &argv, true);
+
+  FLAGS_logbuflevel = -1;
+
   LOG(INFO) << "start simulation";
   axe::simulation::Simulator simulator(ReadJsonFromFile(argv[1]),
                                        ReadJsonFromFile(argv[2]));
@@ -65,7 +68,7 @@ int main(int argc, char **argv) {
   simulator.Init();
   simulator.Print();
   simulator.Serve();
-  LOG(INFO) << "simulation end\n";
+  LOG(INFO) << "simulation end";
 
   google::FlushLogFiles(google::INFO);
   gflags::ShutDownCommandLineFlags();

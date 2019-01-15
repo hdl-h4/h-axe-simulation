@@ -30,7 +30,9 @@ using nlohmann::json;
 
 class Worker {
 public:
-  Worker() = default;
+  Worker(){};
+  Worker(double cpu, double memory, double disk, double network)
+      : cpu_(cpu), memory_(memory), disk_(disk), net_(network) {}
 
   friend void from_json(const json &j, Worker &worker) {
     j.at("cpu").get_to(worker.cpu_);
