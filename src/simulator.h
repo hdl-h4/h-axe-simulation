@@ -66,7 +66,7 @@ public:
     // order
     while (!event_queue_.Empty()) {
       auto event = event_queue_.Top();
-      DLOG(INFO) << "event type: " << event_map[event->GetEventType()];
+      DLOG(INFO) << "event type: " << event_map_[event->GetEventType()];
       event_queue_.Pop();
       event_queue_.Push(Dispatch(event));
     }
@@ -103,6 +103,14 @@ private:
   std::vector<std::shared_ptr<JobManager>> jms_;
   EventQueue event_queue_;
   std::shared_ptr<std::vector<Worker>> workers_;
+  std::map<int, std::string> event_map_ = {
+      {TASK_FINISH, "TASK FINISH"},
+      {RESOURCE_AVAILABLE, "RESOURCE AVAILABLE"},
+      {JOB_FINISH, "JOB FINISH"},
+      {JOB_ADMISSION, "JOB ADMISSION"},
+      {PLACEMENT_DECISION, "PLACEMENT DECISION"},
+      {NEW_TASK_REQ, "NEW TASK REQ"},
+      {NEW_JOB, "NEW JOB"}};
 };
 
 } // namespace simulation
