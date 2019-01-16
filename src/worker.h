@@ -29,45 +29,47 @@ class Worker {
 public:
   Worker(){};
   Worker(double cpu, double memory, double disk, double network)
-      : cpu_(cpu), memory_(memory), disk_(disk), net_(network) {}
+      : resource_capacity_(cpu, memory, disk, network) {}
 
   friend void from_json(const json &j, Worker &worker) {
-    j.at("cpu").get_to(worker.cpu_);
-    j.at("memory").get_to(worker.memory_);
-    j.at("disk").get_to(worker.disk_);
-    j.at("network").get_to(worker.net_);
+    j.get_to(worker.resource_capacity_);
   }
 
   inline auto GetRemainResourcePack() const {
-    return ResourcePack(cpu_ - cpu_counter_, memory_ - memory_counter_,
-                        disk_ - disk_counter_, net_ - net_counter_);
+    return resource_capacity_.Subtract(resource_usage_);
   }
 
   // task finish
   std::vector<ShardTask> TaskFinish(const ShardTask &task) {
     std::vector<ShardTask> tasks;
-    if (task.GetResource() == ResourceType::cpu) {
-      cpu_counter_ -= task.GetReq();
+    if (task.GetResourceType() == kCpu) {
+      resource_usage_.SetCPU(resource_usage_.GetCPU() - task.GetReq());
       while (cpu_queue_.size() != 0 &&
-             cpu_queue_.at(0).GetReq() + cpu_counter_ < cpu_) {
+             cpu_queue_.at(0).GetReq() + resource_usage_.GetCPU() <
+                 resource_capacity_.GetCPU()) {
         tasks.push_back(cpu_queue_.at(0));
-        cpu_counter_ += cpu_queue_.at(0).GetReq();
+        resource_usage_.SetCPU(resource_usage_.GetCPU() +
+                               cpu_queue_.at(0).GetReq());
         cpu_queue_.erase(cpu_queue_.begin());
       }
-    } else if (task.GetResource() == ResourceType::network) {
-      net_counter_ -= task.GetReq();
+    } else if (task.GetResourceType() == kNetwork) {
+      resource_usage_.SetNetwork(resource_usage_.GetNetwork() - task.GetReq());
       while (net_queue_.size() != 0 &&
-             net_queue_.at(0).GetReq() + net_counter_ < net_) {
+             net_queue_.at(0).GetReq() + net_counter_ <
+                 resource_capacity_.GetNetwork()) {
         tasks.push_back(net_queue_.at(0));
-        net_counter_ += net_queue_.at(0).GetReq();
+        resource_usage_.SetNetwork(resource_usage_.GetNetwork() +
+                                   net_queue_.at(0).GetReq());
         net_queue_.erase(net_queue_.begin());
       }
     } else {
-      disk_counter_ -= task.GetReq();
+      resource_usage_.SetDisk(resource_usage_.GetDisk() - task.GetReq());
       while (disk_queue_.size() != 0 &&
-             disk_queue_.at(0).GetReq() + disk_counter_ < disk_) {
+             disk_queue_.at(0).GetReq() + disk_counter_ <
+                 resource_capacity_.GetDisk()) {
         tasks.push_back(disk_queue_.at(0));
-        disk_counter_ += disk_queue_.at(0).GetReq();
+        resource_usage_.SetDisk(resource_usage_.GetDisk() +
+                                disk_queue_.at(0).GetReq());
         disk_queue_.erase(disk_queue_.begin());
       }
     }
@@ -79,25 +81,30 @@ public:
 
   // place new task, return true : task run; false : task waits in queue;
   bool PlaceNewTask(const ShardTask &task) {
-    if (task.GetResource() == ResourceType::cpu) {
-      if (cpu_queue_.size() == 0 && cpu_counter_ + task.GetReq() < cpu_) {
-        cpu_counter_ += task.GetReq();
+    if (task.GetResourceType() == kCpu) {
+      if (cpu_queue_.size() == 0 && resource_usage_.GetCPU() + task.GetReq() <
+                                        resource_capacity_.GetCPU()) {
+        resource_usage_.SetCPU(resource_usage_.GetCPU() + task.GetReq());
         return true;
       } else {
         cpu_queue_.push_back(task);
         return false;
       }
-    } else if (task.GetResource() == ResourceType::network) {
-      if (net_queue_.size() == 0 && net_counter_ + task.GetReq() < net_) {
-        net_counter_ += task.GetReq();
+    } else if (task.GetResourceType() == kNetwork) {
+      if (net_queue_.size() == 0 &&
+          resource_usage_.GetNetwork() + task.GetReq() <
+              resource_capacity_.GetNetwork()) {
+        resource_usage_.SetNetwork(resource_usage_.GetNetwork() +
+                                   task.GetReq());
         return true;
       } else {
         net_queue_.push_back(task);
         return false;
       }
     } else {
-      if (disk_queue_.size() == 0 && disk_counter_ + task.GetReq() < disk_) {
-        disk_counter_ += task.GetReq();
+      if (disk_queue_.size() == 0 && resource_usage_.GetDisk() + task.GetReq() <
+                                         resource_capacity_.GetDisk()) {
+        resource_usage_.SetDisk(resource_usage_.GetDisk() + task.GetReq());
         return true;
       } else {
         disk_queue_.push_back(task);
@@ -107,18 +114,15 @@ public:
   }
 
   void Print() {
-    DLOG(INFO) << "cpu: " << cpu_;
-    DLOG(INFO) << "mem: " << memory_;
-    DLOG(INFO) << "disk: " << disk_;
-    DLOG(INFO) << "net: " << net_;
+    DLOG(INFO) << "cpu: " << resource_capacity_.GetCPU();
+    DLOG(INFO) << "mem: " << resource_capacity_.GetMemory();
+    DLOG(INFO) << "disk: " << resource_capacity_.GetDisk();
+    DLOG(INFO) << "net: " << resource_capacity_.GetNetwork();
   }
 
 private:
-  double cpu_;
-  double memory_;
-  double disk_;
-  double net_;
-  double cpu_counter_ = 0;
+  ResourcePack resource_capacity_;
+  ResourcePack resource_usage_;
   double memory_counter_ = 0;
   double disk_counter_ = 0;
   double net_counter_ = 0;

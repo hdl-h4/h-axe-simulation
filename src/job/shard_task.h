@@ -16,6 +16,7 @@
 
 #include "glog/logging.h"
 #include "nlohmann/json.hpp"
+#include "resource/resource.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -25,8 +26,6 @@ namespace axe {
 namespace simulation {
 
 using nlohmann::json;
-
-enum ResourceType { cpu = 1, memory, network, disk };
 
 struct ShardTaskId {
   int task_id_;
@@ -49,7 +48,7 @@ public:
   inline auto GetTaskId() const { return task_id_; }
   inline auto GetShardId() const { return shard_id_; }
   inline auto &GetChildren() const { return children_; }
-  inline auto GetResource() const { return resource_; }
+  inline auto GetResourceType() const { return resource_type_; }
   inline auto GetReq() const { return req_; }
   inline auto GetDuration() const { return duration_; }
   inline auto GetMemory() const { return memory_; }
@@ -57,7 +56,7 @@ public:
   friend void from_json(const json &j, ShardTask &task) {
     j.at("taskid").get_to(task.task_id_);
     j.at("shardid").get_to(task.shard_id_);
-    j.at("resource").get_to(task.resource_);
+    j.at("resource").get_to(task.resource_type_);
     j.at("request").get_to(task.req_);
     j.at("memory").get_to(task.memory_);
     j.at("duration").get_to(task.duration_);
@@ -70,7 +69,7 @@ public:
   void Print() {
     DLOG(INFO) << "task_id : " << task_id_;
     DLOG(INFO) << "shard_id : " << shard_id_;
-    DLOG(INFO) << "resource : " << resource_;
+    DLOG(INFO) << "resource : " << resource_type_;
     DLOG(INFO) << "request : " << req_;
     DLOG(INFO) << "duration : " << duration_;
     DLOG(INFO) << "memory : " << memory_;
@@ -83,7 +82,7 @@ public:
 private:
   int task_id_ = -1;
   int shard_id_;
-  ResourceType resource_;
+  int resource_type_;
   double memory_;
   double req_;
   double duration_;
