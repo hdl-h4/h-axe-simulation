@@ -28,6 +28,7 @@
 #include "resource/resource.h"
 #include "resource/resource_request.h"
 #include "worker.h"
+
 #include <map>
 #include <memory>
 #include <unordered_map>
@@ -62,7 +63,6 @@ public:
         [&](std::shared_ptr<Event> event)
             -> std::vector<std::shared_ptr<Event>> {
           std::vector<std::shared_ptr<Event>> event_vector;
-
           double time = event->GetTime();
           std::shared_ptr<PlacementDecisionEvent> decision =
               std::static_pointer_cast<PlacementDecisionEvent>(event);

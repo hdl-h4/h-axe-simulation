@@ -29,7 +29,7 @@ namespace simulation {
 struct cmp {
   bool operator()(const std::shared_ptr<Event> &lhs,
                   const std::shared_ptr<Event> &rhs) {
-    return (*lhs) < (*rhs);
+    return (*rhs) < (*lhs);
   }
 };
 
