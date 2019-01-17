@@ -49,6 +49,8 @@ public:
   double GetMemory() const { return resource_[kMemory]; }
   double GetDisk() const { return resource_[kDisk]; }
   double GetNetwork() const { return resource_[kNetwork]; }
+  std::vector<double> GetResourceVector() const { return resource_; }
+  double GetResourceByIndex(int idx) const { return resource_[idx]; }
 
   void SetCPU(double cpu) { resource_[kCpu] = cpu; }
   void SetMemory(double memory) { resource_[kMemory] = memory; }
@@ -94,6 +96,13 @@ public:
     resource_[kCpu] -= rhs.GetCPU();
     resource_[kDisk] -= rhs.GetDisk();
     resource_[kNetwork] -= rhs.GetNetwork();
+  }
+
+  bool FitIn(const ResourcePack &resource) {
+    bool ret = true;
+    for (int i = 0; i < kNumResourceTypes; ++i) {
+      ret = ret && (resource.GetResourceByIndex(i) < resource_[i]);
+    }
   }
 
   friend void from_json(const json &j, ResourcePack &resource_pack) {

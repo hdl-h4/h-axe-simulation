@@ -72,6 +72,15 @@ public:
     }
   }
 
+  void Report() {
+    std::string prefix = "report/worker_";
+    for (int i = 0; i < workers_->size(); ++i) {
+      std::ofstream fout(prefix + std::to_string(i), std::ios::out);
+      (*workers_)[i].ReportUtilization(fout);
+      fout.close();
+    }
+  }
+
   std::vector<std::shared_ptr<Event>> Dispatch(std::shared_ptr<Event> event) {
     // TODO(SXD): send the event to different components to handle
     int event_principal = event->GetEventPrincipal();

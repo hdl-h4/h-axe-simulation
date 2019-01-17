@@ -3,37 +3,37 @@
     {
       "id" : 0,
       "cpu" : 6,
-      "memory" : 6,
+      "memory" : 16,
       "disk" : 6,
-      "network" : 15 
+      "network" : 6 
     },
     {
       "id" : 1,
       "cpu" : 6,
-      "memory" : 6,
+      "memory" : 16,
       "disk" : 6,
-      "network" : 15 
+      "network" : 6 
     },
     {
       "id" : 2,
       "cpu" : 6,
-      "memory" : 6,
+      "memory" : 16,
       "disk" : 6,
-      "network" : 15 
+      "network" : 6 
     },
     {
       "id" : 3,
       "cpu" : 6,
-      "memory" : 6,
+      "memory" : 16,
       "disk" : 6,
-      "network" : 15 
+      "network" : 6 
     },
     {
       "id" : 4,
       "cpu" : 6,
-      "memory" : 6,
+      "memory" : 16,
       "disk" : 6,
-      "network" : 15  
+      "network" : 6  
     }
   ]
 }

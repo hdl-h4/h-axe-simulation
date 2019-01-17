@@ -74,7 +74,7 @@ public:
           for (auto &st : sg.GetShardTasks()) {
             if (dep_counter_[ShardTaskId{st.GetTaskId(), st.GetShardId()}] ==
                 0) {
-              bool success = workers_->at(worker_id).PlaceNewTask(st);
+              bool success = workers_->at(worker_id).PlaceNewTask(time, st);
               if (success) {
                 event_vector.push_back(std::make_shared<TaskFinishEvent>(
                     TaskFinishEvent(TASK_FINISH, time + st.GetDuration(), 0,
@@ -101,7 +101,7 @@ public:
 
           // task finish update resource
           auto new_tasks =
-              workers_->at(sg.GetWorkerId()).TaskFinish(finish_task);
+              workers_->at(sg.GetWorkerId()).TaskFinish(time, finish_task);
           for (auto &t : new_tasks) {
             event_vector.push_back(
                 std::make_shared<TaskFinishEvent>(TaskFinishEvent(
@@ -139,7 +139,7 @@ public:
                                    ->at(job_.GetSubGraphs()
                                             .at(shard_task_to_subgraph_[child])
                                             .GetWorkerId())
-                                   .PlaceNewTask(task);
+                                   .PlaceNewTask(time, task);
                 if (success) {
                   DLOG(INFO) << "subgraph id " << shard_task_to_subgraph_[child]
                              << '\n';
