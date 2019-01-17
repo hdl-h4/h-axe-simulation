@@ -31,6 +31,7 @@ json ReadJsonFromFile(const std::string &file) {
   ret.resize(in.tellg());
   in.seekg(0, std::ios::beg);
   in.read(&ret[0], ret.size());
+  in.close();
   return json::parse(ret);
 }
 
@@ -62,6 +63,7 @@ int main(int argc, char **argv) {
   simulator.Init();
   simulator.Print();
   simulator.Serve();
+  simulator.Report();
   LOG(INFO) << "simulation end";
 
   google::FlushLogFiles(google::INFO);

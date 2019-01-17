@@ -26,11 +26,19 @@ namespace simulation {
 
 std::vector<std::pair<int, ResourceRequest>>
 FIFO(std::multimap<double, ResourceRequest> &req_queue,
-     std::shared_ptr<std::vector<Worker>>) {
+     std::shared_ptr<std::vector<Worker>> workers) {
   DLOG(INFO) << "task placement: FIFO";
+  static int worker_id = -1;
+  worker_id = (worker_id + 1) % 5;
   ResourceRequest req = (*req_queue.begin()).second;
   req_queue.erase(req_queue.begin());
-  return {{0, req}};
+
+  if ((*workers)[worker_id].Reserve(req.GetResource())) {
+    (*workers)[worker_id].IncreaseMemoryUsage(req.GetResource().GetMemory());
+    return {{worker_id, req}};
+  } else {
+    return {};
+  }
 }
 
 } // namespace simulation
