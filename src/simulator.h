@@ -79,6 +79,7 @@ public:
       (*workers_)[i].ReportUtilization(fout);
       fout.close();
     }
+    scheduler_->Report();
   }
 
   std::vector<std::shared_ptr<Event>> Dispatch(std::shared_ptr<Event> event) {

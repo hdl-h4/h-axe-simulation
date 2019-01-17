@@ -29,12 +29,12 @@ FIFO(std::multimap<double, ResourceRequest> &req_queue,
      std::shared_ptr<std::vector<Worker>> workers) {
   DLOG(INFO) << "task placement: FIFO";
   static int worker_id = -1;
-  worker_id = (worker_id + 1) % 5;
+  worker_id = (worker_id + 1) % (*workers).size();
   ResourceRequest req = (*req_queue.begin()).second;
-  req_queue.erase(req_queue.begin());
 
   if ((*workers)[worker_id].Reserve(req.GetResource())) {
     (*workers)[worker_id].IncreaseMemoryUsage(req.GetResource().GetMemory());
+    req_queue.erase(req_queue.begin());
     return {{worker_id, req}};
   } else {
     return {};

@@ -22,9 +22,11 @@
 #include "event/placement_decision_event.h"
 #include "event_handler.h"
 #include "event_queue.h"
+#include "worker.h"
+
 #include "glog/logging.h"
 #include "nlohmann/json.hpp"
-#include "worker.h"
+
 #include <map>
 #include <memory>
 #include <queue>
@@ -41,6 +43,20 @@ public:
   Scheduler(const std::shared_ptr<std::vector<Worker>> workers)
       : workers_(workers) {
     RegisterHandlers();
+  }
+
+  void Report() {
+    std::string file_name = "jobs_report";
+    std::ofstream fout(file_name, std::ios::out);
+    fout << "job id" << std::setw(20) << "submission time" << std::setw(20)
+         << "finish time" << std::setw(20) << "use time" << std::setw(5)
+         << std::endl;
+    for (const auto &record : records_) {
+      fout << record.job_id << std::setw(20) << record.submission_time
+           << std::setw(20) << record.finish_time << std::setw(20)
+           << record.use_time << std::setw(5) << std::endl;
+    }
+    fout.close();
   }
 
   void RegisterHandlers() {
@@ -77,6 +93,9 @@ public:
           std::vector<std::pair<int, ResourceRequest>> decision_vector =
               AssignReqToWorker();
           for (const auto &decision : decision_vector) {
+            DLOG(INFO) << " decision: job id " << decision.second.GetJobID()
+                       << ", subgraph id " << decision.second.GetSubGraphID()
+                       << ", worker id " << decision.first;
             event_vector.push_back(
                 std::make_shared<PlacementDecisionEvent>(PlacementDecisionEvent(
                     PLACEMENT_DECISION, time, 0, decision.second.GetJobID(),
@@ -95,6 +114,9 @@ public:
           std::vector<std::pair<int, ResourceRequest>> decision_vector =
               AssignReqToWorker();
           for (const auto &decision : decision_vector) {
+            DLOG(INFO) << " decision: job id " << decision.second.GetJobID()
+                       << ", subgraph id " << decision.second.GetSubGraphID()
+                       << ", worker id " << decision.first;
             event_vector.push_back(
                 std::make_shared<PlacementDecisionEvent>(PlacementDecisionEvent(
                     PLACEMENT_DECISION, time, 0, decision.second.GetJobID(),
@@ -106,6 +128,14 @@ public:
                     [&](std::shared_ptr<Event> event)
                         -> std::vector<std::shared_ptr<Event>> {
                       std::vector<std::shared_ptr<Event>> event_vector;
+                      std::shared_ptr<JobFinishEvent> job_finish_event =
+                          std::static_pointer_cast<JobFinishEvent>(event);
+                      double sub_time = job_finish_event->GetSubmissionTime();
+                      double finish_time = job_finish_event->GetTime();
+                      double use_time = finish_time - sub_time;
+                      records_.push_back(Record{job_finish_event->GetJobId(),
+                                                sub_time, finish_time,
+                                                use_time});
                       return event_vector;
                     });
   }
@@ -114,7 +144,15 @@ public:
     return AlgorithmBook::GetTaskPlacement()(req_queue_, workers_);
   }
 
+  struct Record {
+    int job_id;
+    double submission_time;
+    double finish_time;
+    double use_time;
+  };
+
 private:
+  std::vector<Record> records_;
   std::multimap<double, ResourceRequest> req_queue_;
   std::shared_ptr<std::vector<Worker>> workers_;
 };

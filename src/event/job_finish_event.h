@@ -23,13 +23,16 @@ namespace simulation {
 class JobFinishEvent : public Event {
 public:
   JobFinishEvent(int event_type, double time, int priority, int event_principal,
-                 int job_id)
-      : Event(event_type, time, priority, event_principal), job_id_(job_id) {}
+                 int job_id, double submission_time)
+      : Event(event_type, time, priority, event_principal), job_id_(job_id),
+        submission_time_(submission_time) {}
 
   inline int GetJobId() const { return job_id_; }
+  inline double GetSubmissionTime() const { return submission_time_; }
 
 private:
   int job_id_;
+  double submission_time_;
 };
 
 } // namespace simulation
