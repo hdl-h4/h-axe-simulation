@@ -146,6 +146,13 @@ public:
     DLOG(INFO) << "net: " << resource_capacity_.GetNetwork();
   }
 
+  void PrintReservation() {
+    DLOG(INFO) << "cpu: " << resource_reservation_.GetCPU();
+    DLOG(INFO) << "mem: " << resource_reservation_.GetMemory();
+    DLOG(INFO) << "disk: " << resource_reservation_.GetDisk();
+    DLOG(INFO) << "net: " << resource_reservation_.GetNetwork();
+  }
+
   void ReportUtilization(std::ofstream &fout) {
     int time = 0;
     fout << "time(second)" << std::setw(15) << "CPU" << std::setw(10)
@@ -174,7 +181,6 @@ public:
     } else {
       return false;
     }
-    
   }
 
 private:

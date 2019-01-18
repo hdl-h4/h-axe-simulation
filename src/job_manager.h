@@ -72,8 +72,10 @@ public:
 
           auto &sg = job_.GetSubGraphs().at(subgraph_id);
           for (auto &st : sg.GetShardTasks()) {
-            if (dep_counter_[ShardTaskId{st.GetTaskId(), st.GetShardId()}] ==
-                0) {
+            ShardTaskId shard_task_id =
+                ShardTaskId{st.GetTaskId(), st.GetShardId()};
+            if (dep_counter_[shard_task_id] ==
+                dep_finish_counter_[shard_task_id]) {
               bool success = workers_->at(worker_id).PlaceNewTask(time, st);
               if (success) {
                 event_vector.push_back(std::make_shared<TaskFinishEvent>(
@@ -99,6 +101,9 @@ public:
               finish_task.GetTaskId(), finish_task.GetShardId()}];
           auto &sg = job_.GetSubGraphs().at(subgraph_id);
 
+          DLOG(INFO) << "TASK FINISH : subgraph id = " << subgraph_id
+                     << ", task id = " << finish_task.GetTaskId()
+                     << ", shard id = " << finish_task.GetShardId();
           // task finish update resource
           auto new_tasks =
               workers_->at(sg.GetWorkerId()).TaskFinish(time, finish_task);
@@ -114,12 +119,11 @@ public:
               subgraph_finished_task_[subgraph_id]) {
             workers_->at(sg.GetWorkerId()).SubGraphFinish(sg.GetMemory());
             finish_subgraph_num_++;
-            /*if(finish_subgraph_num_ == job_.GetSubGraphs().size()) {
-              event_vector.push_back(std::make_shared<JobFinishEvent>(JobFinishEvent(JOB_FINISH,
-            global_clock, 0, job_.GetId())));
-              event_vector.push_back(std::make_shared<ResourceAvailableEvent>(RESOURCE_AVAILABLE,
-            global_clock, 0, SCHEDULER)); return event_vector;
-            }*/
+            if (finish_subgraph_num_ == job_.GetSubGraphs().size()) {
+              event_vector.push_back(std::make_shared<JobFinishEvent>(
+                  JOB_FINISH, time, 0, SCHEDULER, job_.GetId(),
+                  job_.GetSubmissionTime()));
+            }
           }
 
           for (auto &child : finish_task.GetChildren()) {
@@ -195,6 +199,7 @@ public:
       for (const auto &st : sg.GetShardTasks()) {
         shard_task_to_subgraph_[ShardTaskId{st.GetTaskId(), st.GetShardId()}] =
             i;
+        subgraph_finished_task_[i] = 0;
         id_to_shard_task_[ShardTaskId{st.GetTaskId(), st.GetShardId()}] = st;
         for (const auto &child : st.GetChildren()) {
           dep_counter_[child]++;
