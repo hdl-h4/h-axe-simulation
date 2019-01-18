@@ -53,7 +53,6 @@ public:
 
   // task finish
   std::vector<ShardTask> TaskFinish(double time, const ShardTask &task) {
-    records_.push_back(GenerateUtilizationRecord(time));
     std::vector<ShardTask> tasks;
     if (task.GetResourceType() == kCpu) {
       resource_usage_.SetCPU(resource_usage_.GetCPU() - task.GetReq());
@@ -92,13 +91,15 @@ public:
         disk_queue_.erase(disk_queue_.begin());
       }
     }
+    records_.push_back(GenerateUtilizationRecord(time));
     return tasks;
   }
 
   // subgraph finish
-  void SubGraphFinish(double mem) {
+  void SubGraphFinish(double time, double mem) {
     resource_usage_.SetMemory(resource_usage_.GetMemory() - mem);
     resource_reservation_.SetMemory(resource_reservation_.GetMemory() - mem);
+    records_.push_back(GenerateUtilizationRecord(time));
   }
 
   // place new task, return true  : task runs;
@@ -107,8 +108,8 @@ public:
     if (task.GetResourceType() == kCpu) {
       if (cpu_queue_.size() == 0 && resource_usage_.GetCPU() + task.GetReq() <
                                         resource_capacity_.GetCPU()) {
-        records_.push_back(GenerateUtilizationRecord(time));
         resource_usage_.SetCPU(resource_usage_.GetCPU() + task.GetReq());
+        records_.push_back(GenerateUtilizationRecord(time));
         return true;
       } else {
         cpu_queue_.push_back(task);
@@ -118,9 +119,9 @@ public:
       if (net_queue_.size() == 0 &&
           resource_usage_.GetNetwork() + task.GetReq() <
               resource_capacity_.GetNetwork()) {
-        records_.push_back(GenerateUtilizationRecord(time));
         resource_usage_.SetNetwork(resource_usage_.GetNetwork() +
                                    task.GetReq());
+        records_.push_back(GenerateUtilizationRecord(time));
         return true;
       } else {
         net_queue_.push_back(task);
@@ -129,8 +130,8 @@ public:
     } else {
       if (disk_queue_.size() == 0 && resource_usage_.GetDisk() + task.GetReq() <
                                          resource_capacity_.GetDisk()) {
-        records_.push_back(GenerateUtilizationRecord(time));
         resource_usage_.SetDisk(resource_usage_.GetDisk() + task.GetReq());
+        records_.push_back(GenerateUtilizationRecord(time));
         return true;
       } else {
         disk_queue_.push_back(task);

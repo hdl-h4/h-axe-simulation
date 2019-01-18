@@ -22,6 +22,7 @@
 #include "event/placement_decision_event.h"
 #include "event_handler.h"
 #include "event_queue.h"
+#include "user.h"
 #include "worker.h"
 
 #include "glog/logging.h"
@@ -40,13 +41,14 @@ using nlohmann::json;
 
 class Scheduler : public EventHandler {
 public:
-  Scheduler(const std::shared_ptr<std::vector<Worker>> workers)
-      : workers_(workers) {
+  Scheduler(const std::shared_ptr<std::vector<Worker>> workers,
+            const std::shared_ptr<std::vector<User>> users)
+      : workers_(workers), users_(users) {
     RegisterHandlers();
   }
 
   void Report() {
-    std::string file_name = "jobs_report";
+    std::string file_name = "report/jobs_report";
     std::ofstream fout(file_name, std::ios::out);
     fout << "job id" << std::setw(20) << "submission time" << std::setw(20)
          << "finish time" << std::setw(20) << "use time" << std::setw(5)
@@ -68,11 +70,11 @@ public:
           std::vector<std::shared_ptr<Event>> event_vector;
           std::shared_ptr<NewJobEvent> new_job_event =
               std::static_pointer_cast<NewJobEvent>(event);
-          DLOG(INFO) << "job id: " << new_job_event->GetJob().GetId();
+          DLOG(INFO) << "job id: " << new_job_event->GetJob().GetJobId();
           event_vector.push_back(std::make_shared<JobAdmissionEvent>(
               JobAdmissionEvent(JOB_ADMISSION, time, 0,
-                                new_job_event->GetJob().GetId(),
-                                new_job_event->GetJob().GetId())));
+                                new_job_event->GetJob().GetJobId(),
+                                new_job_event->GetJob().GetJobId())));
 
           return event_vector;
         });
@@ -155,6 +157,7 @@ private:
   std::vector<Record> records_;
   std::multimap<double, ResourceRequest> req_queue_;
   std::shared_ptr<std::vector<Worker>> workers_;
+  std::shared_ptr<std::vector<User>> users_;
 };
 
 } // namespace simulation

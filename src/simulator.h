@@ -19,7 +19,9 @@
 #include "job/job.h"
 #include "job_manager.h"
 #include "scheduler.h"
+#include "user.h"
 #include "worker.h"
+
 #include <functional>
 #include <iostream>
 #include <map>
@@ -38,6 +40,7 @@ public:
   Simulator() = default;
   explicit Simulator(const json &workers_json, const json &jobs_json) {
     workers_ = std::make_shared<std::vector<Worker>>();
+    users_ = std::make_shared<std::vector<User>>();
     from_json(workers_json, *this);
     from_json(jobs_json, *this);
   }
@@ -46,12 +49,26 @@ public:
     // TODO(SXD): read the configuration file and new JMs and Scheduler
     // read the configuration file and parse into WS and JS
 
-    scheduler_ = std::make_shared<Scheduler>(workers_);
+    scheduler_ = std::make_shared<Scheduler>(workers_, users_);
+
+    for (const auto &worker : *workers_) {
+      cluster_resource_capacity_.AddToMe(worker.GetRemainResourcePack());
+    }
 
     int size = jobs_.size();
-
+    int users_size = 0;
     for (const auto &job : jobs_) {
-      jms_.push_back(std::make_shared<JobManager>(job, workers_));
+      jms_.push_back(std::make_shared<JobManager>(job, workers_, users_));
+      users_size = std::max(users_size, job.GetUserId() + 1);
+    }
+
+    users_->resize(users_size);
+    for (const auto &job : jobs_) {
+      users_->at(job.GetUserId()).AddJobId(job.GetJobId());
+    }
+
+    for (auto &user : *users_) {
+      user.SetClusterResourceCapacity(cluster_resource_capacity_);
     }
 
     for (const auto &jm : jms_) {
@@ -80,6 +97,12 @@ public:
       fout.close();
     }
     scheduler_->Report();
+    prefix = "report/user_";
+    for (int i = 0; i < users_->size(); ++i) {
+      std::ofstream fout(prefix + std::to_string(i), std::ios::out);
+      (*users_)[i].ReportUtilization(fout);
+      fout.close();
+    }
   }
 
   std::vector<std::shared_ptr<Event>> Dispatch(std::shared_ptr<Event> event) {
@@ -108,11 +131,13 @@ public:
   }
 
 private:
+  ResourcePack cluster_resource_capacity_;
   std::vector<Job> jobs_;
   std::shared_ptr<Scheduler> scheduler_;
   std::vector<std::shared_ptr<JobManager>> jms_;
   EventQueue event_queue_;
   std::shared_ptr<std::vector<Worker>> workers_;
+  std::shared_ptr<std::vector<User>> users_;
   std::map<int, std::string> event_map_ = {
       {TASK_FINISH, "TASK FINISH"},
       {RESOURCE_AVAILABLE, "RESOURCE AVAILABLE"},
