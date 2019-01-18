@@ -1,7 +1,8 @@
 {
   "job" : [
     {
-	    "id" : 0,
+	    "jobid" : 0,
+      "userid" : 0,
 	    "submissiontime" : 0,
 	    "subgraph" : [
 		  {
@@ -157,7 +158,8 @@
 	]
   },
   {
-	    "id" : 1,
+	    "jobid" : 1,
+      "userid" : 0,
 	    "submissiontime" : 0,
 	    "subgraph" : [
 		  {
@@ -313,7 +315,8 @@
 	]
     },
   {
-	    "id" : 2,
+	    "jobid" : 2,
+      "userid" : 0,
 	    "submissiontime" : 2,
 	    "subgraph" : [
 		  {
@@ -469,7 +472,8 @@
 	]
     },
   {
-	    "id" : 3,
+	    "jobid" : 3,
+      "userid" : 1,
 	    "submissiontime" : 3,
 	    "subgraph" : [
 		  {
@@ -625,7 +629,8 @@
 	]
     },
   {
-	    "id" : 4,
+	    "jobid" : 4,
+      "userid" : 1,
 	    "submissiontime" : 4,
 	    "subgraph" : [
 		  {
@@ -781,7 +786,8 @@
 	]
     },
   {
-	    "id" : 5,
+	    "jobid" : 5,
+      "userid" : 1,
 	    "submissiontime" : 4,
 	    "subgraph" : [
 		  {
@@ -937,7 +943,8 @@
 	]
     },
   {
-	    "id" : 6,
+	    "jobid" : 6,
+      "userid" : 2,
 	    "submissiontime" : 7,
 	    "subgraph" : [
 		  {
@@ -1093,7 +1100,8 @@
 	]
     },
   {
-	    "id" : 7,
+	    "jobid" : 7,
+      "userid" : 2,
 	    "submissiontime" : 30,
 	    "subgraph" : [
 		  {

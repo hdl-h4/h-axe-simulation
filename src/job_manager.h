@@ -27,6 +27,7 @@
 #include "job/shard_task.h"
 #include "resource/resource.h"
 #include "resource/resource_request.h"
+#include "user.h"
 #include "worker.h"
 
 #include <map>
@@ -39,8 +40,9 @@ namespace simulation {
 
 class JobManager : public EventHandler {
 public:
-  JobManager(const Job &job, const std::shared_ptr<std::vector<Worker>> workers)
-      : job_(job), workers_(workers) {
+  JobManager(const Job &job, const std::shared_ptr<std::vector<Worker>> workers,
+             const std::shared_ptr<std::vector<User>> users)
+      : job_(job), workers_(workers), users_(users) {
     RegisterHandlers();
     BuildDependencies();
   }
@@ -71,6 +73,10 @@ public:
           job_.SetWorkerId(subgraph_id, worker_id);
 
           auto &sg = job_.GetSubGraphs().at(subgraph_id);
+          // update user resource
+          users_->at(job_.GetUserId())
+              .PlacementDecision(time, sg.GetResourcePack());
+
           for (auto &st : sg.GetShardTasks()) {
             ShardTaskId shard_task_id =
                 ShardTaskId{st.GetTaskId(), st.GetShardId()};
@@ -80,7 +86,7 @@ public:
               if (success) {
                 event_vector.push_back(std::make_shared<TaskFinishEvent>(
                     TaskFinishEvent(TASK_FINISH, time + st.GetDuration(), 0,
-                                    job_.GetId(), st)));
+                                    job_.GetJobId(), st)));
               }
             }
           }
@@ -107,21 +113,24 @@ public:
           // task finish update resource
           auto new_tasks =
               workers_->at(sg.GetWorkerId()).TaskFinish(time, finish_task);
+          users_->at(job_.GetUserId()).TaskFinish(time, finish_task);
+
           for (auto &t : new_tasks) {
-            event_vector.push_back(
-                std::make_shared<TaskFinishEvent>(TaskFinishEvent(
-                    TASK_FINISH, time + t.GetDuration(), 0, job_.GetId(), t)));
+            event_vector.push_back(std::make_shared<TaskFinishEvent>(
+                TaskFinishEvent(TASK_FINISH, time + t.GetDuration(), 0,
+                                job_.GetJobId(), t)));
           }
 
           subgraph_finished_task_[subgraph_id]++;
           // subgraph finish update memory
           if (sg.GetShardTasks().size() ==
               subgraph_finished_task_[subgraph_id]) {
-            workers_->at(sg.GetWorkerId()).SubGraphFinish(sg.GetMemory());
+            workers_->at(sg.GetWorkerId()).SubGraphFinish(time, sg.GetMemory());
+            users_->at(job_.GetUserId()).SubGraphFinish(time, sg.GetMemory());
             finish_subgraph_num_++;
             if (finish_subgraph_num_ == job_.GetSubGraphs().size()) {
               event_vector.push_back(std::make_shared<JobFinishEvent>(
-                  JOB_FINISH, time, 0, SCHEDULER, job_.GetId(),
+                  JOB_FINISH, time, 0, SCHEDULER, job_.GetJobId(),
                   job_.GetSubmissionTime()));
             }
           }
@@ -149,7 +158,7 @@ public:
                              << '\n';
                   event_vector.push_back(std::make_shared<TaskFinishEvent>(
                       TaskFinishEvent(TASK_FINISH, time + task.GetDuration(), 0,
-                                      job_.GetId(), task)));
+                                      job_.GetJobId(), task)));
                 }
               }
             }
@@ -172,8 +181,9 @@ public:
         for (auto &st : sg.GetShardTasks()) {
           if (dep_counter_[ShardTaskId{st.GetTaskId(), st.GetShardId()}] == 0) {
             subgraph_to_req_[id] = 1;
-            req_vector.push_back(ResourceRequest(
-                job_.GetId(), id, sg.GetDataLocality(), sg.GetResourcePack()));
+            req_vector.push_back(ResourceRequest(job_.GetJobId(), id,
+                                                 sg.GetDataLocality(),
+                                                 sg.GetResourcePack()));
             break;
           }
         }
@@ -186,7 +196,7 @@ public:
       subgraph_to_req_[id] = 1;
       auto &sg = job_.GetSubGraphs().at(id);
       req_vector.push_back(ResourceRequest(
-          job_.GetId(), id, sg.GetDataLocality(), sg.GetResourcePack()));
+          job_.GetJobId(), id, sg.GetDataLocality(), sg.GetResourcePack()));
     }
     return req_vector;
   }
@@ -218,6 +228,7 @@ private:
   std::map<ShardTaskId, int> dep_counter_;
   std::map<ShardTaskId, int> dep_finish_counter_;
   std::shared_ptr<std::vector<Worker>> workers_;
+  std::shared_ptr<std::vector<User>> users_;
 };
 
 } // namespace simulation

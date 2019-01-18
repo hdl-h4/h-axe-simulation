@@ -1,7 +1,8 @@
 {
   "job" : [
     {
-	    "id" : 0,
+	    "jobid" : 0,
+      "userid" : 0,
 	    "submissiontime" : 0,
 	    "subgraph" : [
 		  {
