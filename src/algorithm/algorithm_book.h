@@ -31,11 +31,11 @@ class AlgorithmBook {
 public:
   static void Init() {
     task_placement = "FIFO";
-    task_placement_book = {{"FIFO", FIFO}};
+    task_placement_book = {{"FIFO", FIFO}, {"TETRIS", TETRIS}};
   }
   static void Init(std::string str) {
     task_placement = str;
-    task_placement_book = {{"FIFO", FIFO}};
+    task_placement_book = {{"FIFO", FIFO}, {"TETRIS", TETRIS}};
   }
   static auto GetTaskPlacement() { return task_placement_book[task_placement]; }
   static std::string GetTaskPlacementString() { return task_placement; }

@@ -27,17 +27,42 @@ namespace simulation {
 std::vector<std::pair<int, ResourceRequest>>
 FIFO(std::multimap<double, ResourceRequest> &req_queue,
      std::shared_ptr<std::vector<Worker>> workers) {
-  DLOG(INFO) << "task placement: FIFO";
+  DLOG(INFO) << "task placement: FIFO and Round Robin";
   static int worker_id = -1;
   worker_id = (worker_id + 1) % (*workers).size();
   ResourceRequest req = (*req_queue.begin()).second;
 
   if ((*workers)[worker_id].Reserve(req.GetResource())) {
-    (*workers)[worker_id].IncreaseMemoryUsage(req.GetResource().GetMemory());
     req_queue.erase(req_queue.begin());
     return {{worker_id, req}};
   } else {
     return {};
+  }
+}
+
+std::vector<std::pair<int, ResourceRequest>>
+TETRIS(std::multimap<double, ResourceRequest> &req_queue,
+       std::shared_ptr<std::vector<Worker>> workers) {
+  DLOG(INFO) << "task placement: fifo and simplified tetris";
+  int worker_id = -1;
+  double max_product = 0;
+  ResourceRequest req = (*req_queue.begin()).second;
+  for (int i = 0; i < workers->size(); ++i) {
+    if ((*workers)[i].TryToReserve(req.GetResource())) {
+      double product = (*workers)[i].ComputeDotProduct(req.GetResource());
+      if (product > max_product) {
+        max_product = product;
+        worker_id = i;
+      }
+    }
+  }
+  if (worker_id == -1)
+    return {};
+  else {
+    DLOG(INFO) << "max product is: " << max_product;
+    (*workers)[worker_id].Reserve(req.GetResource());
+    req_queue.erase(req_queue.begin());
+    return {{worker_id, req}};
   }
 }
 

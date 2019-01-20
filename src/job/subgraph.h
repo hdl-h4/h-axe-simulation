@@ -165,7 +165,7 @@ public:
 
   void SetResourcesReq() {
     for (auto &st : shard_tasks_) {
-      if (st.GetResourceType() == ResourceType::kCpu) {
+      if (st.GetResourceType() == ResourceType::kCPU) {
         resource_pack_.SetCPU(resource_pack_.GetCPU() + st.GetReq());
       } else if (st.GetResourceType() == ResourceType::kDisk) {
         resource_pack_.SetDisk(resource_pack_.GetDisk() + st.GetReq());
@@ -178,7 +178,7 @@ public:
 
   void Print() {
     DLOG(INFO) << "worker id : " << worker_id_;
-    resource_pack_.Print(); 
+    resource_pack_.Print();
     for (auto &st : shard_tasks_) {
       st.Print();
     }

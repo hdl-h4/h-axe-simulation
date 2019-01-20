@@ -3,7 +3,7 @@
     {
 	    "jobid" : 0,
       "userid" : 0,
-	    "submissiontime" : 0,
+	    "submissiontime" : 5,
 	    "subgraph" : [
 		  {
 			  "shardtask" : [
@@ -160,7 +160,7 @@
   {
 	    "jobid" : 1,
       "userid" : 0,
-	    "submissiontime" : 0,
+	    "submissiontime" : 5,
 	    "subgraph" : [
 		  {
 			  "shardtask" : [
@@ -317,7 +317,7 @@
   {
 	    "jobid" : 2,
       "userid" : 0,
-	    "submissiontime" : 2,
+	    "submissiontime" : 7,
 	    "subgraph" : [
 		  {
 			  "shardtask" : [
@@ -474,7 +474,7 @@
   {
 	    "jobid" : 3,
       "userid" : 1,
-	    "submissiontime" : 3,
+	    "submissiontime" : 8,
 	    "subgraph" : [
 		  {
 			  "shardtask" : [
@@ -631,7 +631,7 @@
   {
 	    "jobid" : 4,
       "userid" : 1,
-	    "submissiontime" : 4,
+	    "submissiontime" : 12,
 	    "subgraph" : [
 		  {
 			  "shardtask" : [
@@ -788,7 +788,7 @@
   {
 	    "jobid" : 5,
       "userid" : 1,
-	    "submissiontime" : 4,
+	    "submissiontime" : 12,
 	    "subgraph" : [
 		  {
 			  "shardtask" : [
@@ -945,7 +945,7 @@
   {
 	    "jobid" : 6,
       "userid" : 2,
-	    "submissiontime" : 7,
+	    "submissiontime" : 17,
 	    "subgraph" : [
 		  {
 			  "shardtask" : [
@@ -1102,7 +1102,7 @@
   {
 	    "jobid" : 7,
       "userid" : 2,
-	    "submissiontime" : 30,
+	    "submissiontime" : 35,
 	    "subgraph" : [
 		  {
 			  "shardtask" : [
