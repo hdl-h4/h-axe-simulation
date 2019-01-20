@@ -45,6 +45,13 @@ public:
     resource_ = resource;
   }
 
+  void Print() {
+    DLOG(INFO) << " cpu = " << resource_[0];
+    DLOG(INFO) << " memory = " << resource_[1];
+    DLOG(INFO) << " disk = " << resource_[2];
+    DLOG(INFO) << " network = " << resource_[3];
+  }
+
   double GetCPU() const { return resource_[kCpu]; }
   double GetMemory() const { return resource_[kMemory]; }
   double GetDisk() const { return resource_[kDisk]; }
