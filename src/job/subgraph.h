@@ -178,6 +178,7 @@ public:
 
   void Print() {
     DLOG(INFO) << "worker id : " << worker_id_;
+    resource_pack_.Print(); 
     for (auto &st : shard_tasks_) {
       st.Print();
     }

@@ -52,9 +52,11 @@ public:
     DLOG(INFO) << "user id : " << user_id_;
     DLOG(INFO) << "job id : " << job_id_;
     DLOG(INFO) << "submission time : " << submission_time_;
-    for (auto &sg : subgraphs_) {
-      sg.Print();
+    for (size_t i = 0; i < subgraphs_.size(); ++i) {
+      DLOG(INFO) << "subgraph id : " << i;
+      subgraphs_.at(i).Print();
     }
+    DLOG(INFO) << "---------------";
   }
 
 private:
