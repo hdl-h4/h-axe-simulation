@@ -52,8 +52,8 @@ public:
     std::string file_name = "report/jobs_report";
     std::ofstream fout(file_name, std::ios::out);
     fout << "job id" << std::setw(20) << "submission time" << std::setw(20)
-         << "finish time" << std::setw(20) << "use time" << std::setw(5)
-         << std::endl;
+         << "finish time" << std::setw(20) << "job completion time"
+         << std::setw(5) << std::endl;
     for (const auto &record : records_) {
       fout << record.job_id << std::setw(20) << record.submission_time
            << std::setw(20) << record.finish_time << std::setw(20)

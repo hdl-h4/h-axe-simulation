@@ -100,7 +100,7 @@ public:
     prefix = "report/user_";
     for (int i = 0; i < users_->size(); ++i) {
       std::ofstream fout(prefix + std::to_string(i), std::ios::out);
-      (*users_)[i].ReportUtilization(fout);
+      (*users_)[i].ReportShare(fout);
       fout.close();
     }
   }

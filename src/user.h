@@ -28,6 +28,7 @@ public:
 
   void SetClusterResourceCapacity(const ResourcePack &resource_pack) {
     cluster_resource_capacity_ = resource_pack;
+    records_.push_back(GenerateResourceReservationRecord(0));
   }
 
   inline const auto &GetResourceReservation() { return resource_reservation_; }
@@ -36,13 +37,13 @@ public:
 
   void AddJobId(int job_id) { jobs_id_.push_back(job_id); }
 
-  void PlacementDecision(double time, const ResourcePack &rp) {
-    resource_reservation_.AddToMe(rp);
+  void PlacementDecision(double time, const ResourcePack &resource) {
+    resource_reservation_.AddToMe(resource);
     records_.push_back(GenerateResourceReservationRecord(time));
   }
 
   void TaskFinish(double time, const ShardTask &task) {
-    if (task.GetResourceType() == kCpu) {
+    if (task.GetResourceType() == kCPU) {
       resource_reservation_.SetCPU(resource_reservation_.GetCPU() -
                                    task.GetReq());
     } else if (task.GetResourceType() == kNetwork) {
@@ -60,19 +61,29 @@ public:
     records_.push_back(GenerateResourceReservationRecord(time));
   }
 
-  void ReportUtilization(std::ofstream &fout) {
+  void ReportShare(std::ofstream &fout) {
     int time = 0;
     fout << "time(second)" << std::setw(15) << "CPU" << std::setw(10)
          << "MEMORY" << std::setw(10) << "DISK" << std::setw(10) << "NETWORK"
          << std::setw(10) << std::endl;
-    for (auto const &record : records_) {
-      while (time <= static_cast<int>(record[0])) {
-        fout << time << std::setw(15);
-        for (int i = 1; i < record.size(); ++i) {
-          fout << record[i] << std::setw(10);
-        }
-        fout << std::endl;
+    for (int i = 0; i < records_.size(); ++i) {
+      auto &this_record = records_[i];
+      fout << time << std::setw(15);
+      for (int j = 1; j < this_record.size(); ++j) {
+        fout << this_record[j] << std::setw(10);
+      }
+      fout << std::endl;
+      if (i < records_.size() - 1) {
+        auto &next_record = records_[i + 1];
         ++time;
+        while (time < static_cast<int>(next_record[0])) {
+          fout << time << std::setw(15);
+          for (int j = 1; j < this_record.size(); ++j) {
+            fout << this_record[j] << std::setw(10);
+          }
+          fout << std::endl;
+          ++time;
+        }
       }
     }
   }

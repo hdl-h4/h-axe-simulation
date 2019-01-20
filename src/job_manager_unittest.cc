@@ -54,9 +54,24 @@ TEST_F(TestJobManager, JobAdmissionEvent) {
       std::make_shared<std::vector<Worker>>();
   workers->push_back(Worker(5, 5, 5, 5));
   workers->push_back(Worker(5, 5, 5, 5));
+  std::shared_ptr<std::vector<User>> users =
+      std::make_shared<std::vector<User>>();
+
+  ResourcePack cluster_resource_capacity(10, 10, 10, 10);
+  int users_size = 0;
   for (const auto &job : jobs) {
-    jms.push_back(std::make_shared<JobManager>(job, workers));
+    jms.push_back(std::make_shared<JobManager>(job, workers, users));
+    users_size = std::max(users_size, job.GetUserId() + 1);
   }
+
+  users->resize(users_size);
+  for (const auto &job : jobs) {
+    users->at(job.GetUserId()).AddJobId(job.GetJobId());
+  }
+  for (auto &user : *users) {
+    user.SetClusterResourceCapacity(cluster_resource_capacity);
+  }
+
   EXPECT_EQ(jms.size(), 1);
   std::shared_ptr<JobAdmissionEvent> job_admission_event =
       std::make_shared<JobAdmissionEvent>(JOB_ADMISSION, 10, 0, 0, 0);
