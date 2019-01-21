@@ -73,7 +73,7 @@ public:
 
     for (const auto &jm : jms_) {
       event_queue_.Push(std::make_shared<NewJobEvent>(
-          NEW_JOB, jm->GetJob().GetSubmissionTime(), 0, SCHEDULER,
+          static_cast<int>(EventType::NEW_JOB), jm->GetJob().GetSubmissionTime(), 0, kScheduler,
           jm->GetJob()));
     }
   }
@@ -108,7 +108,7 @@ public:
   std::vector<std::shared_ptr<Event>> Dispatch(std::shared_ptr<Event> event) {
     // TODO(SXD): send the event to different components to handle
     int event_principal = event->GetEventPrincipal();
-    if (event_principal == SCHEDULER) {
+    if (event_principal == kScheduler) {
       return scheduler_->Handle(event);
     } else {
       return jms_[event_principal]->Handle(event);
@@ -139,13 +139,13 @@ private:
   std::shared_ptr<std::vector<Worker>> workers_;
   std::shared_ptr<std::vector<User>> users_;
   std::map<int, std::string> event_map_ = {
-      {TASK_FINISH, "TASK FINISH"},
-      {RESOURCE_AVAILABLE, "RESOURCE AVAILABLE"},
-      {JOB_FINISH, "JOB FINISH"},
-      {JOB_ADMISSION, "JOB ADMISSION"},
-      {PLACEMENT_DECISION, "PLACEMENT DECISION"},
-      {NEW_TASK_REQ, "NEW TASK REQ"},
-      {NEW_JOB, "NEW JOB"}};
+      {static_cast<int>(EventType::TASK_FINISH), "TASK FINISH"},
+      {static_cast<int>(EventType::RESOURCE_AVAILABLE), "RESOURCE AVAILABLE"},
+      {static_cast<int>(EventType::JOB_FINISH), "JOB FINISH"},
+      {static_cast<int>(EventType::JOB_ADMISSION), "JOB ADMISSION"},
+      {static_cast<int>(EventType::PLACEMENT_DECISION), "PLACEMENT DECISION"},
+      {static_cast<int>(EventType::NEW_TASK_REQ), "NEW TASK REQ"},
+      {static_cast<int>(EventType::NEW_JOB), "NEW JOB"}};
 };
 
 } // namespace simulation

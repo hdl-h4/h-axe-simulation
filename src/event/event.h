@@ -21,7 +21,7 @@
 namespace axe {
 namespace simulation {
 
-enum EventType {
+enum class EventType: int {
   TASK_FINISH = 0,    // SCH tells JM the task req is finished, for JM
   RESOURCE_AVAILABLE, // JM tells SCH there are avaliable resources on workers,
                       // for SCH
@@ -32,7 +32,7 @@ enum EventType {
   NEW_JOB,            // JM sends SCH the new job, for SCH
 };
 
-const int SCHEDULER = -1;
+const int kScheduler = -1;
 
 /**
  * It is actually not elegant design because

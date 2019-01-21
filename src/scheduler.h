@@ -64,7 +64,7 @@ public:
 
   void RegisterHandlers() {
     RegisterHandler(
-        NEW_JOB,
+        static_cast<int>(EventType::NEW_JOB),
         [&](std::shared_ptr<Event> event)
             -> std::vector<std::shared_ptr<Event>> {
           double time = event->GetTime();
@@ -73,14 +73,14 @@ public:
               std::static_pointer_cast<NewJobEvent>(event);
           DLOG(INFO) << "job id: " << new_job_event->GetJob().GetJobId();
           event_vector.push_back(std::make_shared<JobAdmissionEvent>(
-              JobAdmissionEvent(JOB_ADMISSION, time, 0,
+              JobAdmissionEvent(static_cast<int>(EventType::JOB_ADMISSION), time, 0,
                                 new_job_event->GetJob().GetJobId(),
                                 new_job_event->GetJob().GetJobId())));
 
           return event_vector;
         });
     RegisterHandler(
-        NEW_TASK_REQ,
+        static_cast<int>(EventType::NEW_TASK_REQ),
         [&](std::shared_ptr<Event> event)
             -> std::vector<std::shared_ptr<Event>> {
           // Assign the task on workers
@@ -101,13 +101,13 @@ public:
                        << ", worker id " << decision.first;
             event_vector.push_back(
                 std::make_shared<PlacementDecisionEvent>(PlacementDecisionEvent(
-                    PLACEMENT_DECISION, time, 0, decision.second.GetJobID(),
+                    static_cast<int>(EventType::PLACEMENT_DECISION), time, 0, decision.second.GetJobID(),
                     decision.first, decision.second.GetSubGraphID())));
           }
           return event_vector;
         });
     RegisterHandler(
-        RESOURCE_AVAILABLE,
+        static_cast<int>(EventType::RESOURCE_AVAILABLE),
         [&](std::shared_ptr<Event> event)
             -> std::vector<std::shared_ptr<Event>> {
           double time = event->GetTime();
@@ -122,12 +122,12 @@ public:
                        << ", worker id " << decision.first;
             event_vector.push_back(
                 std::make_shared<PlacementDecisionEvent>(PlacementDecisionEvent(
-                    PLACEMENT_DECISION, time, 0, decision.second.GetJobID(),
+                    static_cast<int>(EventType::PLACEMENT_DECISION), time, 0, decision.second.GetJobID(),
                     decision.first, decision.second.GetSubGraphID())));
           }
           return event_vector;
         });
-    RegisterHandler(JOB_FINISH,
+    RegisterHandler(static_cast<int>(EventType::JOB_FINISH),
                     [&](std::shared_ptr<Event> event)
                         -> std::vector<std::shared_ptr<Event>> {
                       std::vector<std::shared_ptr<Event>> event_vector;

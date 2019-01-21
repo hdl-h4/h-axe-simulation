@@ -59,36 +59,36 @@ public:
   std::vector<ShardTask> TaskFinish(double time, const ShardTask &task) {
     std::vector<ShardTask> tasks;
     if (task.GetMemory() < 0) {
-      IncreaseSingleResourceUsage(task.GetMemory(), kMemory);
+      IncreaseSingleResourceUsage(task.GetMemory(), static_cast<size_t>(ResourceType::kMemory));
     }
-    if (task.GetResourceType() == kCPU) {
-      DecreaseSingleResourceUsage(task.GetReq(), kCPU);
-      DecreaseSingleResourceReservation(task.GetReq(), kCPU);
+    if (task.GetResourceType() == static_cast<size_t>(ResourceType::kCPU)) {
+      DecreaseSingleResourceUsage(task.GetReq(), static_cast<size_t>(ResourceType::kCPU));
+      DecreaseSingleResourceReservation(task.GetReq(), static_cast<size_t>(ResourceType::kCPU));
       while (cpu_queue_.size() != 0 &&
              cpu_queue_.at(0).GetReq() + resource_usage_.GetCPU() <
                  resource_capacity_.GetCPU()) {
         tasks.push_back(cpu_queue_.at(0));
-        IncreaseSingleResourceUsage(cpu_queue_.at(0).GetReq(), kCPU);
+        IncreaseSingleResourceUsage(cpu_queue_.at(0).GetReq(), static_cast<size_t>(ResourceType::kCPU));
         cpu_queue_.erase(cpu_queue_.begin());
       }
-    } else if (task.GetResourceType() == kNetwork) {
-      DecreaseSingleResourceUsage(task.GetReq(), kNetwork);
-      DecreaseSingleResourceReservation(task.GetReq(), kNetwork);
+    } else if (task.GetResourceType() == static_cast<size_t>(ResourceType::kNetwork)) {
+      DecreaseSingleResourceUsage(task.GetReq(), static_cast<size_t>(ResourceType::kNetwork));
+      DecreaseSingleResourceReservation(task.GetReq(), static_cast<size_t>(ResourceType::kNetwork));
       while (net_queue_.size() != 0 &&
              net_queue_.at(0).GetReq() + resource_usage_.GetNetwork() <
                  resource_capacity_.GetNetwork()) {
         tasks.push_back(net_queue_.at(0));
-        IncreaseSingleResourceUsage(net_queue_.at(0).GetReq(), kNetwork);
+        IncreaseSingleResourceUsage(net_queue_.at(0).GetReq(), static_cast<size_t>(ResourceType::kNetwork));
         net_queue_.erase(net_queue_.begin());
       }
-    } else if (task.GetResourceType() == kDisk) {
-      DecreaseSingleResourceUsage(task.GetReq(), kDisk);
-      DecreaseSingleResourceReservation(task.GetReq(), kDisk);
+    } else if (task.GetResourceType() == static_cast<size_t>(ResourceType::kDisk)) {
+      DecreaseSingleResourceUsage(task.GetReq(), static_cast<size_t>(ResourceType::kDisk));
+      DecreaseSingleResourceReservation(task.GetReq(), static_cast<size_t>(ResourceType::kDisk));
       while (disk_queue_.size() != 0 &&
              disk_queue_.at(0).GetReq() + resource_usage_.GetDisk() <
                  resource_capacity_.GetDisk()) {
         tasks.push_back(disk_queue_.at(0));
-        IncreaseSingleResourceUsage(disk_queue_.at(0).GetReq(), kDisk);
+        IncreaseSingleResourceUsage(disk_queue_.at(0).GetReq(), static_cast<size_t>(ResourceType::kDisk));
         disk_queue_.erase(disk_queue_.begin());
       }
     } else {
@@ -100,7 +100,7 @@ public:
 
   // subgraph finish
   void SubGraphFinish(double time, double mem) {
-    DecreaseSingleResourceReservation(mem, kMemory);
+    DecreaseSingleResourceReservation(mem, static_cast<size_t>(ResourceType::kMemory));
     records_.push_back(GenerateUtilizationRecord(time));
   }
 
@@ -108,23 +108,23 @@ public:
   //                        false : task waits in queue;
   bool PlaceNewTask(double time, const ShardTask &task) {
     if (task.GetMemory() > 0) {
-      IncreaseSingleResourceUsage(task.GetMemory(), kMemory);
+      IncreaseSingleResourceUsage(task.GetMemory(), static_cast<size_t>(ResourceType::kMemory));
     }
-    if (task.GetResourceType() == kCPU) {
+    if (task.GetResourceType() == static_cast<size_t>(ResourceType::kCPU)) {
       if (cpu_queue_.size() == 0 && resource_usage_.GetCPU() + task.GetReq() <
                                         resource_capacity_.GetCPU()) {
-        IncreaseSingleResourceUsage(task.GetReq(), kCPU);
+        IncreaseSingleResourceUsage(task.GetReq(), static_cast<size_t>(ResourceType::kCPU));
         records_.push_back(GenerateUtilizationRecord(time));
         return true;
       } else {
         cpu_queue_.push_back(task);
         return false;
       }
-    } else if (task.GetResourceType() == kNetwork) {
+    } else if (task.GetResourceType() == static_cast<size_t>(ResourceType::kNetwork)) {
       if (net_queue_.size() == 0 &&
           resource_usage_.GetNetwork() + task.GetReq() <
               resource_capacity_.GetNetwork()) {
-        IncreaseSingleResourceUsage(task.GetReq(), kNetwork);
+        IncreaseSingleResourceUsage(task.GetReq(), static_cast<size_t>(ResourceType::kNetwork));
         records_.push_back(GenerateUtilizationRecord(time));
         return true;
       } else {
@@ -134,7 +134,7 @@ public:
     } else {
       if (disk_queue_.size() == 0 && resource_usage_.GetDisk() + task.GetReq() <
                                          resource_capacity_.GetDisk()) {
-        IncreaseSingleResourceUsage(task.GetReq(), kDisk);
+        IncreaseSingleResourceUsage(task.GetReq(), static_cast<size_t>(ResourceType::kDisk));
         records_.push_back(GenerateUtilizationRecord(time));
         return true;
       } else {
@@ -187,16 +187,16 @@ public:
 
   void IncreaseSingleResourceUsage(double resource, int type) {
     switch (type) {
-    case kCPU:
+    case static_cast<size_t>(ResourceType::kCPU):
       resource_usage_.SetCPU(resource_usage_.GetCPU() + resource);
       break;
-    case kMemory:
+    case static_cast<size_t>(ResourceType::kMemory):
       resource_usage_.SetMemory(resource_usage_.GetMemory() + resource);
       break;
-    case kDisk:
+    case static_cast<size_t>(ResourceType::kDisk):
       resource_usage_.SetDisk(resource_usage_.GetDisk() + resource);
       break;
-    case kNetwork:
+    case static_cast<size_t>(ResourceType::kNetwork):
       resource_usage_.SetNetwork(resource_usage_.GetNetwork() + resource);
       break;
     default:
@@ -206,16 +206,16 @@ public:
 
   void DecreaseSingleResourceUsage(double resource, int type) {
     switch (type) {
-    case kCPU:
+    case static_cast<size_t>(ResourceType::kCPU):
       resource_usage_.SetCPU(resource_usage_.GetCPU() - resource);
       break;
-    case kMemory:
+    case static_cast<size_t>(ResourceType::kMemory):
       resource_usage_.SetMemory(resource_usage_.GetMemory() - resource);
       break;
-    case kDisk:
+    case static_cast<size_t>(ResourceType::kDisk):
       resource_usage_.SetDisk(resource_usage_.GetDisk() - resource);
       break;
-    case kNetwork:
+    case static_cast<size_t>(ResourceType::kNetwork):
       resource_usage_.SetNetwork(resource_usage_.GetNetwork() - resource);
       break;
     default:
@@ -225,17 +225,17 @@ public:
 
   void IncreaseSingleResourceReservation(double resource, int type) {
     switch (type) {
-    case kCPU:
+    case static_cast<size_t>(ResourceType::kCPU):
       resource_reservation_.SetCPU(resource_reservation_.GetCPU() + resource);
       break;
-    case kMemory:
+    case static_cast<size_t>(ResourceType::kMemory):
       resource_reservation_.SetMemory(resource_reservation_.GetMemory() +
                                       resource);
       break;
-    case kDisk:
+    case static_cast<size_t>(ResourceType::kDisk):
       resource_reservation_.SetDisk(resource_reservation_.GetDisk() + resource);
       break;
-    case kNetwork:
+    case static_cast<size_t>(ResourceType::kNetwork):
       resource_reservation_.SetNetwork(resource_reservation_.GetNetwork() +
                                        resource);
       break;
@@ -246,17 +246,17 @@ public:
 
   void DecreaseSingleResourceReservation(double resource, int type) {
     switch (type) {
-    case kCPU:
+    case static_cast<size_t>(ResourceType::kCPU):
       resource_reservation_.SetCPU(resource_reservation_.GetCPU() - resource);
       break;
-    case kMemory:
+    case static_cast<size_t>(ResourceType::kMemory):
       resource_reservation_.SetMemory(resource_reservation_.GetMemory() -
                                       resource);
       break;
-    case kDisk:
+    case static_cast<size_t>(ResourceType::kDisk):
       resource_reservation_.SetDisk(resource_reservation_.GetDisk() - resource);
       break;
-    case kNetwork:
+    case static_cast<size_t>(ResourceType::kNetwork):
       resource_reservation_.SetNetwork(resource_reservation_.GetNetwork() -
                                        resource);
       break;

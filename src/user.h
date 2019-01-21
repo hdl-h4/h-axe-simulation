@@ -43,10 +43,10 @@ public:
   }
 
   void TaskFinish(double time, const ShardTask &task) {
-    if (task.GetResourceType() == kCPU) {
+    if (task.GetResourceType() == static_cast<size_t>(ResourceType::kCPU)) {
       resource_reservation_.SetCPU(resource_reservation_.GetCPU() -
                                    task.GetReq());
-    } else if (task.GetResourceType() == kNetwork) {
+    } else if (task.GetResourceType() == static_cast<size_t>(ResourceType::kNetwork)) {
       resource_reservation_.SetNetwork(resource_reservation_.GetNetwork() -
                                        task.GetReq());
     } else {

@@ -165,11 +165,11 @@ public:
 
   void SetResourcesReq() {
     for (auto &st : shard_tasks_) {
-      if (st.GetResourceType() == ResourceType::kCPU) {
+      if (st.GetResourceType() == static_cast<size_t>(ResourceType::kCPU)) {
         resource_pack_.SetCPU(resource_pack_.GetCPU() + st.GetReq());
-      } else if (st.GetResourceType() == ResourceType::kDisk) {
+      } else if (st.GetResourceType() == static_cast<size_t>(ResourceType::kDisk)) {
         resource_pack_.SetDisk(resource_pack_.GetDisk() + st.GetReq());
-      } else if (st.GetResourceType() == ResourceType::kNetwork) {
+      } else if (st.GetResourceType() == static_cast<size_t>(ResourceType::kNetwork)) {
         resource_pack_.SetNetwork(resource_pack_.GetNetwork() + st.GetReq());
       }
     }

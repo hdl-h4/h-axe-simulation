@@ -23,7 +23,7 @@ namespace simulation {
 
 using nlohmann::json;
 
-enum ResourceType { kCPU = 0, kMemory, kDisk, kNetwork };
+enum class ResourceType: int { kCPU = 0, kMemory, kDisk, kNetwork };
 
 const int kNumResourceTypes = 4;
 
@@ -38,10 +38,10 @@ public:
 
   ResourcePack(double cpu, double memory, double disk, double network) {
     resource_.resize(kNumResourceTypes);
-    resource_[kCPU] = cpu;
-    resource_[kMemory] = memory;
-    resource_[kDisk] = disk;
-    resource_[kNetwork] = network;
+    resource_[static_cast<int>(ResourceType::kCPU)] = cpu;
+    resource_[static_cast<int>(ResourceType::kMemory)] = memory;
+    resource_[static_cast<int>(ResourceType::kDisk)] = disk;
+    resource_[static_cast<int>(ResourceType::kNetwork)] = network;
   }
 
   ResourcePack(std::vector<double> resource) {
@@ -51,63 +51,63 @@ public:
   }
 
   void Print() {
-    DLOG(INFO) << " cpu = " << resource_[kCPU];
-    DLOG(INFO) << " memory = " << resource_[kMemory];
-    DLOG(INFO) << " disk = " << resource_[kDisk];
-    DLOG(INFO) << " network = " << resource_[kNetwork];
+    DLOG(INFO) << " cpu = " << resource_[static_cast<int>(ResourceType::kCPU)];
+    DLOG(INFO) << " memory = " << resource_[static_cast<int>(ResourceType::kMemory)];
+    DLOG(INFO) << " disk = " << resource_[static_cast<int>(ResourceType::kDisk)];
+    DLOG(INFO) << " network = " << resource_[static_cast<int>(ResourceType::kNetwork)];
   }
 
-  double GetCPU() const { return resource_[kCPU]; }
-  double GetMemory() const { return resource_[kMemory]; }
-  double GetDisk() const { return resource_[kDisk]; }
-  double GetNetwork() const { return resource_[kNetwork]; }
+  double GetCPU() const { return resource_[static_cast<int>(ResourceType::kCPU)]; }
+  double GetMemory() const { return resource_[static_cast<int>(ResourceType::kMemory)]; }
+  double GetDisk() const { return resource_[static_cast<int>(ResourceType::kDisk)]; }
+  double GetNetwork() const { return resource_[static_cast<int>(ResourceType::kNetwork)]; }
   std::vector<double> GetResourceVector() const { return resource_; }
   double GetResourceByIndex(int idx) const { return resource_[idx]; }
 
-  void SetCPU(double cpu) { resource_[kCPU] = cpu; }
-  void SetMemory(double memory) { resource_[kMemory] = memory; }
-  void SetDisk(double disk) { resource_[kDisk] = disk; }
-  void SetNetwork(double network) { resource_[kNetwork] = network; }
+  void SetCPU(double cpu) { resource_[static_cast<int>(ResourceType::kCPU)] = cpu; }
+  void SetMemory(double memory) { resource_[static_cast<int>(ResourceType::kMemory)] = memory; }
+  void SetDisk(double disk) { resource_[static_cast<int>(ResourceType::kDisk)] = disk; }
+  void SetNetwork(double network) { resource_[static_cast<int>(ResourceType::kNetwork)] = network; }
 
   ResourcePack Add(const ResourcePack &rhs) const {
     ResourcePack result;
-    result.SetCPU(resource_[kCPU] + rhs.GetCPU());
-    result.SetMemory(resource_[kMemory] + rhs.GetMemory());
-    result.SetDisk(resource_[kDisk] + rhs.GetDisk());
-    result.SetNetwork(resource_[kNetwork] + rhs.GetNetwork());
+    result.SetCPU(resource_[static_cast<int>(ResourceType::kCPU)] + rhs.GetCPU());
+    result.SetMemory(resource_[static_cast<int>(ResourceType::kMemory)] + rhs.GetMemory());
+    result.SetDisk(resource_[static_cast<int>(ResourceType::kDisk)] + rhs.GetDisk());
+    result.SetNetwork(resource_[static_cast<int>(ResourceType::kNetwork)] + rhs.GetNetwork());
     return result;
   }
 
   ResourcePack Subtract(const ResourcePack &rhs) const {
     ResourcePack result = SubtractWithoutMemory(rhs);
-    result.SetMemory(resource_[kMemory] - rhs.GetMemory());
+    result.SetMemory(resource_[static_cast<int>(ResourceType::kMemory)] - rhs.GetMemory());
     return result;
   }
 
   ResourcePack SubtractWithoutMemory(const ResourcePack &rhs) const {
     ResourcePack result;
-    result.SetCPU(resource_[kCPU] - rhs.GetCPU());
-    result.SetDisk(resource_[kDisk] - rhs.GetDisk());
-    result.SetNetwork(resource_[kNetwork] - rhs.GetNetwork());
+    result.SetCPU(resource_[static_cast<int>(ResourceType::kCPU)] - rhs.GetCPU());
+    result.SetDisk(resource_[static_cast<int>(ResourceType::kDisk)] - rhs.GetDisk());
+    result.SetNetwork(resource_[static_cast<int>(ResourceType::kNetwork)] - rhs.GetNetwork());
     return result;
   }
 
   void AddToMe(const ResourcePack &rhs) {
-    resource_[kCPU] += rhs.GetCPU();
-    resource_[kMemory] += rhs.GetMemory();
-    resource_[kDisk] += rhs.GetDisk();
-    resource_[kNetwork] += rhs.GetNetwork();
+    resource_[static_cast<int>(ResourceType::kCPU)] += rhs.GetCPU();
+    resource_[static_cast<int>(ResourceType::kMemory)] += rhs.GetMemory();
+    resource_[static_cast<int>(ResourceType::kDisk)] += rhs.GetDisk();
+    resource_[static_cast<int>(ResourceType::kNetwork)] += rhs.GetNetwork();
   }
 
   void SubtractFromMe(const ResourcePack &rhs) {
     SubtractFromMeWithoutMemory(rhs);
-    resource_[kMemory] -= rhs.GetMemory();
+    resource_[static_cast<int>(ResourceType::kMemory)] -= rhs.GetMemory();
   }
 
   void SubtractFromMeWithoutMemory(const ResourcePack &rhs) {
-    resource_[kCPU] -= rhs.GetCPU();
-    resource_[kDisk] -= rhs.GetDisk();
-    resource_[kNetwork] -= rhs.GetNetwork();
+    resource_[static_cast<int>(ResourceType::kCPU)] -= rhs.GetCPU();
+    resource_[static_cast<int>(ResourceType::kDisk)] -= rhs.GetDisk();
+    resource_[static_cast<int>(ResourceType::kNetwork)] -= rhs.GetNetwork();
   }
 
   bool FitIn(const ResourcePack &resource) {
@@ -120,7 +120,7 @@ public:
   bool WeakFitIn(const ResourcePack &resource, double alpha) {
     bool ret = true;
     for (int i = 0; i < kNumResourceTypes; ++i) {
-      if (i == kMemory)
+      if (i == static_cast<int>(ResourceType::kMemory))
         ret = ret && (resource.GetResourceByIndex(i) < resource_[i]);
       else
         ret = ret && (resource.GetResourceByIndex(i) < resource_[i] * alpha);
@@ -129,10 +129,10 @@ public:
 
   friend void from_json(const json &j, ResourcePack &resource_pack) {
     resource_pack.resource_.resize(kNumResourceTypes);
-    j.at("cpu").get_to(resource_pack.resource_[kCPU]);
-    j.at("memory").get_to(resource_pack.resource_[kMemory]);
-    j.at("disk").get_to(resource_pack.resource_[kDisk]);
-    j.at("network").get_to(resource_pack.resource_[kNetwork]);
+    j.at("cpu").get_to(resource_pack.resource_[static_cast<int>(ResourceType::kCPU)]);
+    j.at("memory").get_to(resource_pack.resource_[static_cast<int>(ResourceType::kMemory)]);
+    j.at("disk").get_to(resource_pack.resource_[static_cast<int>(ResourceType::kDisk)]);
+    j.at("network").get_to(resource_pack.resource_[static_cast<int>(ResourceType::kNetwork)]);
   }
 
 private:
