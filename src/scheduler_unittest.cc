@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "algorithm/algorithm_book.h"
+#include <vector>
+
 #include "glog/logging.h"
+#include "gtest/gtest.h"
+
+#include "algorithm/algorithm_book.h"
 #include "resource/resource_request.h"
 #include "scheduler.h"
-#include "worker.h"
-#include "gtest/gtest.h"
-#include <vector>
+#include "worker/worker.h"
 
 namespace axe {
 namespace simulation {
@@ -70,8 +72,8 @@ TEST_F(TestScheduler, NewTaskReqEvent) {
   EXPECT_DOUBLE_EQ(event->GetTime(), 10);
   EXPECT_EQ(event->GetPriority(), 0);
   EXPECT_EQ(event->GetEventPrincipal(), 5);
-  EXPECT_EQ(event->GetWorkerId(), 0);
-  EXPECT_EQ(event->GetSubGraphId(), 6);
+  EXPECT_EQ(event->GetWorkerID(), 0);
+  EXPECT_EQ(event->GetSubGraphID(), 6);
 }
 */
 

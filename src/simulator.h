@@ -14,21 +14,23 @@
 
 #pragma once
 
-#include "event/event.h"
-#include "glog/logging.h"
-#include "job/job.h"
-#include "job_manager.h"
-#include "scheduler.h"
-#include "user.h"
-#include "worker.h"
-
 #include <functional>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <queue>
+#include <set>
 #include <string>
 #include <vector>
+
+#include "glog/logging.h"
+
+#include "event/event.h"
+#include "job/job.h"
+#include "job_manager.h"
+#include "scheduler.h"
+#include "user.h"
+#include "worker/worker.h"
 
 namespace axe {
 namespace simulation {
@@ -39,10 +41,14 @@ class Simulator {
 public:
   Simulator() = default;
   explicit Simulator(const json &workers_json, const json &jobs_json) {
+    invalid_event_id_set_ = std::make_shared<std::set<int>>();
     workers_ = std::make_shared<std::vector<Worker>>();
     users_ = std::make_shared<std::vector<User>>();
     from_json(workers_json, *this);
     from_json(jobs_json, *this);
+    for (auto &worker : *workers_) {
+      worker.Init(invalid_event_id_set_);
+    }
   }
 
   void Init() {
@@ -59,12 +65,12 @@ public:
     int users_size = 0;
     for (const auto &job : jobs_) {
       jms_.push_back(std::make_shared<JobManager>(job, workers_, users_));
-      users_size = std::max(users_size, job.GetUserId() + 1);
+      users_size = std::max(users_size, job.GetUserID() + 1);
     }
 
     users_->resize(users_size);
     for (const auto &job : jobs_) {
-      users_->at(job.GetUserId()).AddJobId(job.GetJobId());
+      users_->at(job.GetUserID()).AddJobID(job.GetJobID());
     }
 
     for (auto &user : *users_) {
@@ -83,9 +89,17 @@ public:
     // order
     while (!event_queue_.Empty()) {
       auto event = event_queue_.Top();
-      DLOG(INFO) << "event type: " << event_map_[event->GetEventType()];
+      DLOG(INFO) << "event id: " << event->GetEventID()
+                 << " event type: " << event_map_[event->GetEventType()];
       event_queue_.Pop();
-      event_queue_.Push(Dispatch(event));
+      // if the event is invalid, then skip it
+      auto it = invalid_event_id_set_->find(event->GetEventID());
+      if (it == invalid_event_id_set_->end()) {
+        event_queue_.Push(Dispatch(event));
+      } else {
+        invalid_event_id_set_->erase(it);
+        DLOG(INFO) << "skip invalid event: " << event->GetEventID();
+      }
     }
   }
 
@@ -146,6 +160,7 @@ private:
       {PLACEMENT_DECISION, "PLACEMENT DECISION"},
       {NEW_TASK_REQ, "NEW TASK REQ"},
       {NEW_JOB, "NEW JOB"}};
+  std::shared_ptr<std::set<int>> invalid_event_id_set_;
 };
 
 } // namespace simulation

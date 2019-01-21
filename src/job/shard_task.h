@@ -14,27 +14,29 @@
 
 #pragma once
 
-#include "glog/logging.h"
-#include "nlohmann/json.hpp"
-#include "resource/resource.h"
 #include <iostream>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "glog/logging.h"
+#include "nlohmann/json.hpp"
+
+#include "resource/resource.h"
 
 namespace axe {
 namespace simulation {
 
 using nlohmann::json;
 
-struct ShardTaskId {
+struct ShardTaskID {
   int task_id_;
   int shard_id_;
-  friend void from_json(const json &j, ShardTaskId &id) {
+  friend void from_json(const json &j, ShardTaskID &id) {
     j.at("childtaskid").get_to(id.task_id_);
     j.at("childshardid").get_to(id.shard_id_);
   }
-  bool operator<(const ShardTaskId &x) const {
+  bool operator<(const ShardTaskID &x) const {
     if (task_id_ != x.task_id_)
       return task_id_ < x.task_id_;
     return shard_id_ < x.shard_id_;
@@ -45,21 +47,21 @@ class ShardTask {
 public:
   ShardTask() {}
 
-  inline auto GetTaskId() const { return task_id_; }
-  inline auto GetShardId() const { return shard_id_; }
+  inline auto GetTaskID() const { return task_id_; }
+  inline auto GetShardID() const { return shard_id_; }
   inline auto &GetChildren() const { return children_; }
   inline auto GetResourceType() const { return resource_type_; }
   inline auto GetReq() const { return req_; }
-  inline auto GetDuration() const { return duration_; }
   inline auto GetMemory() const { return memory_; }
+  inline auto GetJobID() const { return job_id_; }
+  void SetJobID(int job_id) { job_id_ = job_id; }
 
   friend void from_json(const json &j, ShardTask &task) {
     j.at("taskid").get_to(task.task_id_);
     j.at("shardid").get_to(task.shard_id_);
-    j.at("resource").get_to(task.resource_type_);
+    j.at("resourcetype").get_to(task.resource_type_);
     j.at("request").get_to(task.req_);
     j.at("memory").get_to(task.memory_);
-    j.at("duration").get_to(task.duration_);
     auto pos = j.find("children");
     if (pos != j.end()) {
       pos->get_to(task.children_);
@@ -71,7 +73,6 @@ public:
     DLOG(INFO) << "shard_id : " << shard_id_;
     DLOG(INFO) << "resource : " << resource_type_;
     DLOG(INFO) << "request : " << req_;
-    DLOG(INFO) << "duration : " << duration_;
     DLOG(INFO) << "memory : " << memory_;
     DLOG(INFO) << "children : ";
     for (auto &child : children_) {
@@ -81,12 +82,12 @@ public:
 
 private:
   int task_id_ = -1;
+  int job_id_ = -1;
   int shard_id_;
   int resource_type_;
   double memory_;
   double req_;
-  double duration_;
-  std::vector<ShardTaskId> children_;
+  std::vector<ShardTaskID> children_;
 };
 
 } // namespace simulation

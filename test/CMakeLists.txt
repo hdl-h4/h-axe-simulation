@@ -17,7 +17,7 @@ find_package(GTest)
 
 if(GTEST_FOUND)
   enable_testing()
-  file(GLOB_RECURSE UNIT_TEST_SOURCE ${PROJECT_SOURCE_DIR}/src/*_unittest.cc ${PROJECT_SOURCE_DIR}/src/algorithm/*.cc) 
+  file(GLOB_RECURSE UNIT_TEST_SOURCE ${PROJECT_SOURCE_DIR}/src/*_unittest.cc ${PROJECT_SOURCE_DIR}/src/algorithm/*.cc ${PROJECT_SOURCE_DIR}/src/event/event.cc) 
   include_directories(${GTEST_INCLUDE_DIR})
   add_executable(${PROJECT_NAME}_unit_tests ${UNIT_TEST_SOURCE}  unittest_main.cc)
   set_property(TARGET ${PROJECT_NAME}_unit_tests PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD})

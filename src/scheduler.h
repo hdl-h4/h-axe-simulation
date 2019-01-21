@@ -14,6 +14,15 @@
 
 #pragma once
 
+#include <map>
+#include <memory>
+#include <queue>
+#include <string>
+#include <vector>
+
+#include "glog/logging.h"
+#include "nlohmann/json.hpp"
+
 #include "algorithm/algorithm_book.h"
 #include "event/event.h"
 #include "event/job_admission_event.h"
@@ -24,16 +33,7 @@
 #include "event_handler.h"
 #include "event_queue.h"
 #include "user.h"
-#include "worker.h"
-
-#include "glog/logging.h"
-#include "nlohmann/json.hpp"
-
-#include <map>
-#include <memory>
-#include <queue>
-#include <string>
-#include <vector>
+#include "worker/worker.h"
 
 namespace axe {
 namespace simulation {
@@ -63,53 +63,48 @@ public:
   }
 
   void RegisterHandlers() {
-    RegisterHandler(
-        NEW_JOB,
-        [&](std::shared_ptr<Event> event)
-            -> std::vector<std::shared_ptr<Event>> {
-          double time = event->GetTime();
-          std::vector<std::shared_ptr<Event>> event_vector;
-          std::shared_ptr<NewJobEvent> new_job_event =
-              std::static_pointer_cast<NewJobEvent>(event);
-          DLOG(INFO) << "job id: " << new_job_event->GetJob().GetJobId();
-          event_vector.push_back(std::make_shared<JobAdmissionEvent>(
-              JobAdmissionEvent(JOB_ADMISSION, time, 0,
-                                new_job_event->GetJob().GetJobId(),
-                                new_job_event->GetJob().GetJobId())));
+    RegisterHandler(NEW_JOB, [&](std::shared_ptr<Event> event)
+                                 -> std::vector<std::shared_ptr<Event>> {
+      double time = event->GetTime();
+      std::vector<std::shared_ptr<Event>> event_vector;
+      std::shared_ptr<NewJobEvent> new_job_event =
+          std::static_pointer_cast<NewJobEvent>(event);
+      DLOG(INFO) << "job id: " << new_job_event->GetJob().GetJobID();
+      event_vector.push_back(std::make_shared<JobAdmissionEvent>(
+          JobAdmissionEvent(JOB_ADMISSION, time, 0,
+                            new_job_event->GetJob().GetJobID(),
+                            new_job_event->GetJob().GetJobID())));
 
-          return event_vector;
-        });
+      return event_vector;
+    });
+    RegisterHandler(NEW_TASK_REQ, [&](std::shared_ptr<Event> event)
+                                      -> std::vector<std::shared_ptr<Event>> {
+      // Assign the task on workers
+      double time = event->GetTime();
+      std::vector<std::shared_ptr<Event>> event_vector;
+      std::shared_ptr<NewTaskReqEvent> new_task_req_event =
+          std::static_pointer_cast<NewTaskReqEvent>(event);
+      DLOG(INFO) << "job id: " << new_task_req_event->GetReq().GetJobID()
+                 << " subgraph id: "
+                 << new_task_req_event->GetReq().GetSubGraphID();
+      req_queue_.insert(
+          {new_task_req_event->GetTime(), new_task_req_event->GetReq()});
+      std::vector<std::pair<int, ResourceRequest>> decision_vector =
+          AssignReqToWorker();
+      for (const auto &decision : decision_vector) {
+        DLOG(INFO) << "decision: job id " << decision.second.GetJobID()
+                   << ", subgraph id " << decision.second.GetSubGraphID()
+                   << ", worker id " << decision.first;
+        event_vector.push_back(std::make_shared<PlacementDecisionEvent>(
+            PlacementDecisionEvent(PLACEMENT_DECISION, time, 0,
+                                   decision.second.GetJobID(), decision.first,
+                                   decision.second.GetSubGraphID())));
+      }
+      return event_vector;
+    });
     RegisterHandler(
-        NEW_TASK_REQ,
-        [&](std::shared_ptr<Event> event)
-            -> std::vector<std::shared_ptr<Event>> {
-          // Assign the task on workers
-          double time = event->GetTime();
-          std::vector<std::shared_ptr<Event>> event_vector;
-          std::shared_ptr<NewTaskReqEvent> new_task_req_event =
-              std::static_pointer_cast<NewTaskReqEvent>(event);
-          DLOG(INFO) << "job id: " << new_task_req_event->GetReq().GetJobID()
-                     << " subgraph id: "
-                     << new_task_req_event->GetReq().GetSubGraphID();
-          req_queue_.insert(
-              {new_task_req_event->GetTime(), new_task_req_event->GetReq()});
-          std::vector<std::pair<int, ResourceRequest>> decision_vector =
-              AssignReqToWorker();
-          for (const auto &decision : decision_vector) {
-            DLOG(INFO) << " decision: job id " << decision.second.GetJobID()
-                       << ", subgraph id " << decision.second.GetSubGraphID()
-                       << ", worker id " << decision.first;
-            event_vector.push_back(
-                std::make_shared<PlacementDecisionEvent>(PlacementDecisionEvent(
-                    PLACEMENT_DECISION, time, 0, decision.second.GetJobID(),
-                    decision.first, decision.second.GetSubGraphID())));
-          }
-          return event_vector;
-        });
-    RegisterHandler(
-        RESOURCE_AVAILABLE,
-        [&](std::shared_ptr<Event> event)
-            -> std::vector<std::shared_ptr<Event>> {
+        RESOURCE_AVAILABLE, [&](std::shared_ptr<Event> event)
+                                -> std::vector<std::shared_ptr<Event>> {
           double time = event->GetTime();
           std::vector<std::shared_ptr<Event>> event_vector;
           if (req_queue_.size() == 0)
@@ -127,20 +122,18 @@ public:
           }
           return event_vector;
         });
-    RegisterHandler(JOB_FINISH,
-                    [&](std::shared_ptr<Event> event)
-                        -> std::vector<std::shared_ptr<Event>> {
-                      std::vector<std::shared_ptr<Event>> event_vector;
-                      std::shared_ptr<JobFinishEvent> job_finish_event =
-                          std::static_pointer_cast<JobFinishEvent>(event);
-                      double sub_time = job_finish_event->GetSubmissionTime();
-                      double finish_time = job_finish_event->GetTime();
-                      double use_time = finish_time - sub_time;
-                      records_.push_back(Record{job_finish_event->GetJobId(),
-                                                sub_time, finish_time,
-                                                use_time});
-                      return event_vector;
-                    });
+    RegisterHandler(JOB_FINISH, [&](std::shared_ptr<Event> event)
+                                    -> std::vector<std::shared_ptr<Event>> {
+      std::vector<std::shared_ptr<Event>> event_vector;
+      std::shared_ptr<JobFinishEvent> job_finish_event =
+          std::static_pointer_cast<JobFinishEvent>(event);
+      double sub_time = job_finish_event->GetSubmissionTime();
+      double finish_time = job_finish_event->GetTime();
+      double use_time = finish_time - sub_time;
+      records_.push_back(Record{job_finish_event->GetJobID(), sub_time,
+                                finish_time, use_time});
+      return event_vector;
+    });
   }
 
   std::vector<std::pair<int, ResourceRequest>> AssignReqToWorker() {

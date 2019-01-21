@@ -78,7 +78,7 @@ endif()
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
 ### Executable
-add_executable(Simulation src/main.cc src/algorithm/algorithm_book.cc src/algorithm/task_placement.cc)
+add_executable(Simulation src/main.cc src/algorithm/algorithm_book.cc src/algorithm/task_placement.cc src/event/event.cc)
 if(TARGET json_ep)
   add_dependencies(Simulation json_ep)
 endif()

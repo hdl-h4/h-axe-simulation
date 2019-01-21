@@ -26,8 +26,8 @@ public:
       : Event(event_type, time, priority, event_principal),
         worker_id_(worker_id), subgraph_id_(subgraph_id) {}
 
-  inline auto GetWorkerId() const { return worker_id_; }
-  inline auto GetSubGraphId() const { return subgraph_id_; }
+  inline auto GetWorkerID() const { return worker_id_; }
+  inline auto GetSubGraphID() const { return subgraph_id_; }
 
 private:
   int worker_id_;

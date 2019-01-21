@@ -49,7 +49,8 @@ TETRIS(std::multimap<double, ResourceRequest> &req_queue,
   ResourceRequest req = (*req_queue.begin()).second;
   for (int i = 0; i < workers->size(); ++i) {
     if ((*workers)[i].TryToReserve(req.GetResource())) {
-      double product = (*workers)[i].ComputeDotProduct(req.GetResource());
+      double product =
+          (*workers)[i].GetAvailableResource().DotProduct(req.GetResource());
       if (product > max_product) {
         max_product = product;
         worker_id = i;
