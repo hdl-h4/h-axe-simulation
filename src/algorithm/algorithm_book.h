@@ -16,7 +16,7 @@
 
 #include "algorithm/task_placement.h"
 #include "resource/resource_request.h"
-#include "worker.h"
+#include "worker/worker.h"
 #include <functional>
 #include <map>
 #include <memory>

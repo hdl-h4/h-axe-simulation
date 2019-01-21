@@ -14,10 +14,10 @@
 
 #pragma once
 
+#include <vector>
+
 #include "job/shard_task.h"
 #include "resource/resource.h"
-
-#include <vector>
 
 namespace axe {
 namespace simulation {
@@ -32,10 +32,10 @@ public:
   }
 
   inline const auto &GetResourceReservation() { return resource_reservation_; }
-  inline const auto &GetJobsId() { return jobs_id_; }
+  inline const auto &GetJobsID() { return jobs_id_; }
   inline const auto &GetRecords() { return records_; }
 
-  void AddJobId(int job_id) { jobs_id_.push_back(job_id); }
+  void AddJobID(int job_id) { jobs_id_.push_back(job_id); }
 
   void PlacementDecision(double time, const ResourcePack &resource) {
     resource_reservation_.AddToMe(resource);

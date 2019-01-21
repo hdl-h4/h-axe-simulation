@@ -14,7 +14,6 @@
 
 #pragma once
 
-#include "event/event.h"
 #include <functional>
 #include <iostream>
 #include <map>
@@ -22,6 +21,8 @@
 #include <queue>
 #include <string>
 #include <vector>
+
+#include "event/event.h"
 
 namespace axe {
 namespace simulation {

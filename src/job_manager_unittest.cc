@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "algorithm/algorithm_book.h"
-#include "glog/logging.h"
-#include "job_manager.h"
-#include "resource/resource_request.h"
-#include "worker.h"
-#include "gtest/gtest.h"
 #include <fstream>
 #include <vector>
+
+#include "glog/logging.h"
+#include "gtest/gtest.h"
+
+#include "algorithm/algorithm_book.h"
+#include "job_manager.h"
+#include "resource/resource_request.h"
+#include "worker/worker.h"
 
 namespace axe {
 namespace simulation {
@@ -61,12 +63,12 @@ TEST_F(TestJobManager, JobAdmissionEvent) {
   int users_size = 0;
   for (const auto &job : jobs) {
     jms.push_back(std::make_shared<JobManager>(job, workers, users));
-    users_size = std::max(users_size, job.GetUserId() + 1);
+    users_size = std::max(users_size, job.GetUserID() + 1);
   }
 
   users->resize(users_size);
   for (const auto &job : jobs) {
-    users->at(job.GetUserId()).AddJobId(job.GetJobId());
+    users->at(job.GetUserID()).AddJobID(job.GetJobID());
   }
   for (auto &user : *users) {
     user.SetClusterResourceCapacity(cluster_resource_capacity);

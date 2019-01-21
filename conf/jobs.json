@@ -10,19 +10,17 @@
 				{
 				  "taskid" : 0,
           "shardid" : 0,
-          "resource" : 3,
+          "resourcetype" : 3,
           "request" : 3,
           "memory" : 2,
-          "duration" : 3,
           "children" : [{"childtaskid" : 2, "childshardid" : 0}]
 				},			
 				{
 				  "taskid" : 2,
           "shardid" : 0,
-          "resource" : 0,
+          "resourcetype" : 0,
           "request" : 3,
           "memory" : -2,
-          "duration" : 3,
           "children" : [{"childtaskid" : 4, "childshardid" : 0}, {"childtaskid" : 4, "childshardid" : 1}]
 				}			
 			]
@@ -32,19 +30,17 @@
 				{
 				  "taskid" : 0,
           "shardid" : 1,
-          "resource" : 3,
+          "resourcetype" : 3,
           "request" : 3,
           "memory" : 2,
-          "duration" : 3,
           "children" : [{"childtaskid" : 2, "childshardid" : 1}]
 				},
         {
 				  "taskid" : 2,
           "shardid" : 1,
-          "resource" : 0,
+          "resourcetype" : 0,
           "request" : 3,
           "memory" : -2,
-          "duration" : 3,
           "children" : [{"childtaskid" : 4, "childshardid" : 0}, {"childtaskid" : 4, "childshardid" : 1}]
         }
       ]      
@@ -54,19 +50,17 @@
 				{
 				  "taskid" : 1,
           "shardid" : 0,
-          "resource" : 3,
+          "resourcetype" : 3,
           "request" : 3,
           "memory" : 2,
-          "duration" : 3,
           "children" : [{"childtaskid" : 3, "childshardid" : 0}]
 				},
         {
 				  "taskid" : 3,
           "shardid" : 0,
-          "resource" : 0,
+          "resourcetype" : 0,
           "request" : 3,
           "memory" : -2,
-          "duration" : 3,
           "children" : [{"childtaskid" : 5, "childshardid" : 0}, {"childtaskid" : 5, "childshardid" : 1}]
         }
       ]      
@@ -76,19 +70,17 @@
 				{
 				  "taskid" : 1,
           "shardid" : 1,
-          "resource" : 3,
+          "resourcetype" : 3,
           "request" : 3,
           "memory" : 2,
-          "duration" : 3,
           "children" : [{"childtaskid" : 3, "childshardid" : 1}]
 				},
         {
 				  "taskid" : 3,
           "shardid" : 1,
-          "resource" : 0,
+          "resourcetype" : 0,
           "request" : 3,
           "memory" : -2,
-          "duration" : 3,
           "children" : [{"childtaskid" : 5, "childshardid" : 0}, {"childtaskid" : 5, "childshardid" : 1}]
         }
       ]      
@@ -98,28 +90,25 @@
 				{
 				  "taskid" : 4,
           "shardid" : 0,
-          "resource" : 2,
+          "resourcetype" : 2,
           "request" : 3,
           "memory" : 2,
-          "duration" : 3,
           "children" : [{"childtaskid" : 6, "childshardid" : 0}]
 				},
         {
 				  "taskid" : 5,
           "shardid" : 0,
-          "resource" : 2,
+          "resourcetype" : 2,
           "request" : 3,
           "memory" : 1,
-          "duration" : 3,
           "children" : [{"childtaskid" : 6, "childshardid" : 0}]
         },
         {
 				  "taskid" : 6,
           "shardid" : 0,
-          "resource" : 3,
+          "resourcetype" : 3,
           "request" : 5,
           "memory" : -3,
-          "duration" : 4,
           "children" : []
         }
       ]      
@@ -129,28 +118,25 @@
 				{
 				  "taskid" : 4,
           "shardid" : 1,
-          "resource" : 2,
+          "resourcetype" : 2,
           "request" : 3,
           "memory" : 2,
-          "duration" : 3,
           "children" : [{"childtaskid" : 6, "childshardid" : 1}]
 				},
         {
 				  "taskid" : 5,
           "shardid" : 1,
-          "resource" : 2,
+          "resourcetype" : 2,
           "request" : 3,
           "memory" : 1,
-          "duration" : 3,
           "children" : [{"childtaskid" : 6, "childshardid" : 1}]
         },
         {
 				  "taskid" : 6,
           "shardid" : 1,
-          "resource" : 3,
+          "resourcetype" : 3,
           "request" : 5,
           "memory" : -3,
-          "duration" : 4,
           "children" : []
         }
       ]      

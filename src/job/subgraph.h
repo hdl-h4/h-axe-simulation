@@ -17,6 +17,7 @@
 #include <queue>
 
 #include "glog/logging.h"
+
 #include "resource/resource.h"
 #include "shard_task.h"
 
@@ -121,10 +122,17 @@ public:
 
   inline const auto &GetShardTasks() const { return shard_tasks_; }
   inline const auto &GetResourcePack() const { return resource_pack_; }
-  inline auto GetWorkerId() const { return worker_id_; }
-  inline void SetWorkerId(int worker_id) { worker_id_ = worker_id; }
+  inline auto GetWorkerID() const { return worker_id_; }
+  inline void SetWorkerID(int worker_id) { worker_id_ = worker_id; }
   inline const auto &GetDataLocality() const { return data_locality_; }
   inline auto GetMemory() const { return memory_; }
+  inline auto GetJobID() const { return job_id_; }
+  void SetJobID(int job_id) {
+    job_id_ = job_id;
+    for (auto &task : shard_tasks_) {
+      task.SetJobID(job_id);
+    }
+  }
 
   friend void from_json(const json &j, SubGraph &sg) {
     j.at("shardtask").get_to(sg.shard_tasks_);
@@ -135,10 +143,10 @@ public:
   double GetMemoryCap() {
     int source = 0;
     int sink = shard_tasks_.size() + 1;
-    std::map<ShardTaskId, int> shard_task_id;
+    std::map<ShardTaskID, int> shard_task_id;
     for (int i = 0; i < shard_tasks_.size(); ++i) {
       const auto &st = shard_tasks_.at(i);
-      shard_task_id[ShardTaskId{st.GetTaskId(), st.GetShardId()}] = i + 1;
+      shard_task_id[ShardTaskID{st.GetTaskID(), st.GetShardID()}] = i + 1;
     }
 
     Dinic dinic;
@@ -146,7 +154,7 @@ public:
     int result = 0;
     // add edge : u -> v
     for (const auto &st : shard_tasks_) {
-      int u = shard_task_id[ShardTaskId{st.GetTaskId(), st.GetShardId()}];
+      int u = shard_task_id[ShardTaskID{st.GetTaskID(), st.GetShardID()}];
       if (st.GetMemory() > 0) {
         result += st.GetMemory();
         dinic.AddEdge(source, u, st.GetMemory());
@@ -186,6 +194,7 @@ public:
 
 private:
   int memory_;
+  int job_id_;
   ResourcePack resource_pack_;
   std::vector<ShardTask> shard_tasks_;
   std::vector<int> data_locality_;

@@ -14,11 +14,13 @@
 
 #pragma once
 
-#include "glog/logging.h"
-#include "nlohmann/json.hpp"
-#include "subgraph.h"
 #include <iostream>
 #include <vector>
+
+#include "glog/logging.h"
+#include "nlohmann/json.hpp"
+
+#include "subgraph.h"
 
 namespace axe {
 namespace simulation {
@@ -30,11 +32,11 @@ public:
   Job() = default;
 
   inline const auto &GetSubGraphs() const { return subgraphs_; }
-  inline int GetJobId() const { return job_id_; }
-  inline int GetUserId() const { return user_id_; }
+  inline int GetJobID() const { return job_id_; }
+  inline int GetUserID() const { return user_id_; }
   inline double GetSubmissionTime() const { return submission_time_; }
-  inline void SetWorkerId(int subgraph_id, int worker_id) {
-    subgraphs_.at(subgraph_id).SetWorkerId(worker_id);
+  inline void SetWorkerID(int subgraph_id, int worker_id) {
+    subgraphs_.at(subgraph_id).SetWorkerID(worker_id);
   }
 
   friend void from_json(const json &j, Job &job) {
@@ -44,6 +46,9 @@ public:
     auto pos = j.find("subgraph");
     if (pos != j.end()) {
       pos->get_to(job.subgraphs_);
+    }
+    for (auto &sg : job.subgraphs_) {
+      sg.SetJobID(job.job_id_);
     }
   }
 

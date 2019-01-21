@@ -14,9 +14,10 @@
 
 #pragma once
 
+#include <vector>
+
 #include "glog/logging.h"
 #include "nlohmann/json.hpp"
-#include <vector>
 
 namespace axe {
 namespace simulation {
@@ -110,10 +111,18 @@ public:
     resource_[kNetwork] -= rhs.GetNetwork();
   }
 
+  double DotProduct(const ResourcePack &rhs) {
+    double product = 0;
+    for (int i = 0; i < kNumResourceTypes; ++i) {
+      product += resource_[i] * rhs.GetResourceByIndex(i);
+    }
+    return product;
+  }
+
   bool FitIn(const ResourcePack &resource) {
     bool ret = true;
     for (int i = 0; i < kNumResourceTypes; ++i) {
-      ret = ret && (resource.GetResourceByIndex(i) < resource_[i]);
+      ret = ret && (resource.GetResourceByIndex(i) > resource_[i]);
     }
   }
 
@@ -121,9 +130,9 @@ public:
     bool ret = true;
     for (int i = 0; i < kNumResourceTypes; ++i) {
       if (i == kMemory)
-        ret = ret && (resource.GetResourceByIndex(i) < resource_[i]);
+        ret = ret && (resource.GetResourceByIndex(i) > resource_[i]);
       else
-        ret = ret && (resource.GetResourceByIndex(i) < resource_[i] * alpha);
+        ret = ret && (resource.GetResourceByIndex(i) > resource_[i] * alpha);
     }
   }
 

@@ -27,7 +27,7 @@ public:
       : Event(event_type, time, priority, event_principal), job_id_(job_id),
         submission_time_(submission_time) {}
 
-  inline int GetJobId() const { return job_id_; }
+  inline int GetJobID() const { return job_id_; }
   inline double GetSubmissionTime() const { return submission_time_; }
 
 private:

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "scheduler/scheduler_impl.h"
-
 #include "scheduler/simple_scheduler_impl.h"
 
 namespace axe {

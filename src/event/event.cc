@@ -12,35 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
-
-#include <memory>
-#include <vector>
-
-#include "event/event.h"
-#include "worker/worker.h"
+#include "event.h"
 
 namespace axe {
 namespace simulation {
 
-class EventHandler {
-public:
-  std::vector<std::shared_ptr<Event>> Handle(std::shared_ptr<Event> event) {
-    return handler_map_[event->GetEventType()](event);
-  }
-
-  void RegisterHandler(
-      int handler_id,
-      std::function<std::vector<std::shared_ptr<Event>>(std::shared_ptr<Event>)>
-          handler) {
-    handler_map_.insert({handler_id, handler});
-  }
-
-protected:
-  std::map<int, std::function<std::vector<std::shared_ptr<Event>>(
-                    std::shared_ptr<Event>)>>
-      handler_map_;
-};
+int Event::event_num = 0;
 
 } // namespace simulation
 } // namespace axe

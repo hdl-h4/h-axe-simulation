@@ -14,9 +14,10 @@
 
 #pragma once
 
+#include <cmath>
+#include <cstdint>
 #include <map>
 #include <memory>
-#include <stdint.h>
 
 namespace axe {
 namespace simulation {
@@ -44,25 +45,24 @@ class Event {
 public:
   Event(int event_type, double time, int priority, int event_principal)
       : event_type_(event_type), time_(time), priority_(priority),
-        event_principal_(event_principal) {}
+        event_principal_(event_principal), event_id_(event_num++) {}
   virtual ~Event(){};
+
+  const double eps = 1e-6;
 
   inline int GetEventType() const { return event_type_; }
   inline int GetEventPrincipal() const { return event_principal_; }
+  inline int GetEventID() const { return event_id_; }
   inline double GetTime() const { return time_; }
   inline int GetPriority() const { return priority_; }
   void SetTime(double time) { time_ = time; }
 
   bool operator<(const Event &rhs) const {
-    if (time_ < rhs.GetTime())
-      return true;
-    else if (time_ > rhs.GetTime())
-      return false;
+    if (std::fabs(time_ - rhs.GetTime()) > eps)
+      return time_ < rhs.GetTime();
     else {
-      if (event_type_ < rhs.GetEventType())
-        return true;
-      else if (event_type_ > rhs.GetEventType())
-        return false;
+      if (event_type_ != rhs.GetEventType())
+        return event_type_ < rhs.GetEventType();
       else
         return priority_ < rhs.GetPriority();
     }
@@ -73,6 +73,8 @@ private:
   int event_principal_;
   double time_;
   int priority_;
+  int event_id_;
+  static int event_num;
 };
 
 } // namespace simulation
