@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "algorithm/algorithm_book.h"
-#include "glog/logging.h"
-#include "resource/resource_request.h"
-#include "scheduler.h"
-#include "worker.h"
-#include "gtest/gtest.h"
 #include <vector>
+
+#include "glog/logging.h"
+#include "gtest/gtest.h"
+
+#include "algorithm/algorithm_book.h"
+#include "resource/resource_request.h"
+#include "scheduler/scheduler.h"
+#include "worker.h"
 
 namespace axe {
 namespace simulation {
