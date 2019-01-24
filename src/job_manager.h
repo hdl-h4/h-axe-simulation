@@ -48,22 +48,19 @@ public:
   }
 
   void RegisterHandlers() {
+    RegisterHandler(JOB_ADMISSION, [&](std::shared_ptr<Event> event)
+                                       -> std::vector<std::shared_ptr<Event>> {
+      std::vector<std::shared_ptr<Event>> event_vector;
+      double time = event->GetTime();
+      for (const auto &req : GenerateResourceRequest(JOB_ADMISSION)) {
+        event_vector.push_back(std::make_shared<NewTaskReqEvent>(
+            NewTaskReqEvent(NEW_TASK_REQ, time, 0, SCHEDULER, req)));
+      }
+      return event_vector;
+    });
     RegisterHandler(
-        JOB_ADMISSION,
-        [&](std::shared_ptr<Event> event)
-            -> std::vector<std::shared_ptr<Event>> {
-          std::vector<std::shared_ptr<Event>> event_vector;
-          double time = event->GetTime();
-          for (const auto &req : GenerateResourceRequest(JOB_ADMISSION)) {
-            event_vector.push_back(std::make_shared<NewTaskReqEvent>(
-                NewTaskReqEvent(NEW_TASK_REQ, time, 0, SCHEDULER, req)));
-          }
-          return event_vector;
-        });
-    RegisterHandler(
-        PLACEMENT_DECISION,
-        [&](std::shared_ptr<Event> event)
-            -> std::vector<std::shared_ptr<Event>> {
+        PLACEMENT_DECISION, [&](std::shared_ptr<Event> event)
+                                -> std::vector<std::shared_ptr<Event>> {
           std::vector<std::shared_ptr<Event>> event_vector;
           double time = event->GetTime();
           std::shared_ptr<PlacementDecisionEvent> decision =
@@ -93,82 +90,79 @@ public:
           return event_vector;
         });
 
-    RegisterHandler(
-        TASK_FINISH,
-        [&](std::shared_ptr<Event> event)
-            -> std::vector<std::shared_ptr<Event>> {
-          std::vector<std::shared_ptr<Event>> event_vector;
+    RegisterHandler(TASK_FINISH, [&](std::shared_ptr<Event> event)
+                                     -> std::vector<std::shared_ptr<Event>> {
+      std::vector<std::shared_ptr<Event>> event_vector;
 
-          double time = event->GetTime();
-          std::shared_ptr<TaskFinishEvent> task_finish_event =
-              std::static_pointer_cast<TaskFinishEvent>(event);
-          auto &finish_task = task_finish_event->GetShardTask();
-          auto subgraph_id = shard_task_to_subgraph_[ShardTaskId{
-              finish_task.GetTaskId(), finish_task.GetShardId()}];
-          auto &sg = job_.GetSubGraphs().at(subgraph_id);
+      double time = event->GetTime();
+      std::shared_ptr<TaskFinishEvent> task_finish_event =
+          std::static_pointer_cast<TaskFinishEvent>(event);
+      auto &finish_task = task_finish_event->GetShardTask();
+      auto subgraph_id = shard_task_to_subgraph_[ShardTaskId{
+          finish_task.GetTaskId(), finish_task.GetShardId()}];
+      auto &sg = job_.GetSubGraphs().at(subgraph_id);
 
-          DLOG(INFO) << "TASK FINISH : subgraph id = " << subgraph_id
-                     << ", task id = " << finish_task.GetTaskId()
-                     << ", shard id = " << finish_task.GetShardId();
-          // task finish update resource
-          auto new_tasks =
-              workers_->at(sg.GetWorkerId()).TaskFinish(time, finish_task);
-          users_->at(job_.GetUserId()).TaskFinish(time, finish_task);
+      DLOG(INFO) << "TASK FINISH : subgraph id = " << subgraph_id
+                 << ", task id = " << finish_task.GetTaskId()
+                 << ", shard id = " << finish_task.GetShardId();
+      // task finish update resource
+      auto new_tasks =
+          workers_->at(sg.GetWorkerId()).TaskFinish(time, finish_task);
+      users_->at(job_.GetUserId()).TaskFinish(time, finish_task);
 
-          for (auto &t : new_tasks) {
-            event_vector.push_back(std::make_shared<TaskFinishEvent>(
-                TaskFinishEvent(TASK_FINISH, time + t.GetDuration(), 0,
-                                job_.GetJobId(), t)));
-          }
+      for (auto &t : new_tasks) {
+        event_vector.push_back(
+            std::make_shared<TaskFinishEvent>(TaskFinishEvent(
+                TASK_FINISH, time + t.GetDuration(), 0, job_.GetJobId(), t)));
+      }
 
-          subgraph_finished_task_[subgraph_id]++;
-          // subgraph finish update memory
-          if (sg.GetShardTasks().size() ==
-              subgraph_finished_task_[subgraph_id]) {
-            workers_->at(sg.GetWorkerId()).SubGraphFinish(time, sg.GetMemory());
-            users_->at(job_.GetUserId()).SubGraphFinish(time, sg.GetMemory());
-            finish_subgraph_num_++;
-            if (finish_subgraph_num_ == job_.GetSubGraphs().size()) {
-              event_vector.push_back(std::make_shared<JobFinishEvent>(
-                  JOB_FINISH, time, 0, SCHEDULER, job_.GetJobId(),
-                  job_.GetSubmissionTime()));
+      subgraph_finished_task_[subgraph_id]++;
+      // subgraph finish update memory
+      if (sg.GetShardTasks().size() == subgraph_finished_task_[subgraph_id]) {
+        workers_->at(sg.GetWorkerId()).SubGraphFinish(time, sg.GetMemory());
+        users_->at(job_.GetUserId()).SubGraphFinish(time, sg.GetMemory());
+        finish_subgraph_num_++;
+        if (finish_subgraph_num_ == job_.GetSubGraphs().size()) {
+          event_vector.push_back(std::make_shared<JobFinishEvent>(
+              JOB_FINISH, time, 0, SCHEDULER, job_.GetJobId(),
+              job_.GetSubmissionTime()));
+        }
+      }
+
+      for (auto &child : finish_task.GetChildren()) {
+        dep_finish_counter_[child]++;
+        if (dep_finish_counter_[child] == dep_counter_[child]) {
+          if (job_.GetSubGraphs()
+                  .at(shard_task_to_subgraph_[child])
+                  .GetWorkerId() == -1) {
+            for (const auto &req :
+                 GenerateResourceRequest(TASK_FINISH, child)) {
+              event_vector.push_back(std::make_shared<NewTaskReqEvent>(
+                  NewTaskReqEvent(NEW_TASK_REQ, time, 0, SCHEDULER, req)));
+            }
+          } else {
+            ShardTask task = id_to_shard_task_[child];
+            bool success = workers_
+                               ->at(job_.GetSubGraphs()
+                                        .at(shard_task_to_subgraph_[child])
+                                        .GetWorkerId())
+                               .PlaceNewTask(time, task);
+            if (success) {
+              DLOG(INFO) << "subgraph id " << shard_task_to_subgraph_[child]
+                         << '\n';
+              event_vector.push_back(std::make_shared<TaskFinishEvent>(
+                  TaskFinishEvent(TASK_FINISH, time + task.GetDuration(), 0,
+                                  job_.GetJobId(), task)));
             }
           }
+        }
+      }
 
-          for (auto &child : finish_task.GetChildren()) {
-            dep_finish_counter_[child]++;
-            if (dep_finish_counter_[child] == dep_counter_[child]) {
-              if (job_.GetSubGraphs()
-                      .at(shard_task_to_subgraph_[child])
-                      .GetWorkerId() == -1) {
-                for (const auto &req :
-                     GenerateResourceRequest(TASK_FINISH, child)) {
-                  event_vector.push_back(std::make_shared<NewTaskReqEvent>(
-                      NewTaskReqEvent(NEW_TASK_REQ, time, 0, SCHEDULER, req)));
-                }
-              } else {
-                ShardTask task = id_to_shard_task_[child];
-                bool success = workers_
-                                   ->at(job_.GetSubGraphs()
-                                            .at(shard_task_to_subgraph_[child])
-                                            .GetWorkerId())
-                                   .PlaceNewTask(time, task);
-                if (success) {
-                  DLOG(INFO) << "subgraph id " << shard_task_to_subgraph_[child]
-                             << '\n';
-                  event_vector.push_back(std::make_shared<TaskFinishEvent>(
-                      TaskFinishEvent(TASK_FINISH, time + task.GetDuration(), 0,
-                                      job_.GetJobId(), task)));
-                }
-              }
-            }
-          }
-
-          // create resource available event
-          event_vector.push_back(std::make_shared<ResourceAvailableEvent>(
-              RESOURCE_AVAILABLE, time, 0, SCHEDULER));
-          return event_vector;
-        });
+      // create resource available event
+      event_vector.push_back(std::make_shared<ResourceAvailableEvent>(
+          RESOURCE_AVAILABLE, time, 0, SCHEDULER));
+      return event_vector;
+    });
   }
 
   std::vector<ResourceRequest>

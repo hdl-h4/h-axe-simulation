@@ -18,7 +18,7 @@
 #include "glog/logging.h"
 #include "job/job.h"
 #include "job_manager.h"
-#include "scheduler.h"
+#include "scheduler/scheduler.h"
 #include "user.h"
 #include "worker.h"
 

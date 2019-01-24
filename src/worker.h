@@ -111,8 +111,9 @@ public:
       IncreaseSingleResourceUsage(task.GetMemory(), kMemory);
     }
     if (task.GetResourceType() == kCPU) {
-      if (cpu_queue_.size() == 0 && resource_usage_.GetCPU() + task.GetReq() <
-                                        resource_capacity_.GetCPU()) {
+      if (cpu_queue_.size() == 0 &&
+          resource_usage_.GetCPU() + task.GetReq() <
+              resource_capacity_.GetCPU()) {
         IncreaseSingleResourceUsage(task.GetReq(), kCPU);
         records_.push_back(GenerateUtilizationRecord(time));
         return true;
@@ -132,8 +133,9 @@ public:
         return false;
       }
     } else {
-      if (disk_queue_.size() == 0 && resource_usage_.GetDisk() + task.GetReq() <
-                                         resource_capacity_.GetDisk()) {
+      if (disk_queue_.size() == 0 &&
+          resource_usage_.GetDisk() + task.GetReq() <
+              resource_capacity_.GetDisk()) {
         IncreaseSingleResourceUsage(task.GetReq(), kDisk);
         records_.push_back(GenerateUtilizationRecord(time));
         return true;
