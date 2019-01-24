@@ -1,0 +1,52 @@
+box: ubuntu:17.10
+build:
+  steps:
+    - script:
+        name: dependency
+        code: |
+          apt-get update -y
+          apt-get install wget build-essential libgflags-dev libgoogle-glog-dev libzmq3-dev libxml2-dev libprotobuf-dev libkrb5-dev uuid-dev libgsasl7-dev protobuf-compiler cmake git clang-format-3.9 -y
+          mkdir tmp
+          cd tmp
+
+          # gtest
+          wget https://github.com/google/googletest/archive/release-1.8.0.tar.gz
+          tar -xf release-1.8.0.tar.gz
+          cd googletest-release-1.8.0
+          mkdir build
+          cd build
+          cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_GTEST=1 -DBUILD_GMOCK=0 ..
+          make -j8
+          make install
+          cd ../..
+
+          # cppzmq
+          git clone https://github.com/zeromq/cppzmq
+          cp cppzmq/zmq.hpp /usr/local/include
+
+          # libhdfs3
+          git clone https://github.com/wangzw/libhdfs3
+          cd libhdfs3
+          sed -i s/dumpversion/dumpfullversion/ CMake/Platform.cmake # Workaround
+          mkdir build
+          cd build
+          ../bootstrap --prefix=/usr/local/
+          make -j8
+          make install
+          cd ../../..
+          
+          rm -rf tmp
+    - script:
+        name: clang-format
+        code: |
+          export AXE_BASE_ROOT=.
+          export CLANG_FORMAT=clang-format-3.9
+          ./scripts/clang-format.py -o check
+    - script:
+        name: axe-simulation
+        code: |
+          mkdir release
+          cd release
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make -j4
+          make test
