@@ -77,12 +77,22 @@ endif()
 ### Source
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
+FILE(GLOB simulation-sources
+  src/algorithm/algorithm_book.cc
+  src/algorithm/task_placement.cc
+  src/scheduler/scheduler_impl.cc
+)
+
+add_library(simulation-obj OBJECT ${simulation-sources})
+set_property(TARGET simulation-obj PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD})
+
 ### Executable
-add_executable(Simulation src/main.cc src/algorithm/algorithm_book.cc src/algorithm/task_placement.cc)
+add_executable(Simulation src/main.cc)
+
 if(TARGET json_ep)
   add_dependencies(Simulation json_ep)
 endif()
-target_link_libraries(Simulation ${glog_LIBRARY} ${gflags_LIBRARIES})
+target_link_libraries(Simulation $<TARGET_OBJECTS:simulation-obj> ${glog_LIBRARY} ${gflags_LIBRARIES})
 set_property(TARGET Simulation PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD})
 set_property(TARGET Simulation PROPERTY RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 

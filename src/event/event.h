@@ -45,6 +45,7 @@ public:
   Event(int event_type, double time, int priority, int event_principal)
       : event_type_(event_type), time_(time), priority_(priority),
         event_principal_(event_principal) {}
+  virtual ~Event(){};
 
   inline int GetEventType() const { return event_type_; }
   inline int GetEventPrincipal() const { return event_principal_; }
