@@ -81,6 +81,7 @@ FILE(GLOB simulation-sources
   src/algorithm/algorithm_book.cc
   src/algorithm/task_placement.cc
   src/scheduler/scheduler_impl.cc
+  src/event/event.cc
 )
 
 add_library(simulation-obj OBJECT ${simulation-sources})

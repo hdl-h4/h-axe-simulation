@@ -20,7 +20,7 @@
 #include "algorithm/algorithm_book.h"
 #include "resource/resource_request.h"
 #include "scheduler/scheduler.h"
-#include "worker.h"
+#include "worker/worker.h"
 
 namespace axe {
 namespace simulation {
@@ -72,8 +72,8 @@ TEST_F(TestScheduler, NewTaskReqEvent) {
   EXPECT_DOUBLE_EQ(event->GetTime(), 10);
   EXPECT_EQ(event->GetPriority(), 0);
   EXPECT_EQ(event->GetEventPrincipal(), 5);
-  EXPECT_EQ(event->GetWorkerId(), 0);
-  EXPECT_EQ(event->GetSubGraphId(), 6);
+  EXPECT_EQ(event->GetWorkerID(), 0);
+  EXPECT_EQ(event->GetSubGraphID(), 6);
 }
 */
 

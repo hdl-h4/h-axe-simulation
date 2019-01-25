@@ -14,6 +14,12 @@
 
 #pragma once
 
+#include <map>
+#include <memory>
+#include <queue>
+#include <string>
+#include <vector>
+
 #include "algorithm/algorithm_book.h"
 #include "event/event.h"
 #include "event/job_admission_event.h"
@@ -24,13 +30,7 @@
 #include "event_handler.h"
 #include "event_queue.h"
 #include "user.h"
-#include "worker.h"
-
-#include <map>
-#include <memory>
-#include <queue>
-#include <string>
-#include <vector>
+#include "worker/worker.h"
 
 namespace axe {
 namespace simulation {

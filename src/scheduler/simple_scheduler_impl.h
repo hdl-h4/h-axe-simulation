@@ -31,7 +31,7 @@
 #include "event_queue.h"
 #include "scheduler/scheduler_impl.h"
 #include "user.h"
-#include "worker.h"
+#include "worker/worker.h"
 
 namespace axe {
 namespace simulation {
@@ -46,11 +46,11 @@ public:
     double time = event->GetTime();
     std::vector<std::shared_ptr<Event>> event_vector;
     auto new_job_event = std::static_pointer_cast<NewJobEvent>(event);
-    DLOG(INFO) << "job id: " << new_job_event->GetJob().GetJobId();
+    DLOG(INFO) << "job id: " << new_job_event->GetJob().GetJobID();
     event_vector.push_back(std::make_shared<JobAdmissionEvent>(
         JobAdmissionEvent(JOB_ADMISSION, time, 0,
-                          new_job_event->GetJob().GetJobId(),
-                          new_job_event->GetJob().GetJobId())));
+                          new_job_event->GetJob().GetJobID(),
+                          new_job_event->GetJob().GetJobID())));
 
     return event_vector;
   }
@@ -106,7 +106,7 @@ public:
     double finish_time = job_finish_event->GetTime();
     double use_time = finish_time - sub_time;
     records_.push_back(
-        Record{job_finish_event->GetJobId(), sub_time, finish_time, use_time});
+        Record{job_finish_event->GetJobID(), sub_time, finish_time, use_time});
     return event_vector;
   }
 

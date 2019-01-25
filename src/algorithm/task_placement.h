@@ -15,7 +15,7 @@
 #pragma once
 
 #include "resource/resource_request.h"
-#include "worker.h"
+#include "worker/worker.h"
 #include <map>
 #include <queue>
 #include <vector>
