@@ -2,10 +2,10 @@
   "worker" : [
     {
       "id" : 0,
-      "cpu" : 10,
-      "memory" : 15,
-      "disk" : 10,
-      "network" : 10 
+      "cpu" : 50,
+      "memory" : 50,
+      "disk" : 50,
+      "network" : 50 
     }
   ]
 }

@@ -62,8 +62,9 @@ public:
       ShardTask task = network_queue_.at(0);
       double duration = ComputeNewTaskDuration(task);
       std::shared_ptr<TaskFinishEvent> task_finish_event =
-          std::make_shared<TaskFinishEvent>(TaskFinishEvent(
-              TASK_FINISH, time + duration, 0, task.GetJobID(), task));
+          std::make_shared<TaskFinishEvent>(
+              TaskFinishEvent(EventType::TASK_FINISH, time + duration, 0,
+                              task.GetJobID(), task));
       event_vector.push_back(task_finish_event);
       AddRunningTaskRecord(time, task_finish_event->GetEventID(), task);
       network_queue_.erase(network_queue_.begin());
@@ -86,8 +87,9 @@ public:
       IncreaseNetworkUsage(network_slot_);
       double duration = ComputeNewTaskDuration(task);
       std::shared_ptr<TaskFinishEvent> task_finish_event =
-          std::make_shared<TaskFinishEvent>(TaskFinishEvent(
-              TASK_FINISH, time + duration, 0, task.GetJobID(), task));
+          std::make_shared<TaskFinishEvent>(
+              TaskFinishEvent(EventType::TASK_FINISH, time + duration, 0,
+                              task.GetJobID(), task));
       event_vector.push_back(task_finish_event);
       std::vector<std::shared_ptr<Event>> update_event_vector =
           AddRunningTaskRecord(time, task_finish_event->GetEventID(), task);
@@ -157,7 +159,7 @@ private:
       invalid_event_id_set_->insert(record.event_id);
       std::shared_ptr<TaskFinishEvent> new_task_finish_event =
           std::make_shared<TaskFinishEvent>(TaskFinishEvent(
-              TASK_FINISH,
+              EventType::TASK_FINISH,
               time + record.last_check_data_size / record.last_check_bandwidth,
               0, record.shard_task.GetJobID(), record.shard_task));
       record.event_id = new_task_finish_event->GetEventID();

@@ -22,7 +22,7 @@ namespace simulation {
 
 class TaskFinishEvent : public Event {
 public:
-  TaskFinishEvent(int event_type, double time, int priority,
+  TaskFinishEvent(EventType event_type, double time, int priority,
                   int event_principal, const ShardTask &shard_task)
       : Event(event_type, time, priority, event_principal),
         shard_task_(shard_task) {}

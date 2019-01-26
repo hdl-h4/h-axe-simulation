@@ -22,7 +22,7 @@ namespace simulation {
 
 class NewTaskReqEvent : public Event {
 public:
-  NewTaskReqEvent(int event_type, double time, int priority,
+  NewTaskReqEvent(EventType event_type, double time, int priority,
                   int event_principal, const ResourceRequest &req)
       : Event(event_type, time, priority, event_principal), req_(req) {}
 

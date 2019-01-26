@@ -76,15 +76,16 @@ TEST_F(TestJobManager, JobAdmissionEvent) {
 
   EXPECT_EQ(jms.size(), 1);
   std::shared_ptr<JobAdmissionEvent> job_admission_event =
-      std::make_shared<JobAdmissionEvent>(JOB_ADMISSION, 10, 0, 0, 0);
+      std::make_shared<JobAdmissionEvent>(EventType::JOB_ADMISSION, 10, 0, 0,
+                                          0);
   std::vector<std::shared_ptr<Event>> ret_vector =
       jms[0]->Handle(job_admission_event);
   EXPECT_EQ(ret_vector.size(), 4);
   for (auto event : ret_vector) {
-    EXPECT_EQ(event->GetEventType(), NEW_TASK_REQ);
+    EXPECT_EQ(event->GetEventType(), EventType::NEW_TASK_REQ);
     EXPECT_EQ(event->GetTime(), 10);
     EXPECT_EQ(event->GetPriority(), 0);
-    EXPECT_EQ(event->GetEventPrincipal(), SCHEDULER);
+    EXPECT_EQ(event->GetEventPrincipal(), kScheduler);
   }
 }
 

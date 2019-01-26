@@ -50,7 +50,7 @@ public:
   inline auto GetTaskID() const { return task_id_; }
   inline auto GetShardID() const { return shard_id_; }
   inline auto &GetChildren() const { return children_; }
-  inline auto GetResourceType() const { return resource_type_; }
+  inline ResourceType GetResourceType() const { return resource_type_; }
   inline auto GetReq() const { return req_; }
   inline auto GetMemory() const { return memory_; }
   inline auto GetJobID() const { return job_id_; }
@@ -71,7 +71,7 @@ public:
   void Print() {
     DLOG(INFO) << "task_id : " << task_id_;
     DLOG(INFO) << "shard_id : " << shard_id_;
-    DLOG(INFO) << "resource : " << resource_type_;
+    DLOG(INFO) << "resource : " << static_cast<int>(resource_type_);
     DLOG(INFO) << "request : " << req_;
     DLOG(INFO) << "memory : " << memory_;
     DLOG(INFO) << "children : ";
@@ -84,7 +84,7 @@ private:
   int task_id_ = -1;
   int job_id_ = -1;
   int shard_id_;
-  int resource_type_;
+  ResourceType resource_type_;
   double memory_;
   double req_;
   std::vector<ShardTaskID> children_;

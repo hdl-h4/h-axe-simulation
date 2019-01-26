@@ -30,15 +30,15 @@ public:
   }
 
   void RegisterHandler(
-      int handler_id,
+      EventType handler_id,
       std::function<std::vector<std::shared_ptr<Event>>(std::shared_ptr<Event>)>
           handler) {
     handler_map_.insert({handler_id, handler});
   }
 
 protected:
-  std::map<int, std::function<std::vector<std::shared_ptr<Event>>(
-                    std::shared_ptr<Event>)>>
+  std::map<EventType, std::function<std::vector<std::shared_ptr<Event>>(
+                          std::shared_ptr<Event>)>>
       handler_map_;
 };
 

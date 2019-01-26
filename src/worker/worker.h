@@ -42,10 +42,12 @@ public:
 
   Worker(double cpu, double memory, double disk, double network) {
     // CHECK(false) << "don't support this worker constructor now";
-    resource_capacity_ = std::make_shared<ResourcePack>(cpu, memory, disk, network);
+    resource_capacity_ =
+        std::make_shared<ResourcePack>(cpu, memory, disk, network);
     resource_usage_ = std::make_shared<ResourcePack>();
     resource_reservation_ = std::make_shared<ResourcePack>();
-    resource_maximum_reservation_ = std::make_shared<ResourcePack>(20, resource_capacity_->GetMemory(), 20, 20);
+    resource_maximum_reservation_ = std::make_shared<ResourcePack>(
+        20, resource_capacity_->GetMemory(), 20, 20);
   }
 
   void Init(std::shared_ptr<std::set<int>> invalid_event_id_set) {
@@ -89,11 +91,11 @@ public:
   std::vector<std::shared_ptr<Event>> PlaceNewTask(double time,
                                                    const ShardTask &task) {
     std::vector<std::shared_ptr<Event>> event_vector;
-    if (task.GetResourceType() == kCPU) {
+    if (task.GetResourceType() == ResourceType::kCPU) {
       event_vector = worker_cpu_.PlaceNewTask(time, task);
-    } else if (task.GetResourceType() == kDisk) {
+    } else if (task.GetResourceType() == ResourceType::kDisk) {
       event_vector = worker_disk_.PlaceNewTask(time, task);
-    } else if (task.GetResourceType() == kNetwork) {
+    } else if (task.GetResourceType() == ResourceType::kNetwork) {
       event_vector = worker_network_.PlaceNewTask(time, task);
     } else {
       CHECK(false) << "invalid resource type";
@@ -106,11 +108,11 @@ public:
   std::vector<std::shared_ptr<Event>> TaskFinish(double time, int event_id,
                                                  const ShardTask &task) {
     std::vector<std::shared_ptr<Event>> event_vector;
-    if (task.GetResourceType() == kCPU) {
+    if (task.GetResourceType() == ResourceType::kCPU) {
       event_vector = worker_cpu_.TaskFinish(time, event_id, task);
-    } else if (task.GetResourceType() == kDisk) {
+    } else if (task.GetResourceType() == ResourceType::kDisk) {
       event_vector = worker_disk_.TaskFinish(time, event_id, task);
-    } else if (task.GetResourceType() == kNetwork) {
+    } else if (task.GetResourceType() == ResourceType::kNetwork) {
       event_vector = worker_network_.TaskFinish(time, event_id, task);
     } else {
       CHECK(false) << "invalid resource type";
