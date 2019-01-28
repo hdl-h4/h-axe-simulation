@@ -38,8 +38,13 @@ protected:
 TEST_F(TestScheduler, NewJobEvent) {
   std::shared_ptr<std::vector<Worker>> workers =
       std::make_shared<std::vector<Worker>>();
-  workers->push_back(Worker(5, 5, 5, 5));
-  workers->push_back(Worker(5, 5, 5, 5));
+  auto invalid_event_id_set = std::make_shared<std::set<int>>();
+  Worker w1(10, 10, 10, 10);
+  w1.Init(invalid_event_id_set);
+  Worker w2(10, 10, 10, 10);
+  w2.Init(invalid_event_id_set);
+  workers->push_back(w1);
+  workers->push_back(w2);
   std::shared_ptr<NewJobEvent> new_job_event =
       std::make_shared<NewJobEvent>(NEW_JOB, 10, 0, 0, Job());
   Scheduler scheduler(workers, std::shared_ptr<std::vector<User>>());
