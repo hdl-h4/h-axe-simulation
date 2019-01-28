@@ -111,7 +111,8 @@ public:
 
           DLOG(INFO) << "TASK FINISH : subgraph id = " << subgraph_id
                      << ", task id = " << finish_task.GetTaskID()
-                     << ", shard id = " << finish_task.GetShardID();
+                     << ", shard id = " << finish_task.GetShardID()
+                     << ", worker id = " << sg.GetWorkerID();
 
           // task finish update resource
 
@@ -190,6 +191,7 @@ public:
       }
     } else {
       int id = shard_task_to_subgraph_[shard_task];
+      DLOG(INFO) << "subgraph id : " << id;
       if (subgraph_to_req_[id] == 1) {
         return req_vector;
       }

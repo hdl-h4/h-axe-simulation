@@ -28,16 +28,18 @@ std::vector<std::pair<int, ResourceRequest>>
 FIFO(std::multimap<double, ResourceRequest> &req_queue,
      std::shared_ptr<std::vector<Worker>> workers) {
   DLOG(INFO) << "task placement: FIFO and Round Robin";
+  std::vector<std::pair<int, ResourceRequest>> placement_decision_;
   static int worker_id = -1;
-  worker_id = (worker_id + 1) % (*workers).size();
   ResourceRequest req = (*req_queue.begin()).second;
+  worker_id = (worker_id + 1) % (*workers).size();
 
-  if ((*workers)[worker_id].Reserve(req.GetResource())) {
+  while ((*workers)[worker_id].Reserve(req.GetResource())) {
     req_queue.erase(req_queue.begin());
-    return {{worker_id, req}};
-  } else {
-    return {};
+    placement_decision_.push_back({worker_id, req});
+    worker_id = (worker_id + 1) % (*workers).size();
+    req = (*req_queue.begin()).second;
   }
+  return placement_decision_;
 }
 
 std::vector<std::pair<int, ResourceRequest>>
