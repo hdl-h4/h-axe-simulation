@@ -47,7 +47,7 @@ public:
     resource_usage_ = std::make_shared<ResourcePack>();
     resource_reservation_ = std::make_shared<ResourcePack>();
     resource_maximum_reservation_ = std::make_shared<ResourcePack>(
-        20, resource_capacity_->GetMemory(), 20, 20);
+        30, resource_capacity_->GetMemory(), 2000, 2000);
   }
 
   void Init(std::shared_ptr<std::set<int>> invalid_event_id_set) {
@@ -69,7 +69,7 @@ public:
     j.get_to(*(worker.resource_capacity_));
     worker.records_.push_back(worker.GenerateUtilizationRecord(0));
     *(worker.resource_maximum_reservation_) = {
-        20, worker.resource_capacity_->GetMemory(), 20, 20};
+        30, worker.resource_capacity_->GetMemory(), 2000, 2000};
   }
 
   inline auto GetRemainResourcePack() const {

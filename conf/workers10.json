@@ -1,0 +1,74 @@
+{
+  "worker" : [
+    {
+      "id" : 0,
+      "cpu" : 20,
+      "memory" : 40,
+      "disk" : 200,
+      "network" : 200 
+    },
+    {
+      "id" : 1,
+      "cpu" : 20,
+      "memory" : 40,
+      "disk" : 200,
+      "network" : 200 
+    },
+    {
+      "id" : 2,
+      "cpu" : 20,
+      "memory" : 40,
+      "disk" : 200,
+      "network" : 200 
+    },
+    {
+      "id" : 3,
+      "cpu" : 20,
+      "memory" : 40,
+      "disk" : 200,
+      "network" : 200 
+    },
+    {
+      "id" : 4,
+      "cpu" : 20,
+      "memory" : 40,
+      "disk" : 200,
+      "network" : 200  
+    },
+    {
+      "id" : 5,
+      "cpu" : 20,
+      "memory" : 40,
+      "disk" : 200,
+      "network" : 200 
+    },
+    {
+      "id" : 6,
+      "cpu" : 20,
+      "memory" : 40,
+      "disk" : 200,
+      "network" : 200 
+    },
+    {
+      "id" : 7,
+      "cpu" : 20,
+      "memory" : 40,
+      "disk" : 200,
+      "network" : 200 
+    },
+    {
+      "id" : 8,
+      "cpu" : 20,
+      "memory" : 40,
+      "disk" : 200,
+      "network" : 200 
+    },
+    {
+      "id" : 9,
+      "cpu" : 20,
+      "memory" : 40,
+      "disk" : 200,
+      "network" : 200 
+    }
+  ]
+}

@@ -37,6 +37,7 @@ struct cmp {
 class EventQueue {
 public:
   std::shared_ptr<Event> Top() const { return pq_.top(); }
+  const auto Size() { return pq_.size(); }
   void Pop() { pq_.pop(); }
   void Push(std::shared_ptr<Event> event) { pq_.push(event); }
   void Push(std::vector<std::shared_ptr<Event>> event_vector) {
