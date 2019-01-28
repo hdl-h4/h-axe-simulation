@@ -33,7 +33,9 @@ FIFO(std::multimap<double, ResourceRequest> &req_queue,
   ResourceRequest req = (*req_queue.begin()).second;
   worker_id = (worker_id + 1) % (*workers).size();
 
-  while ((*workers)[worker_id].Reserve(req.GetResource())) {
+  DLOG(INFO) << "reserve on worker " << worker_id;
+  while (workers->at(worker_id).Reserve(req.GetResource())) {
+    DLOG(INFO) << "reserve succefully";
     req_queue.erase(req_queue.begin());
     placement_decision_.push_back({worker_id, req});
     if (req_queue.size() == 0) {
@@ -41,6 +43,7 @@ FIFO(std::multimap<double, ResourceRequest> &req_queue,
     }
     worker_id = (worker_id + 1) % (*workers).size();
     req = (*req_queue.begin()).second;
+    DLOG(INFO) << "reserve on worker " << worker_id;
   }
   return placement_decision_;
 }

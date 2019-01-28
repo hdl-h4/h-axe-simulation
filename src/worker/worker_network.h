@@ -15,6 +15,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstdlib>
 #include <fstream>
 #include <iomanip>
 #include <memory>
@@ -35,11 +36,12 @@ namespace simulation {
 class WorkerNetwork : public WorkerCommon {
 public:
   WorkerNetwork() {}
-  WorkerNetwork(std::shared_ptr<ResourcePack> resource_capacity,
+  WorkerNetwork(int worker_id, std::shared_ptr<ResourcePack> resource_capacity,
                 std::shared_ptr<ResourcePack> resource_usage,
                 std::shared_ptr<ResourcePack> resource_reservation,
                 std::shared_ptr<std::set<int>> invalid_event_id_set)
-      : WorkerCommon(resource_capacity, resource_usage, resource_reservation),
+      : WorkerCommon(worker_id, resource_capacity, resource_usage,
+                     resource_reservation),
         invalid_event_id_set_(invalid_event_id_set) {
     network_slot_ =
         resource_capacity_->GetNetwork() / maximum_network_task_number_;
@@ -48,7 +50,11 @@ public:
   std::vector<std::shared_ptr<Event>> TaskFinish(double time, int event_id,
                                                  const ShardTask &task) {
     std::vector<std::shared_ptr<Event>> event_vector;
+    DLOG(INFO) << "job:task:shard " << task.GetJobID() << ' '
+               << task.GetTaskID() << ' ' << task.GetShardID() << " memory is "
+               << task.GetMemory();
     if (task.GetMemory() < 0) {
+      DLOG(INFO) << "will release memory " << task.GetMemory();
       IncreaseMemoryUsage(task.GetMemory());
     }
     DeleteRunningTask(event_id);
@@ -80,11 +86,12 @@ public:
   std::vector<std::shared_ptr<Event>> PlaceNewTask(double time,
                                                    const ShardTask &task) {
     std::vector<std::shared_ptr<Event>> event_vector;
-    if (task.GetMemory() > 0) {
-      IncreaseMemoryUsage(task.GetMemory());
-    }
+
     if (network_queue_.size() == 0 && ResourceAvailable()) {
       IncreaseNetworkUsage(network_slot_);
+      if (task.GetMemory() > 0) {
+        IncreaseMemoryUsage(task.GetMemory());
+      }
       double duration = ComputeNewTaskDuration(task);
       std::shared_ptr<TaskFinishEvent> task_finish_event =
           std::make_shared<TaskFinishEvent>(
@@ -133,8 +140,9 @@ private:
   }
 
   double ComputeNewTaskDuration(const ShardTask &task) {
-    return current_network_task_number_ * task.GetReq() /
-           resource_capacity_->GetNetwork();
+    double duration = current_network_task_number_ * task.GetReq() /
+                      resource_capacity_->GetNetwork();
+    return duration + RandomNoise(duration);
   }
 
   double GetBandWidth() {

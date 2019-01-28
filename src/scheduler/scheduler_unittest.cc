@@ -40,9 +40,9 @@ TEST_F(TestScheduler, NewJobEvent) {
       std::make_shared<std::vector<Worker>>();
   auto invalid_event_id_set = std::make_shared<std::set<int>>();
   Worker w1(10, 10, 10, 10);
-  w1.Init(invalid_event_id_set);
+  w1.Init(0, invalid_event_id_set);
   Worker w2(10, 10, 10, 10);
-  w2.Init(invalid_event_id_set);
+  w2.Init(1, invalid_event_id_set);
   workers->push_back(w1);
   workers->push_back(w2);
   std::shared_ptr<NewJobEvent> new_job_event =

@@ -14,10 +14,12 @@
 
 #pragma once
 
+#include <chrono>
 #include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <memory>
+#include <random>
 #include <set>
 #include <vector>
 
@@ -43,10 +45,11 @@ struct DiskNetworkRunningTaskRecord {
 class WorkerCommon {
 public:
   WorkerCommon() {}
-  WorkerCommon(std::shared_ptr<ResourcePack> resource_capacity,
+  WorkerCommon(int worker_id, std::shared_ptr<ResourcePack> resource_capacity,
                std::shared_ptr<ResourcePack> resource_usage,
                std::shared_ptr<ResourcePack> resource_reservation)
-      : resource_capacity_(resource_capacity), resource_usage_(resource_usage),
+      : worker_id_(worker_id), resource_capacity_(resource_capacity),
+        resource_usage_(resource_usage),
         resource_reservation_(resource_reservation) {}
 
   virtual std::vector<std::shared_ptr<Event>>
@@ -60,11 +63,20 @@ protected:
   virtual bool ResourceAvailable() = 0;
 
   void IncreaseMemoryUsage(double resource) {
+    DLOG(INFO) << "worker" << worker_id_ << " memory usage now is "
+               << resource_usage_->GetMemory() << " and will increase by "
+               << resource;
     resource_usage_->SetMemory(resource_usage_->GetMemory() + resource);
+    CHECK(resource_usage_->GetMemory() <= resource_capacity_->GetMemory())
+        << "memory usage is larger than capactiy!!!";
   }
 
   void DecreaseMemoryUsage(double resource) {
+    DLOG(INFO) << "memory usage now is " << resource_usage_->GetMemory()
+               << " and will decrease by " << resource;
     resource_usage_->SetMemory(resource_usage_->GetMemory() - resource);
+    CHECK(resource_usage_->GetMemory() >= 0)
+        << "memory usage is lower than 0!!!";
   }
 
   void IncreaseMemoryReservation(double resource) {
@@ -76,9 +88,20 @@ protected:
     resource_reservation_->SetMemory(resource_reservation_->GetMemory() -
                                      resource);
   }
+
+  double RandomNoise(double duration) {
+    auto seed =
+        std::chrono::high_resolution_clock::now().time_since_epoch().count();
+    auto rand_noise =
+        std::bind(std::uniform_real_distribution<double>(0, duration),
+                  std::mt19937(seed));
+    return rand_noise();
+  }
+
   std::shared_ptr<ResourcePack> resource_capacity_;
   std::shared_ptr<ResourcePack> resource_usage_;
   std::shared_ptr<ResourcePack> resource_reservation_;
+  int worker_id_;
 };
 
 } // namespace simulation
