@@ -27,7 +27,7 @@ from matplotlib import pyplot as plt
 
 class Painter:
     def __init__(self, args):
-        self.columns = ['MEMORY', 'CPU', 'NETWORK', 'DISKIO']
+        self.columns = ['CPU', 'MEMORY', 'DISKIO', 'NETWORK']
         self.figsize = (8, 6)
         self.xlabel = "Time"
         self.ylabel = "ResourceUtilization"
@@ -56,6 +56,7 @@ class Painter:
                 continue
             # load data
             data = read_csv(in_file, sep="\t", comment='#', names=self.columns)
+            print(data)
             # plot
             output_file = os.path.join(self.output, os.path.splitext(os.path.basename(in_file))[0] + '.png')
             self.plot(len(data), data[:][self.columns], output_file)
