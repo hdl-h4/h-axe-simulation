@@ -41,7 +41,11 @@ public:
   Worker() {}
 
   Worker(double cpu, double memory, double disk, double network) {
-    CHECK(false) << "don't support this worker constructor now";
+    // CHECK(false) << "don't support this worker constructor now";
+    resource_capacity_ = std::make_shared<ResourcePack>(cpu, memory, disk, network);
+    resource_usage_ = std::make_shared<ResourcePack>();
+    resource_reservation_ = std::make_shared<ResourcePack>();
+    resource_maximum_reservation_ = std::make_shared<ResourcePack>(20, resource_capacity_->GetMemory(), 20, 20);
   }
 
   void Init(std::shared_ptr<std::set<int>> invalid_event_id_set) {
