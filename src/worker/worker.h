@@ -80,6 +80,8 @@ public:
     std::vector<double> record;
     record.push_back(time);
     for (int i = 0; i < kNumResourceTypes; ++i) {
+      CHECK(resource_usage_->GetResourceByIndex(i) >= 0)
+          << "resource usage cannot be lower than 0";
       record.push_back(resource_usage_->GetResourceByIndex(i) /
                        resource_capacity_->GetResourceByIndex(i));
     }
@@ -143,23 +145,29 @@ public:
 
   void ReportUtilization(std::ofstream &fout) {
     int time = 0;
-    fout << "time(second)" << std::setw(15) << "CPU" << std::setw(10)
-         << "MEMORY" << std::setw(10) << "DISK" << std::setw(10) << "NETWORK"
-         << std::setw(10) << std::endl;
+    fout << "#CPU"
+         << "\t"
+         << "MEMORY"
+         << "\t"
+         << "DISK"
+         << "\t"
+         << "NETWORK" << std::endl;
     for (int i = 0; i < records_.size(); ++i) {
       auto &this_record = records_[i];
-      fout << time << std::setw(15);
       for (int j = 1; j < this_record.size(); ++j) {
-        fout << this_record[j] << std::setw(10);
+        fout << this_record[j];
+        if (j < kNumResourceTypes)
+          fout << "\t";
       }
       fout << std::endl;
       if (i < records_.size() - 1) {
         auto &next_record = records_[i + 1];
         ++time;
         while (time < static_cast<int>(next_record[0])) {
-          fout << time << std::setw(15);
           for (int j = 1; j < this_record.size(); ++j) {
-            fout << this_record[j] << std::setw(10);
+            fout << this_record[j];
+            if (j < kNumResourceTypes)
+              fout << "\t";
           }
           fout << std::endl;
           ++time;

@@ -44,6 +44,10 @@ public:
                                                    const ShardTask &task) {
     std::vector<std::shared_ptr<Event>> event_vector;
 
+    if (task.GetMemory() > 0) {
+      IncreaseMemoryUsage(task.GetMemory());
+    }
+
     if (cpu_queue_.size() == 0 && ResourceAvailable()) {
       IncreaseCPUUsage(1);
 

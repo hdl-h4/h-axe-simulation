@@ -105,8 +105,9 @@ public:
 
   void Report() {
     std::string prefix = "report/worker_";
+    std::string suffix = ".csv";
     for (int i = 0; i < workers_->size(); ++i) {
-      std::ofstream fout(prefix + std::to_string(i), std::ios::out);
+      std::ofstream fout(prefix + std::to_string(i) + suffix, std::ios::out);
       (*workers_)[i].ReportUtilization(fout);
       fout.close();
     }
