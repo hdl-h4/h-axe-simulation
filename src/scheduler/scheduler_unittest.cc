@@ -46,13 +46,13 @@ TEST_F(TestScheduler, NewJobEvent) {
   workers->push_back(w1);
   workers->push_back(w2);
   std::shared_ptr<NewJobEvent> new_job_event =
-      std::make_shared<NewJobEvent>(NEW_JOB, 10, 0, 0, Job());
+      std::make_shared<NewJobEvent>(EventType::NEW_JOB, 10, 0, 0, Job());
   Scheduler scheduler(workers, std::shared_ptr<std::vector<User>>());
   std::vector<std::shared_ptr<Event>> ret_vector =
       scheduler.Handle(new_job_event);
   EXPECT_EQ(ret_vector.size(), 1);
   auto event = std::static_pointer_cast<JobAdmissionEvent>(ret_vector[0]);
-  EXPECT_EQ(event->GetEventType(), JOB_ADMISSION);
+  EXPECT_EQ(event->GetEventType(), EventType::JOB_ADMISSION);
   EXPECT_DOUBLE_EQ(event->GetTime(), 10);
   EXPECT_EQ(event->GetPriority(), 0);
   EXPECT_EQ(event->GetEventPrincipal(), 0);
@@ -67,13 +67,13 @@ TEST_F(TestScheduler, NewTaskReqEvent) {
   workers->push_back(Worker(5, 5, 5, 5));
   ResourceRequest req(5, 6, std::vector<int>(0, 1), ResourcePack(1, 2, 3, 4));
   std::shared_ptr<NewTaskReqEvent> new_task_req_event =
-      std::make_shared<NewTaskReqEvent>(NEW_TASK_REQ, 10, 0, 5, req);
+      std::make_shared<NewTaskReqEvent>(EventType::NEW_TASK_REQ, 10, 0, 5, req);
   Scheduler scheduler(workers, std::shared_ptr<std::vector<User>>());
   std::vector<std::shared_ptr<Event>> ret_vector =
       scheduler.Handle(new_task_req_event);
   EXPECT_EQ(ret_vector.size(), 1);
   auto event = std::static_pointer_cast<PlacementDecisionEvent>(ret_vector[0]);
-  EXPECT_EQ(event->GetEventType(), PLACEMENT_DECISION);
+  EXPECT_EQ(event->GetEventType(), EventType::PLACEMENT_DECISION);
   EXPECT_DOUBLE_EQ(event->GetTime(), 10);
   EXPECT_EQ(event->GetPriority(), 0);
   EXPECT_EQ(event->GetEventPrincipal(), 5);

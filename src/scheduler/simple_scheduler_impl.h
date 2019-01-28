@@ -48,10 +48,9 @@ public:
     auto new_job_event = std::static_pointer_cast<NewJobEvent>(event);
     DLOG(INFO) << "job id: " << new_job_event->GetJob().GetJobID();
     event_vector.push_back(std::make_shared<JobAdmissionEvent>(
-        JobAdmissionEvent(JOB_ADMISSION, time, 0,
+        JobAdmissionEvent(EventType::JOB_ADMISSION, time, 0,
                           new_job_event->GetJob().GetJobID(),
                           new_job_event->GetJob().GetJobID())));
-
     return event_vector;
   }
   std::vector<std::shared_ptr<Event>>
@@ -73,7 +72,7 @@ public:
                  << ", subgraph id " << decision.second.GetSubGraphID()
                  << ", worker id " << decision.first;
       event_vector.push_back(std::make_shared<PlacementDecisionEvent>(
-          PlacementDecisionEvent(PLACEMENT_DECISION, time, 0,
+          PlacementDecisionEvent(EventType::PLACEMENT_DECISION, time, 0,
                                  decision.second.GetJobID(), decision.first,
                                  decision.second.GetSubGraphID())));
     }
@@ -92,7 +91,7 @@ public:
                  << ", subgraph id " << decision.second.GetSubGraphID()
                  << ", worker id " << decision.first;
       event_vector.push_back(std::make_shared<PlacementDecisionEvent>(
-          PlacementDecisionEvent(PLACEMENT_DECISION, time, 0,
+          PlacementDecisionEvent(EventType::PLACEMENT_DECISION, time, 0,
                                  decision.second.GetJobID(), decision.first,
                                  decision.second.GetSubGraphID())));
     }

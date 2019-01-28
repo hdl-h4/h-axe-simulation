@@ -22,8 +22,8 @@ namespace simulation {
 
 class NewJobEvent : public Event {
 public:
-  NewJobEvent(int event_type, double time, int priority, int event_principal,
-              const Job &job)
+  NewJobEvent(EventType event_type, double time, int priority,
+              int event_principal, const Job &job)
       : Event(event_type, time, priority, event_principal), job_(job) {}
 
   inline auto &GetJob() const { return job_; }

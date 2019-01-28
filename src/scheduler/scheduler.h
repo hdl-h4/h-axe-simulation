@@ -34,23 +34,26 @@ public:
   }
 
   void RegisterHandlers() {
-    RegisterHandler(NEW_JOB, [&](std::shared_ptr<Event> event)
-                                 -> std::vector<std::shared_ptr<Event>> {
-      return impl_->HandleNewJobEvent(event);
-    });
-    RegisterHandler(NEW_TASK_REQ, [&](std::shared_ptr<Event> event)
-                                      -> std::vector<std::shared_ptr<Event>> {
-      return impl_->HandleNewReqEvent(event);
-    });
-    RegisterHandler(RESOURCE_AVAILABLE,
+    RegisterHandler(EventType::NEW_JOB,
+                    [&](std::shared_ptr<Event> event)
+                        -> std::vector<std::shared_ptr<Event>> {
+                      return impl_->HandleNewJobEvent(event);
+                    });
+    RegisterHandler(EventType::NEW_TASK_REQ,
+                    [&](std::shared_ptr<Event> event)
+                        -> std::vector<std::shared_ptr<Event>> {
+                      return impl_->HandleNewReqEvent(event);
+                    });
+    RegisterHandler(EventType::RESOURCE_AVAILABLE,
                     [&](std::shared_ptr<Event> event)
                         -> std::vector<std::shared_ptr<Event>> {
                       return impl_->HandleResourceAvailableEvent(event);
                     });
-    RegisterHandler(JOB_FINISH, [&](std::shared_ptr<Event> event)
-                                    -> std::vector<std::shared_ptr<Event>> {
-      return impl_->HandleJobFinishEvent(event);
-    });
+    RegisterHandler(EventType::JOB_FINISH,
+                    [&](std::shared_ptr<Event> event)
+                        -> std::vector<std::shared_ptr<Event>> {
+                      return impl_->HandleJobFinishEvent(event);
+                    });
   }
 
   void Report() { impl_->Report(); }

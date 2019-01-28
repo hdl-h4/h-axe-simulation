@@ -21,7 +21,7 @@ namespace simulation {
 
 class ResourceAvailableEvent : public Event {
 public:
-  ResourceAvailableEvent(int event_type, double time, int priority,
+  ResourceAvailableEvent(EventType event_type, double time, int priority,
                          int event_principal)
       : Event(event_type, time, priority, event_principal) {}
 };

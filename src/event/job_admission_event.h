@@ -21,7 +21,7 @@ namespace simulation {
 
 class JobAdmissionEvent : public Event {
 public:
-  JobAdmissionEvent(int event_type, double time, int priority,
+  JobAdmissionEvent(EventType event_type, double time, int priority,
                     int event_principal, int job_id)
       : Event(event_type, time, priority, event_principal), job_id_(job_id) {}
 

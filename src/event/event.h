@@ -22,7 +22,7 @@
 namespace axe {
 namespace simulation {
 
-enum EventType {
+enum class EventType : int {
   TASK_FINISH = 0,    // SCH tells JM the task req is finished, for JM
   RESOURCE_AVAILABLE, // JM tells SCH there are avaliable resources on workers,
                       // for SCH
@@ -33,7 +33,7 @@ enum EventType {
   NEW_JOB,            // JM sends SCH the new job, for SCH
 };
 
-const int SCHEDULER = -1;
+const int kScheduler = -1;
 
 /**
  * It is actually not elegant design because
@@ -43,14 +43,14 @@ const int SCHEDULER = -1;
 
 class Event {
 public:
-  Event(int event_type, double time, int priority, int event_principal)
+  Event(EventType event_type, double time, int priority, int event_principal)
       : event_type_(event_type), time_(time), priority_(priority),
         event_principal_(event_principal), event_id_(event_num++) {}
   virtual ~Event(){};
 
   const double eps = 1e-6;
 
-  inline int GetEventType() const { return event_type_; }
+  inline EventType GetEventType() const { return event_type_; }
   inline int GetEventPrincipal() const { return event_principal_; }
   inline int GetEventID() const { return event_id_; }
   inline double GetTime() const { return time_; }
@@ -69,7 +69,7 @@ public:
   }
 
 private:
-  int event_type_;
+  EventType event_type_;
   int event_principal_;
   double time_;
   int priority_;

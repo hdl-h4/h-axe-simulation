@@ -49,8 +49,9 @@ public:
 
       double duration = ComputeNewTaskDuration(task);
       std::shared_ptr<TaskFinishEvent> task_finish_event =
-          std::make_shared<TaskFinishEvent>(TaskFinishEvent(
-              TASK_FINISH, time + duration, 0, task.GetJobID(), task));
+          std::make_shared<TaskFinishEvent>(
+              TaskFinishEvent(EventType::TASK_FINISH, time + duration, 0,
+                              task.GetJobID(), task));
       event_vector.push_back(task_finish_event);
     } else {
       cpu_queue_.push_back(task);
@@ -75,8 +76,9 @@ public:
       ShardTask task = cpu_queue_.at(0);
       double duration = ComputeNewTaskDuration(task);
       std::shared_ptr<TaskFinishEvent> task_finish_event =
-          std::make_shared<TaskFinishEvent>(TaskFinishEvent(
-              TASK_FINISH, time + duration, 0, task.GetJobID(), task));
+          std::make_shared<TaskFinishEvent>(
+              TaskFinishEvent(EventType::TASK_FINISH, time + duration, 0,
+                              task.GetJobID(), task));
       event_vector.push_back(task_finish_event);
       cpu_queue_.erase(cpu_queue_.begin());
     }

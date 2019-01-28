@@ -21,7 +21,7 @@ if(GTEST_FOUND)
   include_directories(${GTEST_INCLUDE_DIR})
   add_executable(${PROJECT_NAME}_unit_tests ${UNIT_TEST_SOURCE}  unittest_main.cc)
   set_property(TARGET ${PROJECT_NAME}_unit_tests PROPERTY CXX_STANDARD ${CMAKE_CXX_STANDARD})
-  target_link_libraries(${PROJECT_NAME}_unit_tests $<TARGET_OBJECTS:simulation-obj> ${GTEST_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${glog_LIBRARY} ${gflags_LIBRARIES})
+  target_link_libraries(${PROJECT_NAME}_unit_tests static-simulation ${GTEST_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} ${AXE_SIMULATION_EXTERNAL_LIB})
   add_test(NAME AllTestsIn${PROJECT_NAME}UnitTests
     COMMAND ${PROJECT_NAME}_unit_tests
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}

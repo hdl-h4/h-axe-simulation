@@ -21,7 +21,7 @@ namespace simulation {
 
 class PlacementDecisionEvent : public Event {
 public:
-  PlacementDecisionEvent(int event_type, double time, int priority,
+  PlacementDecisionEvent(EventType event_type, double time, int priority,
                          int event_principal, int worker_id, int subgraph_id)
       : Event(event_type, time, priority, event_principal),
         worker_id_(worker_id), subgraph_id_(subgraph_id) {}
