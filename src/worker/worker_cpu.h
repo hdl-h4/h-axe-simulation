@@ -35,21 +35,21 @@ namespace simulation {
 class WorkerCPU : public WorkerCommon {
 public:
   WorkerCPU() {}
-  WorkerCPU(std::shared_ptr<ResourcePack> resource_capacity,
+  WorkerCPU(int worker_id, std::shared_ptr<ResourcePack> resource_capacity,
             std::shared_ptr<ResourcePack> resource_usage,
             std::shared_ptr<ResourcePack> resource_reservation)
-      : WorkerCommon(resource_capacity, resource_usage, resource_reservation) {}
+      : WorkerCommon(worker_id, resource_capacity, resource_usage,
+                     resource_reservation) {}
 
   std::vector<std::shared_ptr<Event>> PlaceNewTask(double time,
                                                    const ShardTask &task) {
     std::vector<std::shared_ptr<Event>> event_vector;
 
-    if (task.GetMemory() > 0) {
-      IncreaseMemoryUsage(task.GetMemory());
-    }
-
     if (cpu_queue_.size() == 0 && ResourceAvailable()) {
       IncreaseCPUUsage(1);
+      if (task.GetMemory() > 0) {
+        IncreaseMemoryUsage(task.GetMemory());
+      }
 
       double duration = ComputeNewTaskDuration(task);
       std::shared_ptr<TaskFinishEvent> task_finish_event =
@@ -66,7 +66,11 @@ public:
   std::vector<std::shared_ptr<Event>> TaskFinish(double time, int event_id,
                                                  const ShardTask &task) {
     std::vector<std::shared_ptr<Event>> event_vector;
+    DLOG(INFO) << "job:task:shard " << task.GetJobID() << ' '
+               << task.GetTaskID() << ' ' << task.GetShardID() << " memory is "
+               << task.GetMemory();
     if (task.GetMemory() < 0) {
+      DLOG(INFO) << "will release memory " << task.GetMemory();
       IncreaseMemoryUsage(task.GetMemory());
     }
     DecreaseCPUUsage(1);
@@ -106,7 +110,10 @@ private:
     resource_reservation_->SetCPU(resource_reservation_->GetCPU() - resource);
   }
 
-  double ComputeNewTaskDuration(const ShardTask &task) { return task.GetReq(); }
+  double ComputeNewTaskDuration(const ShardTask &task) {
+    double duration = task.GetReq();
+    return duration + RandomNoise(duration);
+  }
 
   bool ResourceAvailable() {
     return static_cast<int>(resource_usage_->GetCPU()) + 1 <=

@@ -47,17 +47,19 @@ public:
     resource_usage_ = std::make_shared<ResourcePack>();
     resource_reservation_ = std::make_shared<ResourcePack>();
     resource_maximum_reservation_ = std::make_shared<ResourcePack>(
-        30, resource_capacity_->GetMemory(), 2000, 2000);
+        2000, resource_capacity_->GetMemory(), 2000, 2000);
   }
 
-  void Init(std::shared_ptr<std::set<int>> invalid_event_id_set) {
+  void Init(int worker_id,
+            std::shared_ptr<std::set<int>> invalid_event_id_set) {
+    worker_id_ = worker_id;
     invalid_event_id_set_ = invalid_event_id_set;
-    worker_cpu_ =
-        WorkerCPU(resource_capacity_, resource_usage_, resource_reservation_);
-    worker_disk_ = WorkerDisk(resource_capacity_, resource_usage_,
+    worker_cpu_ = WorkerCPU(worker_id_, resource_capacity_, resource_usage_,
+                            resource_reservation_);
+    worker_disk_ = WorkerDisk(worker_id_, resource_capacity_, resource_usage_,
                               resource_reservation_, invalid_event_id_set_);
     worker_network_ =
-        WorkerNetwork(resource_capacity_, resource_usage_,
+        WorkerNetwork(worker_id_, resource_capacity_, resource_usage_,
                       resource_reservation_, invalid_event_id_set_);
   }
 
@@ -67,24 +69,26 @@ public:
     worker.resource_reservation_ = std::make_shared<ResourcePack>();
     worker.resource_maximum_reservation_ = std::make_shared<ResourcePack>();
     j.get_to(*(worker.resource_capacity_));
-    worker.records_.push_back(worker.GenerateUtilizationRecord(0));
+    worker.records_.insert(worker.GenerateUtilizationRecord(0));
     *(worker.resource_maximum_reservation_) = {
-        30, worker.resource_capacity_->GetMemory(), 2000, 2000};
+        2000, worker.resource_capacity_->GetMemory(), 2000, 2000};
   }
 
   inline auto GetRemainResourcePack() const {
     return resource_capacity_->Subtract(*resource_usage_);
   }
 
-  std::vector<double> GenerateUtilizationRecord(double time) {
-    std::vector<double> record;
-    record.push_back(time);
+  std::pair<int, std::vector<double>> GenerateUtilizationRecord(double time) {
+
+    std::vector<double> resource_vector;
     for (int i = 0; i < kNumResourceTypes; ++i) {
       CHECK(resource_usage_->GetResourceByIndex(i) >= 0)
           << "resource usage cannot be lower than 0";
-      record.push_back(resource_usage_->GetResourceByIndex(i) /
-                       resource_capacity_->GetResourceByIndex(i));
+      resource_vector.push_back(resource_usage_->GetResourceByIndex(i) /
+                                resource_capacity_->GetResourceByIndex(i));
     }
+    std::pair<int, std::vector<double>> record(static_cast<int>(time * 20),
+                                               resource_vector);
     return record;
   }
 
@@ -92,6 +96,9 @@ public:
   //                        false : task waits in queue;
   std::vector<std::shared_ptr<Event>> PlaceNewTask(double time,
                                                    const ShardTask &task) {
+    place_time_++;
+    DLOG(INFO) << "worker " << worker_id_ << " place " << place_time_
+               << " new task";
     std::vector<std::shared_ptr<Event>> event_vector;
     if (task.GetResourceType() == ResourceType::kCPU) {
       event_vector = worker_cpu_.PlaceNewTask(time, task);
@@ -102,7 +109,7 @@ public:
     } else {
       CHECK(false) << "invalid resource type";
     }
-    records_.push_back(GenerateUtilizationRecord(time));
+    records_.insert(GenerateUtilizationRecord(time));
     return event_vector;
   }
 
@@ -119,14 +126,15 @@ public:
     } else {
       CHECK(false) << "invalid resource type";
     }
-    records_.push_back(GenerateUtilizationRecord(time));
+    records_.insert(GenerateUtilizationRecord(time));
     return event_vector;
   }
 
   // subgraph finish
   void SubGraphFinish(double time, double mem) {
+    DLOG(INFO) << "sg finish, release memory reservation: " << mem;
     resource_reservation_->SetMemory(resource_reservation_->GetMemory() - mem);
-    records_.push_back(GenerateUtilizationRecord(time));
+    records_.insert(GenerateUtilizationRecord(time));
   }
 
   void Print() {
@@ -152,21 +160,24 @@ public:
          << "DISK"
          << "\t"
          << "NETWORK" << std::endl;
-    for (int i = 0; i < records_.size(); ++i) {
-      auto &this_record = records_[i];
-      for (int j = 1; j < this_record.size(); ++j) {
-        fout << this_record[j];
-        if (j < kNumResourceTypes)
+    for (auto iter = records_.begin(); iter != records_.end(); ++iter) {
+      int time = iter->first;
+      std::vector<double> record = iter->second;
+      // fout << time << "\t";
+      for (int i = 0; i < record.size(); ++i) {
+        fout << record[i];
+        if (i < record.size() - 1)
           fout << "\t";
       }
       fout << std::endl;
-      if (i < records_.size() - 1) {
-        auto &next_record = records_[i + 1];
+      auto next_iter = std::next(iter, 1);
+      if (next_iter != records_.end()) {
         ++time;
-        while (time < static_cast<int>(next_record[0])) {
-          for (int j = 1; j < this_record.size(); ++j) {
-            fout << this_record[j];
-            if (j < kNumResourceTypes)
+        while (time < next_iter->first) {
+          // fout << time << "\t";
+          for (int i = 0; i < record.size(); ++i) {
+            fout << record[i];
+            if (i < record.size() - 1)
               fout << "\t";
           }
           fout << std::endl;
@@ -179,7 +190,13 @@ public:
   bool Reserve(ResourcePack resource) {
     if (resource_reservation_->Add(resource).FitIn(
             *resource_maximum_reservation_)) {
+      DLOG(INFO) << "resource memory reservation now is "
+                 << resource_reservation_->GetMemory() << " will increase by "
+                 << resource.GetMemory();
       resource_reservation_->AddToMe(resource);
+      reserve_time_++;
+      DLOG(INFO) << "worker " << worker_id_ << " reserve for " << reserve_time_
+                 << " times";
       return true;
     } else {
       return false;
@@ -241,12 +258,15 @@ private:
   std::shared_ptr<ResourcePack> resource_maximum_reservation_;
   // the maximum reservation which is a upper bound during Reserve()
 
-  std::vector<std::vector<double>> records_;
+  std::map<int, std::vector<double>> records_;
   double oversell_factor_ = 1.5;
   std::shared_ptr<std::set<int>> invalid_event_id_set_;
   WorkerCPU worker_cpu_;
   WorkerDisk worker_disk_;
   WorkerNetwork worker_network_;
+  int worker_id_;
+  int reserve_time_ = 0;
+  int place_time_ = 0;
 };
 
 } //  namespace simulation

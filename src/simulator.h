@@ -46,8 +46,8 @@ public:
     users_ = std::make_shared<std::vector<User>>();
     from_json(workers_json, *this);
     from_json(jobs_json, *this);
-    for (auto &worker : *workers_) {
-      worker.Init(invalid_event_id_set_);
+    for (int i = 0; i < workers_->size(); ++i) {
+      (*workers_)[i].Init(i, invalid_event_id_set_);
     }
   }
 

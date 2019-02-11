@@ -151,6 +151,7 @@ public:
     for (int i = 0; i < kNumResourceTypes; ++i) {
       ret = ret && (resource.GetResourceByIndex(i) > resource_[i]);
     }
+    return ret;
   }
 
   bool WeakFitIn(const ResourcePack &resource, double alpha) {
@@ -161,6 +162,7 @@ public:
       else
         ret = ret && (resource.GetResourceByIndex(i) > resource_[i] * alpha);
     }
+    return ret;
   }
 
   friend void from_json(const json &j, ResourcePack &resource_pack) {

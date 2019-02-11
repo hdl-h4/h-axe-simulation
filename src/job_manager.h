@@ -62,38 +62,40 @@ public:
           }
           return event_vector;
         });
-    RegisterHandler(EventType::PLACEMENT_DECISION,
-                    [&](std::shared_ptr<Event> event)
-                        -> std::vector<std::shared_ptr<Event>> {
-                      std::vector<std::shared_ptr<Event>> event_vector;
-                      double time = event->GetTime();
-                      std::shared_ptr<PlacementDecisionEvent> decision =
-                          std::static_pointer_cast<PlacementDecisionEvent>(
-                              event);
-                      int worker_id = decision->GetWorkerID();
-                      int subgraph_id = decision->GetSubGraphID();
-                      job_.SetWorkerID(subgraph_id, worker_id);
+    RegisterHandler(
+        EventType::PLACEMENT_DECISION,
+        [&](std::shared_ptr<Event> event)
+            -> std::vector<std::shared_ptr<Event>> {
+          std::vector<std::shared_ptr<Event>> event_vector;
+          double time = event->GetTime();
+          std::shared_ptr<PlacementDecisionEvent> decision =
+              std::static_pointer_cast<PlacementDecisionEvent>(event);
+          int worker_id = decision->GetWorkerID();
+          int subgraph_id = decision->GetSubGraphID();
+          job_.SetWorkerID(subgraph_id, worker_id);
 
-                      auto &sg = job_.GetSubGraphs().at(subgraph_id);
-                      // update user resource
-                      users_->at(job_.GetUserID())
-                          .PlacementDecision(time, sg.GetResourcePack());
-
-                      for (auto &st : sg.GetShardTasks()) {
-                        ShardTaskID shard_task_id =
-                            ShardTaskID{st.GetTaskID(), st.GetShardID()};
-                        if (dep_counter_[shard_task_id] ==
-                            dep_finish_counter_[shard_task_id]) {
-                          std::vector<std::shared_ptr<Event>> events =
-                              workers_->at(worker_id).PlaceNewTask(time, st);
-                          if (events.size() == 0)
-                            DLOG(INFO) << "event vector is empty";
-                          event_vector.insert(event_vector.end(),
-                                              events.begin(), events.end());
-                        }
-                      }
-                      return event_vector;
-                    });
+          auto &sg = job_.GetSubGraphs().at(subgraph_id);
+          // update user resource
+          users_->at(job_.GetUserID())
+              .PlacementDecision(time, sg.GetResourcePack());
+          DLOG(INFO) << "the number of tasks is " << sg.GetShardTasks().size();
+          for (auto &st : sg.GetShardTasks()) {
+            DLOG(INFO) << "task memory of sg: " << subgraph_id << " is "
+                       << st.GetMemory();
+            ShardTaskID shard_task_id =
+                ShardTaskID{st.GetTaskID(), st.GetShardID()};
+            if (dep_counter_[shard_task_id] ==
+                dep_finish_counter_[shard_task_id]) {
+              std::vector<std::shared_ptr<Event>> events =
+                  workers_->at(worker_id).PlaceNewTask(time, st);
+              if (events.size() == 0)
+                DLOG(INFO) << "event vector is empty";
+              event_vector.insert(event_vector.end(), events.begin(),
+                                  events.end());
+            }
+          }
+          return event_vector;
+        });
 
     RegisterHandler(EventType::TASK_FINISH, [&](std::shared_ptr<Event> event)
                                                 -> std::vector<
