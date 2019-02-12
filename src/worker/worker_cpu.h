@@ -37,9 +37,9 @@ public:
   WorkerCPU() {}
   WorkerCPU(int worker_id, std::shared_ptr<ResourcePack> resource_capacity,
             std::shared_ptr<ResourcePack> resource_usage,
-            std::shared_ptr<ResourcePack> resource_reservation)
+            std::shared_ptr<ResourcePack> resource_reservation, bool is_worker)
       : WorkerCommon(worker_id, resource_capacity, resource_usage,
-                     resource_reservation) {}
+                     resource_reservation, is_worker) {}
 
   std::vector<std::shared_ptr<Event>> PlaceNewTask(double time,
                                                    const ShardTask &task) {
@@ -103,11 +103,13 @@ private:
   }
 
   void IncreaseCPUReservation(double resource) {
-    resource_reservation_->SetCPU(resource_reservation_->GetCPU() + resource);
+    if (is_worker_)
+      resource_reservation_->SetCPU(resource_reservation_->GetCPU() + resource);
   }
 
   void DecreaseCPUReservation(double resource) {
-    resource_reservation_->SetCPU(resource_reservation_->GetCPU() - resource);
+    if (is_worker_)
+      resource_reservation_->SetCPU(resource_reservation_->GetCPU() - resource);
   }
 
   double ComputeNewTaskDuration(const ShardTask &task) {

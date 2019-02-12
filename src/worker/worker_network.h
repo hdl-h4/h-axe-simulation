@@ -39,9 +39,10 @@ public:
   WorkerNetwork(int worker_id, std::shared_ptr<ResourcePack> resource_capacity,
                 std::shared_ptr<ResourcePack> resource_usage,
                 std::shared_ptr<ResourcePack> resource_reservation,
-                std::shared_ptr<std::set<int>> invalid_event_id_set)
+                std::shared_ptr<std::set<int>> invalid_event_id_set,
+                bool is_worker)
       : WorkerCommon(worker_id, resource_capacity, resource_usage,
-                     resource_reservation),
+                     resource_reservation, is_worker),
         invalid_event_id_set_(invalid_event_id_set) {
     network_slot_ =
         resource_capacity_->GetNetwork() / maximum_network_task_number_;
@@ -126,13 +127,15 @@ private:
   }
 
   void IncreaseNetworkReservation(double resource) {
-    resource_reservation_->SetNetwork(resource_reservation_->GetNetwork() +
-                                      resource);
+    if (is_worker_)
+      resource_reservation_->SetNetwork(resource_reservation_->GetNetwork() +
+                                        resource);
   }
 
   void DecreaseNetworkReservation(double resource) {
-    resource_reservation_->SetNetwork(resource_reservation_->GetNetwork() -
-                                      resource);
+    if (is_worker_)
+      resource_reservation_->SetNetwork(resource_reservation_->GetNetwork() -
+                                        resource);
   }
 
   bool ResourceAvailable() {
