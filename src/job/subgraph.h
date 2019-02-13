@@ -172,16 +172,27 @@ public:
   }
 
   void SetResourcesReq() {
-    for (auto &st : shard_tasks_) {
-      if (st.GetResourceType() == ResourceType::kCPU) {
-        resource_pack_.SetCPU(resource_pack_.GetCPU() + st.GetReq());
-      } else if (st.GetResourceType() == ResourceType::kDisk) {
-        resource_pack_.SetDisk(resource_pack_.GetDisk() + st.GetReq());
-      } else if (st.GetResourceType() == ResourceType::kNetwork) {
-        resource_pack_.SetNetwork(resource_pack_.GetNetwork() + st.GetReq());
+    if (is_worker_) {
+      for (auto &st : shard_tasks_) {
+        if (st.GetResourceType() == ResourceType::kCPU) {
+          resource_pack_.SetCPU(resource_pack_.GetCPU() + st.GetReq());
+        } else if (st.GetResourceType() == ResourceType::kDisk) {
+          resource_pack_.SetDisk(resource_pack_.GetDisk() + st.GetReq());
+        } else if (st.GetResourceType() == ResourceType::kNetwork) {
+          resource_pack_.SetNetwork(resource_pack_.GetNetwork() + st.GetReq());
+        }
       }
+      resource_pack_.SetMemory(GetMemoryCap());
+    } else {
+      for (auto &st : shard_tasks_) {
+        if (st.GetResourceType() == ResourceType::kCPU) {
+          resource_pack_.SetCPU(resource_pack_.GetCPU() + 1);
+        }
+      }
+      resource_pack_.SetDisk(0);
+      resource_pack_.SetNetwork(0);
+      resource_pack_.SetMemory(GetMemoryCap());
     }
-    resource_pack_.SetMemory(GetMemoryCap());
   }
 
   void Print() {
@@ -195,6 +206,7 @@ public:
 private:
   int memory_;
   int job_id_;
+  bool is_worker_ = true;
   ResourcePack resource_pack_;
   std::vector<ShardTask> shard_tasks_;
   std::vector<int> data_locality_;
