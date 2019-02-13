@@ -47,10 +47,11 @@ public:
   WorkerCommon() {}
   WorkerCommon(int worker_id, std::shared_ptr<ResourcePack> resource_capacity,
                std::shared_ptr<ResourcePack> resource_usage,
-               std::shared_ptr<ResourcePack> resource_reservation)
+               std::shared_ptr<ResourcePack> resource_reservation,
+               bool is_worker)
       : worker_id_(worker_id), resource_capacity_(resource_capacity),
         resource_usage_(resource_usage),
-        resource_reservation_(resource_reservation) {}
+        resource_reservation_(resource_reservation), is_worker_(is_worker) {}
 
   virtual std::vector<std::shared_ptr<Event>>
   PlaceNewTask(double time, const ShardTask &task) = 0;
@@ -102,6 +103,7 @@ protected:
   std::shared_ptr<ResourcePack> resource_usage_;
   std::shared_ptr<ResourcePack> resource_reservation_;
   int worker_id_;
+  bool is_worker_;
 };
 
 } // namespace simulation

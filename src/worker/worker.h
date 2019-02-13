@@ -14,29 +14,14 @@
 
 #pragma once
 
-#include <cmath>
-#include <fstream>
-#include <iomanip>
-#include <memory>
-#include <set>
-#include <vector>
-
-#include "glog/logging.h"
-#include "nlohmann/json.hpp"
-
-#include "event/task_finish_event.h"
-#include "job/shard_task.h"
-#include "resource/resource.h"
-#include "worker_cpu.h"
-#include "worker_disk.h"
-#include "worker_network.h"
+#include "worker_abstract.h"
 
 namespace axe {
 namespace simulation {
 
 using nlohmann::json;
 
-class Worker {
+class Worker : public WorkerAbstract {
 public:
   Worker() {}
 
@@ -55,12 +40,13 @@ public:
     worker_id_ = worker_id;
     invalid_event_id_set_ = invalid_event_id_set;
     worker_cpu_ = WorkerCPU(worker_id_, resource_capacity_, resource_usage_,
-                            resource_reservation_);
-    worker_disk_ = WorkerDisk(worker_id_, resource_capacity_, resource_usage_,
-                              resource_reservation_, invalid_event_id_set_);
+                            resource_reservation_, true);
+    worker_disk_ =
+        WorkerDisk(worker_id_, resource_capacity_, resource_usage_,
+                   resource_reservation_, invalid_event_id_set_, true);
     worker_network_ =
         WorkerNetwork(worker_id_, resource_capacity_, resource_usage_,
-                      resource_reservation_, invalid_event_id_set_);
+                      resource_reservation_, invalid_event_id_set_, true);
   }
 
   friend void from_json(const json &j, Worker &worker) {
@@ -76,58 +62,6 @@ public:
 
   inline auto GetRemainResourcePack() const {
     return resource_capacity_->Subtract(*resource_usage_);
-  }
-
-  std::pair<int, std::vector<double>> GenerateUtilizationRecord(double time) {
-
-    std::vector<double> resource_vector;
-    for (int i = 0; i < kNumResourceTypes; ++i) {
-      CHECK(resource_usage_->GetResourceByIndex(i) >= 0)
-          << "resource usage cannot be lower than 0";
-      resource_vector.push_back(resource_usage_->GetResourceByIndex(i) /
-                                resource_capacity_->GetResourceByIndex(i));
-    }
-    std::pair<int, std::vector<double>> record(static_cast<int>(time * 20),
-                                               resource_vector);
-    return record;
-  }
-
-  // place new task, return true  : task runs;
-  //                        false : task waits in queue;
-  std::vector<std::shared_ptr<Event>> PlaceNewTask(double time,
-                                                   const ShardTask &task) {
-    place_time_++;
-    DLOG(INFO) << "worker " << worker_id_ << " place " << place_time_
-               << " new task";
-    std::vector<std::shared_ptr<Event>> event_vector;
-    if (task.GetResourceType() == ResourceType::kCPU) {
-      event_vector = worker_cpu_.PlaceNewTask(time, task);
-    } else if (task.GetResourceType() == ResourceType::kDisk) {
-      event_vector = worker_disk_.PlaceNewTask(time, task);
-    } else if (task.GetResourceType() == ResourceType::kNetwork) {
-      event_vector = worker_network_.PlaceNewTask(time, task);
-    } else {
-      CHECK(false) << "invalid resource type";
-    }
-    records_.insert(GenerateUtilizationRecord(time));
-    return event_vector;
-  }
-
-  // task finish
-  std::vector<std::shared_ptr<Event>> TaskFinish(double time, int event_id,
-                                                 const ShardTask &task) {
-    std::vector<std::shared_ptr<Event>> event_vector;
-    if (task.GetResourceType() == ResourceType::kCPU) {
-      event_vector = worker_cpu_.TaskFinish(time, event_id, task);
-    } else if (task.GetResourceType() == ResourceType::kDisk) {
-      event_vector = worker_disk_.TaskFinish(time, event_id, task);
-    } else if (task.GetResourceType() == ResourceType::kNetwork) {
-      event_vector = worker_network_.TaskFinish(time, event_id, task);
-    } else {
-      CHECK(false) << "invalid resource type";
-    }
-    records_.insert(GenerateUtilizationRecord(time));
-    return event_vector;
   }
 
   // subgraph finish
@@ -193,10 +127,10 @@ public:
       DLOG(INFO) << "resource memory reservation now is "
                  << resource_reservation_->GetMemory() << " will increase by "
                  << resource.GetMemory();
+      DLOG(INFO) << "resource cpu reservation now is "
+                 << resource_reservation_->GetCPU() << " will increase by "
+                 << resource.GetCPU();
       resource_reservation_->AddToMe(resource);
-      reserve_time_++;
-      DLOG(INFO) << "worker " << worker_id_ << " reserve for " << reserve_time_
-                 << " times";
       return true;
     } else {
       return false;
@@ -214,8 +148,8 @@ public:
   }
 
   bool TryToReserve(ResourcePack resource) {
-    return resource_maximum_reservation_->FitIn(
-        resource_reservation_->Add(resource));
+    return resource_reservation_->Add(resource).FitIn(
+        *resource_maximum_reservation_);
   }
 
   ResourcePack GetAvailableResource() {
@@ -223,14 +157,14 @@ public:
   }
 
 private:
-  std::shared_ptr<ResourcePack> resource_capacity_;
+  // std::shared_ptr<ResourcePack> resource_capacity_;
   /* Capacity: capacity describes the physical resources on the worker.
    *   CPU: the number of cpu cores on this worker (e.g., 8 cores).
    *   Memory: the size of memory on this worker (e.g., 16GB).
    *   Disk: the bandwidth of disk on this worker (e.g., 100MB/s).
    *   Network: the bandwidth of network on this worker (e.g., 1GB/s).
    */
-  std::shared_ptr<ResourcePack> resource_usage_;
+  // std::shared_ptr<ResourcePack> resource_usage_;
   /* Usage: usage describes the resource utilization at this moment which is
    * considered in local queue management.
    *    CPU: the number of cpu cores in use on this worker (e.g., 4 cores in
@@ -243,7 +177,7 @@ private:
    * 0.5GB/s if you have 5 network tasks sharing a 1GB/s bandwidth and the
    * maximum network task number is 10).
    */
-  std::shared_ptr<ResourcePack> resource_reservation_;
+  // std::shared_ptr<ResourcePack> resource_reservation_;
   /* Reservation: reservation is a coarse description of the expected workload
    * on this worker which is considered in global scheduling.
    *    CPU: the total CPU workload reserved on this worker (the total workload
@@ -258,15 +192,7 @@ private:
   std::shared_ptr<ResourcePack> resource_maximum_reservation_;
   // the maximum reservation which is a upper bound during Reserve()
 
-  std::map<int, std::vector<double>> records_;
   double oversell_factor_ = 1.5;
-  std::shared_ptr<std::set<int>> invalid_event_id_set_;
-  WorkerCPU worker_cpu_;
-  WorkerDisk worker_disk_;
-  WorkerNetwork worker_network_;
-  int worker_id_;
-  int reserve_time_ = 0;
-  int place_time_ = 0;
 };
 
 } //  namespace simulation
