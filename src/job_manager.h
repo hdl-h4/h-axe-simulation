@@ -41,9 +41,14 @@ namespace simulation {
 
 class JobManager : public EventHandler {
 public:
-  JobManager(const Job &job, const std::shared_ptr<std::vector<Worker>> workers,
-             const std::shared_ptr<std::vector<User>> users)
+  JobManager(const Job &job,
+             std::vector<std::shared_ptr<WorkerAbstract>> &workers,
+             const std::shared_ptr<std::vector<User>> users,
+             const std::string &executor)
       : job_(job), workers_(workers), users_(users) {
+    if (executor == "YARN") {
+      job_.SetIsNodeManager();
+    }
     RegisterHandlers();
     BuildDependencies();
   }
@@ -87,7 +92,7 @@ public:
             if (dep_counter_[shard_task_id] ==
                 dep_finish_counter_[shard_task_id]) {
               std::vector<std::shared_ptr<Event>> events =
-                  workers_->at(worker_id).PlaceNewTask(time, st);
+                  workers_.at(worker_id)->PlaceNewTask(time, st);
               if (events.size() == 0)
                 DLOG(INFO) << "event vector is empty";
               event_vector.insert(event_vector.end(), events.begin(),
@@ -119,15 +124,15 @@ public:
       // task finish update resource
 
       std::vector<std::shared_ptr<Event>> events =
-          workers_->at(sg.GetWorkerID())
-              .TaskFinish(time, event_id, finish_task);
+          workers_.at(sg.GetWorkerID())
+              ->TaskFinish(time, event_id, finish_task);
       event_vector.insert(event_vector.end(), events.begin(), events.end());
       users_->at(job_.GetUserID()).TaskFinish(time, finish_task);
 
       subgraph_finished_task_[subgraph_id]++;
       // subgraph finish update memory
       if (sg.GetShardTasks().size() == subgraph_finished_task_[subgraph_id]) {
-        workers_->at(sg.GetWorkerID()).SubGraphFinish(time, sg.GetMemory());
+        workers_.at(sg.GetWorkerID())->SubGraphFinish(time, sg.GetMemory());
         users_->at(job_.GetUserID()).SubGraphFinish(time, sg.GetMemory());
         DLOG(INFO) << "finish subgraph: " << subgraph_id
                    << " of job id: " << sg.GetJobID();
@@ -158,9 +163,8 @@ public:
             ShardTask task = id_to_shard_task_[child];
             std::vector<std::shared_ptr<Event>> update_event_vector =
                 workers_
-                    ->at(
-                        job_.GetSubGraphs().at(child_subgraph_id).GetWorkerID())
-                    .PlaceNewTask(time, task);
+                    .at(job_.GetSubGraphs().at(child_subgraph_id).GetWorkerID())
+                    ->PlaceNewTask(time, task);
             event_vector.insert(event_vector.end(), update_event_vector.begin(),
                                 update_event_vector.end());
           }
@@ -209,7 +213,7 @@ public:
 
   void BuildDependencies() {
     for (int i = 0; i < job_.GetSubGraphs().size(); ++i) {
-      const auto &sg = job_.GetSubGraphs().at(i);
+      auto &sg = job_.GetSubGraphs().at(i);
       for (const auto &st : sg.GetShardTasks()) {
         shard_task_to_subgraph_[ShardTaskID{st.GetTaskID(), st.GetShardID()}] =
             i;
@@ -243,7 +247,7 @@ private:
   std::map<ShardTaskID, int> dep_finish_counter_; // for task
   std::map<int, int> subgraph_dep_counter_;
   std::map<int, int> subgraph_dep_finish_counter_;
-  std::shared_ptr<std::vector<Worker>> workers_;
+  std::vector<std::shared_ptr<WorkerAbstract>> workers_;
   std::shared_ptr<std::vector<User>> users_;
 }; // namespace simulation
 

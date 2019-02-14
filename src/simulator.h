@@ -30,6 +30,7 @@
 #include "job_manager.h"
 #include "scheduler/scheduler.h"
 #include "user.h"
+#include "worker/node_manager.h"
 #include "worker/worker.h"
 
 namespace axe {
@@ -40,31 +41,47 @@ using nlohmann::json;
 class Simulator {
 public:
   Simulator() = default;
-  explicit Simulator(const json &workers_json, const json &jobs_json) {
+  explicit Simulator(const json &workers_json, const json &jobs_json,
+                     const std::string &executor) {
     invalid_event_id_set_ = std::make_shared<std::set<int>>();
-    workers_ = std::make_shared<std::vector<Worker>>();
+
+    if (executor == "YARN") {
+      is_worker_ = false;
+    }
+
     users_ = std::make_shared<std::vector<User>>();
     from_json(workers_json, *this);
     from_json(jobs_json, *this);
-    for (int i = 0; i < workers_->size(); ++i) {
-      (*workers_)[i].Init(i, invalid_event_id_set_);
+    if (is_worker_) {
+      for (auto worker : workers_) {
+        workers_abstract_.push_back(worker);
+      }
+    } else {
+      for (auto worker : node_manager_) {
+        workers_abstract_.push_back(worker);
+      }
+    }
+
+    for (int i = 0; i < workers_abstract_.size(); ++i) {
+      workers_abstract_[i]->Init(i, invalid_event_id_set_);
     }
   }
 
-  void Init() {
+  void Init(const std::string &executor) {
     // TODO(SXD): read the configuration file and new JMs and Scheduler
     // read the configuration file and parse into WS and JS
 
-    scheduler_ = std::make_shared<Scheduler>(workers_, users_);
+    scheduler_ = std::make_shared<Scheduler>(workers_abstract_, users_);
 
-    for (const auto &worker : *workers_) {
-      cluster_resource_capacity_.AddToMe(worker.GetRemainResourcePack());
+    for (const auto &worker : workers_abstract_) {
+      cluster_resource_capacity_.AddToMe(worker->GetRemainResourcePack());
     }
 
     int size = jobs_.size();
     int users_size = 0;
     for (const auto &job : jobs_) {
-      jms_.push_back(std::make_shared<JobManager>(job, workers_, users_));
+      jms_.push_back(std::make_shared<JobManager>(job, workers_abstract_,
+                                                  users_, executor));
       users_size = std::max(users_size, job.GetUserID() + 1);
     }
 
@@ -106,9 +123,9 @@ public:
   void Report() {
     std::string prefix = "report/worker_";
     std::string suffix = ".csv";
-    for (int i = 0; i < workers_->size(); ++i) {
+    for (int i = 0; i < workers_abstract_.size(); ++i) {
       std::ofstream fout(prefix + std::to_string(i) + suffix, std::ios::out);
-      (*workers_)[i].ReportUtilization(fout);
+      workers_abstract_[i]->ReportUtilization(fout);
       fout.close();
     }
     scheduler_->Report();
@@ -139,19 +156,26 @@ public:
 
   friend void from_json(const json &j, Simulator &sim) {
     if (j.find("worker") != j.end()) {
-      j.at("worker").get_to(*(sim.workers_));
+      if (sim.is_worker_) {
+        j.at("worker").get_to(sim.workers_);
+      } else {
+        j.at("worker").get_to(sim.node_manager_);
+      }
     } else if (j.find("job") != j.end()) {
       j.at("job").get_to(sim.jobs_);
     }
   }
 
 private:
+  bool is_worker_ = true;
   ResourcePack cluster_resource_capacity_;
   std::vector<Job> jobs_;
   std::shared_ptr<Scheduler> scheduler_;
   std::vector<std::shared_ptr<JobManager>> jms_;
   EventQueue event_queue_;
-  std::shared_ptr<std::vector<Worker>> workers_;
+  std::vector<std::shared_ptr<Worker>> workers_;
+  std::vector<std::shared_ptr<NodeManager>> node_manager_;
+  std::vector<std::shared_ptr<WorkerAbstract>> workers_abstract_;
   std::shared_ptr<std::vector<User>> users_;
   std::map<EventType, std::string> event_map_ = {
       {EventType::TASK_FINISH, "TASK FINISH"},

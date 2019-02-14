@@ -34,9 +34,9 @@ protected:
   void SetUp() {}
   void TearDown() {}
 };
-
+/*
 TEST_F(TestScheduler, NewJobEvent) {
-  std::shared_ptr<std::vector<Worker>> workers =
+  std::shared_ptr<std::vector<WorkerAbstract>> workers =
       std::make_shared<std::vector<Worker>>();
   auto invalid_event_id_set = std::make_shared<std::set<int>>();
   Worker w1(10, 10, 10, 10);
@@ -58,7 +58,7 @@ TEST_F(TestScheduler, NewJobEvent) {
   EXPECT_EQ(event->GetEventPrincipal(), 0);
 }
 
-/*
+
 TEST_F(TestScheduler, NewTaskReqEvent) {
   axe::simulation::AlgorithmBook::Init("FIFO");
   std::shared_ptr<std::vector<Worker>> workers =

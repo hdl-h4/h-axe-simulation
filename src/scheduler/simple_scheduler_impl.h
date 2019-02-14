@@ -38,7 +38,7 @@ namespace simulation {
 
 class SimpleSchedulerImpl : public SchedulerImpl {
 public:
-  SimpleSchedulerImpl(const std::shared_ptr<std::vector<Worker>> workers,
+  SimpleSchedulerImpl(std::vector<std::shared_ptr<WorkerAbstract>> &workers,
                       const std::shared_ptr<std::vector<User>> users)
       : SchedulerImpl(workers, users) {}
   std::vector<std::shared_ptr<Event>>

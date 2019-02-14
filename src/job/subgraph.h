@@ -124,6 +124,7 @@ public:
   inline const auto &GetResourcePack() const { return resource_pack_; }
   inline auto GetWorkerID() const { return worker_id_; }
   inline void SetWorkerID(int worker_id) { worker_id_ = worker_id; }
+  inline void SetIsNodeManager() { is_worker_ = false; }
   inline const auto &GetDataLocality() const { return data_locality_; }
   inline auto GetMemory() const { return memory_; }
   inline auto GetJobID() const { return job_id_; }

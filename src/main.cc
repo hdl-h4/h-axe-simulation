@@ -60,9 +60,9 @@ int main(int argc, char **argv) {
 
   LOG(INFO) << "start simulation";
   axe::simulation::Simulator simulator(ReadJsonFromFile(argv[1]),
-                                       ReadJsonFromFile(argv[2]));
+                                       ReadJsonFromFile(argv[2]), argv[4]);
   SetAlgorithm(ReadJsonFromFile(argv[3]));
-  simulator.Init();
+  simulator.Init(argv[4]);
   simulator.Print();
   simulator.Serve();
   simulator.Report();

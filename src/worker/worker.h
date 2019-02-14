@@ -37,6 +37,7 @@ public:
 
   void Init(int worker_id,
             std::shared_ptr<std::set<int>> invalid_event_id_set) {
+
     worker_id_ = worker_id;
     invalid_event_id_set_ = invalid_event_id_set;
     worker_cpu_ = WorkerCPU(worker_id_, resource_capacity_, resource_usage_,
@@ -47,21 +48,6 @@ public:
     worker_network_ =
         WorkerNetwork(worker_id_, resource_capacity_, resource_usage_,
                       resource_reservation_, invalid_event_id_set_, true);
-  }
-
-  friend void from_json(const json &j, Worker &worker) {
-    worker.resource_capacity_ = std::make_shared<ResourcePack>();
-    worker.resource_usage_ = std::make_shared<ResourcePack>();
-    worker.resource_reservation_ = std::make_shared<ResourcePack>();
-    worker.resource_maximum_reservation_ = std::make_shared<ResourcePack>();
-    j.get_to(*(worker.resource_capacity_));
-    worker.records_.insert(worker.GenerateUtilizationRecord(0));
-    *(worker.resource_maximum_reservation_) = {
-        2000, worker.resource_capacity_->GetMemory(), 2000, 2000};
-  }
-
-  inline auto GetRemainResourcePack() const {
-    return resource_capacity_->Subtract(*resource_usage_);
   }
 
   // subgraph finish
@@ -83,42 +69,6 @@ public:
     DLOG(INFO) << "mem: " << resource_reservation_->GetMemory();
     DLOG(INFO) << "disk: " << resource_reservation_->GetDisk();
     DLOG(INFO) << "net: " << resource_reservation_->GetNetwork();
-  }
-
-  void ReportUtilization(std::ofstream &fout) {
-    int time = 0;
-    fout << "#CPU"
-         << "\t"
-         << "MEMORY"
-         << "\t"
-         << "DISK"
-         << "\t"
-         << "NETWORK" << std::endl;
-    for (auto iter = records_.begin(); iter != records_.end(); ++iter) {
-      int time = iter->first;
-      std::vector<double> record = iter->second;
-      // fout << time << "\t";
-      for (int i = 0; i < record.size(); ++i) {
-        fout << record[i];
-        if (i < record.size() - 1)
-          fout << "\t";
-      }
-      fout << std::endl;
-      auto next_iter = std::next(iter, 1);
-      if (next_iter != records_.end()) {
-        ++time;
-        while (time < next_iter->first) {
-          // fout << time << "\t";
-          for (int i = 0; i < record.size(); ++i) {
-            fout << record[i];
-            if (i < record.size() - 1)
-              fout << "\t";
-          }
-          fout << std::endl;
-          ++time;
-        }
-      }
-    }
   }
 
   bool Reserve(ResourcePack resource) {
@@ -152,8 +102,16 @@ public:
         *resource_maximum_reservation_);
   }
 
-  ResourcePack GetAvailableResource() {
-    return resource_capacity_->Subtract(*resource_usage_);
+  friend void from_json(const json &j, std::shared_ptr<Worker> &worker) {
+    worker = std::make_shared<Worker>();
+    worker->resource_capacity_ = std::make_shared<ResourcePack>();
+    worker->resource_usage_ = std::make_shared<ResourcePack>();
+    worker->resource_reservation_ = std::make_shared<ResourcePack>();
+    j.get_to(*(worker->resource_capacity_));
+    worker->resource_maximum_reservation_ = std::make_shared<ResourcePack>();
+    *(worker->resource_maximum_reservation_) = {
+        2000, worker->resource_capacity_->GetMemory(), 2000, 2000};
+    worker->records_.insert(worker->GenerateUtilizationRecord(0));
   }
 
 private:

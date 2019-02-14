@@ -33,6 +33,7 @@ public:
 
   void Init(int worker_id,
             std::shared_ptr<std::set<int>> invalid_event_id_set) {
+    records_.insert(GenerateUtilizationRecord(0));
     worker_id_ = worker_id;
     invalid_event_id_set_ = invalid_event_id_set;
     CHECK(false) << "stop here";
@@ -44,14 +45,6 @@ public:
     worker_network_ =
         WorkerNetwork(worker_id_, resource_capacity_, resource_usage_,
                       resource_reservation_, invalid_event_id_set_, false);
-  }
-
-  friend void from_json(const json &j, NodeManager &manager) {
-    manager.resource_capacity_ = std::make_shared<ResourcePack>();
-    manager.resource_usage_ = std::make_shared<ResourcePack>();
-    manager.resource_reservation_ = std::make_shared<ResourcePack>();
-    j.get_to(*(manager.resource_capacity_));
-    manager.records_.insert(manager.GenerateUtilizationRecord(0));
   }
 
   // subgraph finish
@@ -75,6 +68,14 @@ public:
 
   bool TryToReserve(ResourcePack resource) {
     return resource_reservation_->Add(resource).FitIn(*resource_capacity_);
+  }
+  friend void from_json(const json &j, std::shared_ptr<NodeManager> &worker) {
+    worker = std::make_shared<NodeManager>();
+    worker->resource_capacity_ = std::make_shared<ResourcePack>();
+    worker->resource_usage_ = std::make_shared<ResourcePack>();
+    worker->resource_reservation_ = std::make_shared<ResourcePack>();
+    j.get_to(*(worker->resource_capacity_));
+    worker->records_.insert(worker->GenerateUtilizationRecord(0));
   }
 
 private:

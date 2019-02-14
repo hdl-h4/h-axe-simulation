@@ -26,7 +26,7 @@ using nlohmann::json;
 
 class Scheduler : public EventHandler {
 public:
-  Scheduler(const std::shared_ptr<std::vector<Worker>> workers,
+  Scheduler(std::vector<std::shared_ptr<WorkerAbstract>> &workers,
             const std::shared_ptr<std::vector<User>> users) {
     // TODO(czk) Change Mode
     impl_ = SchedulerImpl::CreateImpl(workers, users, "RealTime");

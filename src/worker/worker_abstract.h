@@ -39,7 +39,36 @@ using nlohmann::json;
 class WorkerAbstract {
 public:
   virtual void Init(int worker_id,
-                    std::shared_ptr<std::set<int>> invalid_event_id_set) = 0;
+                    std::shared_ptr<std::set<int>> invalid_event_id_set) {}
+
+  virtual void Print() {}
+
+  virtual void PrintReservation() {}
+
+  virtual bool WeakReserve(ResourcePack resource) {}
+
+  virtual bool Reserve(ResourcePack resource) {}
+
+  virtual bool TryToReserve(ResourcePack resource) {}
+
+  virtual void SubGraphFinish(double time, ResourcePack resource) {}
+
+  virtual void SubGraphFinish(double time, double mem) {}
+  /*
+  friend void from_json(const json& j, WorkerAbstract &worker_abstract) {
+    worker_abstract.resource_capacity_ = std::make_shared<ResourcePack>();
+    worker_abstract.resource_usage_ = std::make_shared<ResourcePack>();
+    worker_abstract.resource_reservation_ = std::make_shared<ResourcePack>();
+    //j.get_to(*(worker_abstract.resource_capacity_));
+  }
+
+  void ReadFromJson(const json& j) {
+    resource_capacity_ = std::make_shared<ResourcePack>();
+    resource_usage_ = std::make_shared<ResourcePack>();
+    resource_reservation_ = std::make_shared<ResourcePack>();
+    j.get_to(*(resource_capacity_));
+  }
+  */
 
   // place new task, return true  : task runs;
   //                        false : task waits in queue;
@@ -76,8 +105,6 @@ public:
     records_.insert(GenerateUtilizationRecord(time));
     return event_vector;
   }
-
-  virtual void Print() = 0;
 
   std::pair<int, std::vector<double>> GenerateUtilizationRecord(double time) {
 
@@ -129,9 +156,13 @@ public:
     }
   }
 
-  virtual bool Reserve(ResourcePack resource) = 0;
+  inline auto GetRemainResourcePack() const {
+    return resource_capacity_->Subtract(*resource_usage_);
+  }
 
-  virtual bool TryToReserve(ResourcePack resource) = 0;
+  ResourcePack GetAvailableResource() {
+    return resource_capacity_->Subtract(*resource_usage_);
+  }
 
 protected:
   std::map<int, std::vector<double>> records_;

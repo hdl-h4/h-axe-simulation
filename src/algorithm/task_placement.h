@@ -25,11 +25,11 @@ namespace simulation {
 
 std::vector<std::pair<int, ResourceRequest>>
 FIFO(std::multimap<double, ResourceRequest> &req_queue,
-     std::shared_ptr<std::vector<Worker>>);
+     std::vector<std::shared_ptr<WorkerAbstract>> &);
 
 std::vector<std::pair<int, ResourceRequest>>
 TETRIS(std::multimap<double, ResourceRequest> &req_queue,
-       std::shared_ptr<std::vector<Worker>>);
+       std::vector<std::shared_ptr<WorkerAbstract>> &);
 
 } // namespace simulation
 } // namespace axe

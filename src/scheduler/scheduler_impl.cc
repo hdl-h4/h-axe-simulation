@@ -19,7 +19,7 @@ namespace axe {
 namespace simulation {
 
 std::shared_ptr<SchedulerImpl>
-SchedulerImpl::CreateImpl(const std::shared_ptr<std::vector<Worker>> &workers,
+SchedulerImpl::CreateImpl(std::vector<std::shared_ptr<WorkerAbstract>> &workers,
                           const std::shared_ptr<std::vector<User>> &users,
                           const std::string &mode) {
   return std::make_shared<SimpleSchedulerImpl>(workers, users);

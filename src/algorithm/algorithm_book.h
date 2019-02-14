@@ -46,7 +46,7 @@ private:
   static std::map<std::string,
                   std::function<std::vector<std::pair<int, ResourceRequest>>(
                       std::multimap<double, ResourceRequest> &,
-                      std::shared_ptr<std::vector<Worker>>)>>
+                      std::vector<std::shared_ptr<WorkerAbstract>> &)>>
       task_placement_book;
 };
 
