@@ -27,7 +27,7 @@ std::string AlgorithmBook::task_placement = "";
 std::map<std::string,
          std::function<std::vector<std::pair<int, ResourceRequest>>(
              std::multimap<double, ResourceRequest> &,
-             std::shared_ptr<std::vector<Worker>>)>>
+             std::vector<std::shared_ptr<WorkerAbstract>> &)>>
     AlgorithmBook::task_placement_book = {};
 
 } // namespace simulation

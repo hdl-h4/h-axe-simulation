@@ -26,22 +26,22 @@ namespace simulation {
 
 std::vector<std::pair<int, ResourceRequest>>
 FIFO(std::multimap<double, ResourceRequest> &req_queue,
-     std::shared_ptr<std::vector<Worker>> workers) {
+     std::vector<std::shared_ptr<WorkerAbstract>> &workers) {
   DLOG(INFO) << "task placement: FIFO and Round Robin";
   std::vector<std::pair<int, ResourceRequest>> placement_decision_;
   static int worker_id = -1;
   ResourceRequest req = (*req_queue.begin()).second;
-  worker_id = (worker_id + 1) % (*workers).size();
+  worker_id = (worker_id + 1) % workers.size();
 
   DLOG(INFO) << "reserve on worker " << worker_id;
-  while (workers->at(worker_id).Reserve(req.GetResource())) {
+  while (workers.at(worker_id)->Reserve(req.GetResource())) {
     DLOG(INFO) << "reserve succefully";
     req_queue.erase(req_queue.begin());
     placement_decision_.push_back({worker_id, req});
     if (req_queue.size() == 0) {
       break;
     }
-    worker_id = (worker_id + 1) % (*workers).size();
+    worker_id = (worker_id + 1) % workers.size();
     req = (*req_queue.begin()).second;
     DLOG(INFO) << "reserve on worker " << worker_id;
   }
@@ -50,15 +50,15 @@ FIFO(std::multimap<double, ResourceRequest> &req_queue,
 
 std::vector<std::pair<int, ResourceRequest>>
 TETRIS(std::multimap<double, ResourceRequest> &req_queue,
-       std::shared_ptr<std::vector<Worker>> workers) {
+       std::vector<std::shared_ptr<WorkerAbstract>> &workers) {
   DLOG(INFO) << "task placement: fifo and simplified tetris";
   int worker_id = -1;
   double max_product = 0;
   ResourceRequest req = (*req_queue.begin()).second;
-  for (int i = 0; i < workers->size(); ++i) {
-    if ((*workers)[i].TryToReserve(req.GetResource())) {
+  for (int i = 0; i < workers.size(); ++i) {
+    if (workers[i]->TryToReserve(req.GetResource())) {
       double product =
-          (*workers)[i].GetAvailableResource().DotProduct(req.GetResource());
+          workers[i]->GetAvailableResource().DotProduct(req.GetResource());
       if (product > max_product) {
         max_product = product;
         worker_id = i;
@@ -69,7 +69,7 @@ TETRIS(std::multimap<double, ResourceRequest> &req_queue,
     return {};
   else {
     DLOG(INFO) << "max product is: " << max_product;
-    (*workers)[worker_id].Reserve(req.GetResource());
+    workers[worker_id]->Reserve(req.GetResource());
     req_queue.erase(req_queue.begin());
     return {{worker_id, req}};
   }

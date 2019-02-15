@@ -38,6 +38,11 @@ public:
   inline void SetWorkerID(int subgraph_id, int worker_id) {
     subgraphs_.at(subgraph_id).SetWorkerID(worker_id);
   }
+  void SetIsNodeManager() {
+    for (auto &sg : subgraphs_) {
+      sg.SetIsNodeManager();
+    }
+  }
 
   friend void from_json(const json &j, Job &job) {
     j.at("jobid").get_to(job.job_id_);

@@ -30,7 +30,9 @@
 #include "event_handler.h"
 #include "event_queue.h"
 #include "user.h"
+#include "worker/node_manager.h"
 #include "worker/worker.h"
+#include "worker/worker_abstract.h"
 
 namespace axe {
 namespace simulation {
@@ -38,7 +40,7 @@ namespace simulation {
 class SchedulerImpl {
 public:
   static std::shared_ptr<SchedulerImpl>
-  CreateImpl(const std::shared_ptr<std::vector<Worker>> &workers,
+  CreateImpl(std::vector<std::shared_ptr<WorkerAbstract>> &workers,
              const std::shared_ptr<std::vector<User>> &users,
              const std::string &mode);
   struct Record {
@@ -48,7 +50,7 @@ public:
     double use_time;
   };
 
-  SchedulerImpl(const std::shared_ptr<std::vector<Worker>> &workers,
+  SchedulerImpl(std::vector<std::shared_ptr<WorkerAbstract>> &workers,
                 const std::shared_ptr<std::vector<User>> &users)
       : workers_(workers), users_(users) {}
   virtual std::vector<std::shared_ptr<Event>>
@@ -79,7 +81,7 @@ public:
   // TODO (czk) Do scheduling in a time interval
 
 protected:
-  std::shared_ptr<std::vector<Worker>> workers_;
+  std::vector<std::shared_ptr<WorkerAbstract>> workers_;
   std::vector<Record> records_;
   std::shared_ptr<std::vector<User>> users_;
 };

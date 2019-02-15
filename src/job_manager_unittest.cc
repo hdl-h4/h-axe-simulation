@@ -35,7 +35,7 @@ protected:
   void SetUp() {}
   void TearDown() {}
 };
-
+/*
 json ReadJsonFromFile(const std::string &file) {
   std::ifstream in(file, std::ios::in);
   CHECK(in.is_open()) << "Cannot open json file " << file;
@@ -88,6 +88,7 @@ TEST_F(TestJobManager, JobAdmissionEvent) {
     EXPECT_EQ(event->GetEventPrincipal(), kScheduler);
   }
 }
+*/
 
 } // namespace simulation
 } // namespace axe
