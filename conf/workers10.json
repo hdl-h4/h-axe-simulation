@@ -2,71 +2,71 @@
   "worker" : [
     {
       "id" : 0,
-      "cpu" : 20,
-      "memory" : 40,
+      "cpu" : 32,
+      "memory" : 128,
       "disk" : 1,
       "network" : 1 
     },
     {
       "id" : 1,
-      "cpu" : 20,
-      "memory" : 40,
+      "cpu" : 32,
+      "memory" : 128,
       "disk" : 1,
       "network" : 1 
     },
     {
       "id" : 2,
-      "cpu" : 20,
-      "memory" : 40,
+      "cpu" : 32,
+      "memory" : 128,
       "disk" : 1,
       "network" : 1 
     },
     {
       "id" : 3,
-      "cpu" : 20,
-      "memory" : 40,
+      "cpu" : 32,
+      "memory" : 128,
       "disk" : 1,
       "network" : 1 
     },
     {
       "id" : 4,
-      "cpu" : 20,
-      "memory" : 40,
+      "cpu" : 32,
+      "memory" : 128,
       "disk" : 1,
       "network" : 1  
     },
     {
       "id" : 5,
-      "cpu" : 20,
-      "memory" : 40,
+      "cpu" : 32,
+      "memory" : 128,
       "disk" : 1,
       "network" : 1 
     },
     {
       "id" : 6,
-      "cpu" : 20,
-      "memory" : 40,
+      "cpu" : 32,
+      "memory" : 128,
       "disk" : 1,
       "network" : 1 
     },
     {
       "id" : 7,
-      "cpu" : 20,
-      "memory" : 40,
+      "cpu" : 32,
+      "memory" : 128,
       "disk" : 1,
       "network" : 1 
     },
     {
       "id" : 8,
-      "cpu" : 20,
-      "memory" : 40,
+      "cpu" : 32,
+      "memory" : 128,
       "disk" : 1,
       "network" : 1 
     },
     {
       "id" : 9,
-      "cpu" : 20,
-      "memory" : 40,
+      "cpu" : 32,
+      "memory" : 128,
       "disk" : 1,
       "network" : 1 
     }

@@ -53,10 +53,6 @@ public:
 
   virtual void SubGraphFinish(double time, ResourcePack resource) {}
 
-  virtual void SubGraphFinish(double time, double mem) {}
-
-  virtual void ReportCPUStatus() {}
-
   /*
   friend void from_json(const json& j, WorkerAbstract &worker_abstract) {
     worker_abstract.resource_capacity_ = std::make_shared<ResourcePack>();
@@ -73,6 +69,7 @@ public:
   }
   */
 
+  const auto &GetAverageUsage() { return average_usage_; }
   // place new task, return true  : task runs;
   //                        false : task waits in queue;
   std::vector<std::shared_ptr<Event>> PlaceNewTask(double time,
@@ -113,17 +110,22 @@ public:
 
     std::vector<double> resource_vector;
     for (int i = 0; i < kNumResourceTypes; ++i) {
+      if (resource_usage_->GetResourceByIndex(i) < 0 &&
+          -resource_usage_->GetResourceByIndex(i) < (double)1e-6) {
+        resource_usage_->SetResourceByIndex(i, 0);
+      }
       CHECK(resource_usage_->GetResourceByIndex(i) >= 0)
           << "resource usage cannot be lower than 0";
       resource_vector.push_back(resource_usage_->GetResourceByIndex(i) /
                                 resource_capacity_->GetResourceByIndex(i));
     }
-    std::pair<int, std::vector<double>> record(static_cast<int>(time * 20),
+    std::pair<int, std::vector<double>> record(static_cast<int>(time),
                                                resource_vector);
     return record;
   }
 
-  void ReportUtilization(std::ofstream &fout) {
+  void ReportUtilization(std::ofstream &fout,
+                         std::vector<std::vector<double>> &total_records_) {
     int time = 0;
     fout << "#CPU"
          << "\t"
@@ -132,15 +134,26 @@ public:
          << "DISK"
          << "\t"
          << "NETWORK" << std::endl;
+
+    for (int i = 0; i < kNumResourceTypes; i++) {
+      average_usage_.push_back(0);
+    }
+
+    int idx = 0;
+
     for (auto iter = records_.begin(); iter != records_.end(); ++iter) {
       int time = iter->first;
       std::vector<double> record = iter->second;
       // fout << time << "\t";
       for (int i = 0; i < record.size(); ++i) {
+        if (time < 100000)
+          total_records_.at(time).at(i) += record[i];
+        average_usage_[i] += record[i];
         fout << record[i];
         if (i < record.size() - 1)
           fout << "\t";
       }
+      idx++;
       fout << std::endl;
       auto next_iter = std::next(iter, 1);
       if (next_iter != records_.end()) {
@@ -148,14 +161,20 @@ public:
         while (time < next_iter->first) {
           // fout << time << "\t";
           for (int i = 0; i < record.size(); ++i) {
+            if (time < 100000)
+              total_records_.at(time).at(i) += record[i];
             fout << record[i];
             if (i < record.size() - 1)
               fout << "\t";
           }
+          idx++;
           fout << std::endl;
           ++time;
         }
       }
+    }
+    for (int i = 0; i < kNumResourceTypes; i++) {
+      average_usage_[i] /= records_.size();
     }
   }
 
@@ -169,6 +188,7 @@ public:
 
 protected:
   std::map<int, std::vector<double>> records_;
+  std::vector<double> average_usage_;
   std::shared_ptr<std::set<int>> invalid_event_id_set_;
   int worker_id_;
 

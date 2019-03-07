@@ -88,6 +88,7 @@ public:
   void SetNetwork(double network) {
     resource_[static_cast<int>(ResourceType::kNetwork)] = network;
   }
+  void SetResourceByIndex(int idx, double value) { resource_[idx] = value; }
 
   ResourcePack Add(const ResourcePack &rhs) const {
     ResourcePack result;

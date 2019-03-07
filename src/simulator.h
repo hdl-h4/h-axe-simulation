@@ -121,13 +121,51 @@ public:
   }
 
   void Report() {
+    average_records_.resize(100000);
+    for (int i = 0; i < 100000; i++) {
+      average_records_.at(i).resize(4);
+    }
     std::string prefix = "report/worker_";
     std::string suffix = ".csv";
     for (int i = 0; i < workers_abstract_.size(); ++i) {
       std::ofstream fout(prefix + std::to_string(i) + suffix, std::ios::out);
-      workers_abstract_[i]->ReportUtilization(fout);
+      workers_abstract_[i]->ReportUtilization(fout, average_records_);
       fout.close();
+      std::cout << "average usage of worker " << i
+                << "   CPU : " << workers_abstract_[i]->GetAverageUsage()[0]
+                << ",  Memory : " << workers_abstract_[i]->GetAverageUsage()[1]
+                << ",  Disk : " << workers_abstract_[i]->GetAverageUsage()[2]
+                << ",  Network : " << workers_abstract_[i]->GetAverageUsage()[3]
+                << "\n";
     }
+    std::ofstream fout(std::string("report/cluster_average") + suffix,
+                       std::ios::out);
+    fout << "#CPU"
+         << "\t"
+         << "MEMORY"
+         << "\t"
+         << "DISK"
+         << "\t"
+         << "NETWORK" << std::endl;
+
+    int worker_num = workers_abstract_.size();
+    std::vector<double> average_;
+    average_.resize(4);
+    for (int i = 0; i < 100000; i++) {
+      for (int j = 0; j < average_records_.at(i).size(); j++) {
+        average_[j] += average_records_[i][j] / worker_num;
+        fout << (average_records_[i][j] / worker_num);
+        if (j < average_records_.at(i).size() - 1)
+          fout << "\t";
+      }
+      fout << std::endl;
+    }
+    fout.close();
+    std::cout << "average usage of cluster "
+              << "   CPU : " << average_[0] / 100000
+              << ",  Memory : " << average_[1] / 100000
+              << ",  Disk : " << average_[2] / 100000
+              << ",  Network : " << average_[3] / 100000 << "\n";
     scheduler_->Report();
     prefix = "report/user_";
     for (int i = 0; i < users_->size(); ++i) {
@@ -168,6 +206,7 @@ public:
 
 private:
   bool is_worker_ = true;
+  std::vector<std::vector<double>> average_records_;
   ResourcePack cluster_resource_capacity_;
   std::vector<Job> jobs_;
   std::shared_ptr<Scheduler> scheduler_;

@@ -49,6 +49,7 @@ public:
     if (executor == "YARN") {
       job_.SetIsNodeManager();
     }
+    job_.SetResourcesReq();
     RegisterHandlers();
     BuildDependencies();
   }
@@ -132,7 +133,8 @@ public:
       subgraph_finished_task_[subgraph_id]++;
       // subgraph finish update memory
       if (sg.GetShardTasks().size() == subgraph_finished_task_[subgraph_id]) {
-        workers_.at(sg.GetWorkerID())->SubGraphFinish(time, sg.GetMemory());
+        workers_.at(sg.GetWorkerID())
+            ->SubGraphFinish(time, sg.GetResourcePack());
         users_->at(job_.GetUserID()).SubGraphFinish(time, sg.GetMemory());
         DLOG(INFO) << "finish subgraph: " << subgraph_id
                    << " of job id: " << sg.GetJobID();

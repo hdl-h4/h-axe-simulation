@@ -69,7 +69,7 @@ protected:
                << resource;
     resource_usage_->SetMemory(resource_usage_->GetMemory() + resource);
     CHECK(resource_usage_->GetMemory() <= resource_capacity_->GetMemory())
-        << "memory usage is larger than capactiy!!!";
+        << "memory usage is larger than capacity!!!";
   }
 
   void DecreaseMemoryUsage(double resource) {

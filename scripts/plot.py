@@ -66,7 +66,7 @@ class Painter:
         ax.set_ylabel(self.ylabel)
         ax.set_xlim([0, size-1])
         print("size is {}".format(size))
-        ax.set_ylim([0, 1])
+        ax.set_ylim([0, 1.2])
 
         # TODO xlim
         df.plot(linewidth=self.linewidth, ax=ax)

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <chrono>
+#include <ctime>
 #include <fstream>
 #include <string>
 
@@ -27,6 +29,7 @@
 using json = nlohmann::json;
 
 json ReadJsonFromFile(const std::string &file) {
+  auto read_start = std::chrono::system_clock::now();
   std::ifstream in(file, std::ios::in);
   CHECK(in.is_open()) << "Cannot open json file " << file;
   std::string ret;
@@ -35,6 +38,10 @@ json ReadJsonFromFile(const std::string &file) {
   in.seekg(0, std::ios::beg);
   in.read(&ret[0], ret.size());
   in.close();
+  auto read_end = std::chrono::system_clock::now();
+  std::cout << "Reading " << file << " uses time : "
+            << std::chrono::duration<double>(read_end - read_start).count()
+            << std::endl;
   return json::parse(ret);
 }
 
@@ -71,17 +78,47 @@ int main(int argc, char **argv) {
     LOG(INFO) << "play end";
   } else {
     LOG(INFO) << "start simulation";
+    auto init_start = std::chrono::system_clock::now();
     axe::simulation::Simulator simulator(
         axe::simulation::ReadJsonFromFile(argv[2]),
-        axe::simulation::ReadJsonFromFile(argv[3]), argv[1]);
+        axe::simulation::ReadJsonFromFile(argv[3]), argv[5]);
     axe::simulation::SetAlgorithm(axe::simulation::ReadJsonFromFile(argv[4]));
-    simulator.Init(argv[1]);
+    auto init_end = std::chrono::system_clock::now();
+    std::cout << "Init uses time : "
+              << std::chrono::duration<double>(init_end - init_start).count()
+              << std::endl;
+
+    auto init2_start = std::chrono::system_clock::now();
+    simulator.Init(argv[5]);
+    auto init2_end = std::chrono::system_clock::now();
+    std::cout << "Init2 uses time : "
+              << std::chrono::duration<double>(init2_end - init2_start).count()
+              << std::endl;
+
+    /*
+    auto print_start = std::chrono::system_clock::now();
     simulator.Print();
+    auto print_end = std::chrono::system_clock::now();
+    std::cout << "Print uses time : " << std::chrono::duration<double>(print_end
+    -
+    print_start).count() << std::endl;
+    */
+
+    auto serve_start = std::chrono::system_clock::now();
     simulator.Serve();
+    auto serve_end = std::chrono::system_clock::now();
+    std::cout << "Serving use time : "
+              << std::chrono::duration<double>(serve_end - serve_start).count()
+              << std::endl;
+    auto report_start = std::chrono::system_clock::now();
     simulator.Report();
+    auto report_end = std::chrono::system_clock::now();
+    std::cout
+        << "Reportation use time : "
+        << std::chrono::duration<double>(report_end - report_start).count()
+        << std::endl;
     LOG(INFO) << "simulation end";
   }
-
   google::FlushLogFiles(google::INFO);
   gflags::ShutDownCommandLineFlags();
   return 0;
