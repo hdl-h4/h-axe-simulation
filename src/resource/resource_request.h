@@ -33,6 +33,7 @@ public:
   inline int GetSubGraphID() const { return subgraph_id_; }
   inline const auto &GetDataLocality() const { return data_locality_; }
   inline const auto &GetResource() const { return resource_; }
+  bool IsCPURequest() { return resource_.GetCPU() > 0; }
 
 private:
   int job_id_;

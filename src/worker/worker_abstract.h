@@ -54,6 +54,9 @@ public:
   virtual void SubGraphFinish(double time, ResourcePack resource) {}
 
   virtual void SubGraphFinish(double time, double mem) {}
+
+  virtual void ReportCPUStatus() {}
+
   /*
   friend void from_json(const json& j, WorkerAbstract &worker_abstract) {
     worker_abstract.resource_capacity_ = std::make_shared<ResourcePack>();

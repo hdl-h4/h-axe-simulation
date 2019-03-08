@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#pragma once
+
 #include <fstream>
 #include <string>
 
 #include "glog/logging.h"
 #include "nlohmann/json.hpp"
 
-#include "common.h"
-#include "play_back/player.h"
-#include "simulator.h"
-#include "worker/worker.h"
+#include "algorithm/algorithm_book.h"
+#include "algorithm/task_placement.h"
 
-/*
+namespace axe {
+namespace simulation {
+
 using json = nlohmann::json;
 
 json ReadJsonFromFile(const std::string &file) {
@@ -40,49 +42,15 @@ json ReadJsonFromFile(const std::string &file) {
 
 void PrintAlgorithm() {
   DLOG(INFO) << "Algorithm:";
-  DLOG(INFO) << "TaskPlacement: "
-             << axe::simulation::AlgorithmBook::GetTaskPlacementString();
+  DLOG(INFO) << "TaskPlacement: " << AlgorithmBook::GetTaskPlacementString();
 }
 
 void SetAlgorithm(const json &j) {
   DLOG(INFO) << "set alg";
   std::string task_placement_str;
   j.at("TaskPlacement").get_to(task_placement_str);
-  axe::simulation::AlgorithmBook::Init(task_placement_str);
+  AlgorithmBook::Init(task_placement_str);
   PrintAlgorithm();
 }
-
-*/
-
-int main(int argc, char **argv) {
-  google::InitGoogleLogging(argv[0]);
-  google::SetLogDestination(google::INFO, "log/SIMULATION.INFO");
-  gflags::ParseCommandLineFlags(&argc, &argv, true);
-
-  FLAGS_logbuflevel = -1;
-
-  std::string mode(argv[1]);
-
-  if (mode == "PLAYER") {
-    LOG(INFO) << "start play";
-    axe::simulation::Player player;
-
-    player.Init(axe::simulation::ReadJsonFromFile(argv[2]));
-    LOG(INFO) << "play end";
-  } else {
-    LOG(INFO) << "start simulation";
-    axe::simulation::Simulator simulator(
-        axe::simulation::ReadJsonFromFile(argv[2]),
-        axe::simulation::ReadJsonFromFile(argv[3]), argv[1]);
-    axe::simulation::SetAlgorithm(axe::simulation::ReadJsonFromFile(argv[4]));
-    simulator.Init(argv[1]);
-    simulator.Print();
-    simulator.Serve();
-    simulator.Report();
-    LOG(INFO) << "simulation end";
-  }
-
-  google::FlushLogFiles(google::INFO);
-  gflags::ShutDownCommandLineFlags();
-  return 0;
+}
 }
