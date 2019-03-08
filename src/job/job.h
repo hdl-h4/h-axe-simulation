@@ -43,6 +43,11 @@ public:
       sg.SetIsNodeManager();
     }
   }
+  void SetResourcesReq() {
+    for (auto &sg : subgraphs_) {
+      sg.SetResourcesReq();
+    }
+  }
 
   friend void from_json(const json &j, Job &job) {
     j.at("jobid").get_to(job.job_id_);

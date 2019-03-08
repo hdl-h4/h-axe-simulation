@@ -209,7 +209,7 @@ private:
     }
   }
 
-  int maximum_network_task_number_ = 10; // the maximum number of network tasks
+  int maximum_network_task_number_ = 70; // the maximum number of network tasks
                                          // running on this worker
   int current_network_task_number_ =
       0; // the number of current running network tasks

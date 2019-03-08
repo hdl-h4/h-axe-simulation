@@ -70,9 +70,11 @@ public:
   }
 
   // subgraph finish
-  void SubGraphFinish(double time, double mem) {
-    DLOG(INFO) << "sg finish, release memory reservation: " << mem;
-    resource_reservation_->SetMemory(resource_reservation_->GetMemory() - mem);
+  void SubGraphFinish(double time, ResourcePack resource) {
+    DLOG(INFO) << "sg finish, release memory reservation: "
+               << resource.GetMemory();
+    resource_reservation_->SetMemory(resource_reservation_->GetMemory() -
+                                     resource.GetMemory());
     records_.insert(GenerateUtilizationRecord(time));
   }
 
@@ -129,7 +131,7 @@ public:
     j.get_to(*(worker->resource_capacity_));
     worker->resource_maximum_reservation_ = std::make_shared<ResourcePack>();
     *(worker->resource_maximum_reservation_) = {
-        2000, worker->resource_capacity_->GetMemory(), 2000, 2000};
+        50000000, worker->resource_capacity_->GetMemory(), 1000000, 1000000};
     worker->records_.insert(worker->GenerateUtilizationRecord(0));
   }
 

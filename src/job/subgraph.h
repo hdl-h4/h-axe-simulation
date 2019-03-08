@@ -137,8 +137,6 @@ public:
 
   friend void from_json(const json &j, SubGraph &sg) {
     j.at("shardtask").get_to(sg.shard_tasks_);
-    sg.SetResourcesReq();
-    sg.memory_ = sg.GetMemoryCap();
   }
 
   double GetMemoryCap() {
@@ -173,6 +171,7 @@ public:
   }
 
   void SetResourcesReq() {
+    memory_ = GetMemoryCap();
     if (is_worker_) {
       for (auto &st : shard_tasks_) {
         if (st.GetResourceType() == ResourceType::kCPU) {

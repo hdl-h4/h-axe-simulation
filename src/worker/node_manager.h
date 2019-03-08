@@ -36,7 +36,6 @@ public:
     records_.insert(GenerateUtilizationRecord(0));
     worker_id_ = worker_id;
     invalid_event_id_set_ = invalid_event_id_set;
-    CHECK(false) << "stop here";
     worker_cpu_ = WorkerCPU(worker_id_, resource_capacity_, resource_usage_,
                             resource_reservation_, false);
     worker_disk_ =
@@ -69,6 +68,7 @@ public:
   bool TryToReserve(ResourcePack resource) {
     return resource_reservation_->Add(resource).FitIn(*resource_capacity_);
   }
+
   friend void from_json(const json &j, std::shared_ptr<NodeManager> &worker) {
     worker = std::make_shared<NodeManager>();
     worker->resource_capacity_ = std::make_shared<ResourcePack>();

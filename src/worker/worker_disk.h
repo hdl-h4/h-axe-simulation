@@ -207,7 +207,7 @@ private:
     }
   }
 
-  int maximum_disk_task_number_ = 10; // the maximum number of disk tasks
+  int maximum_disk_task_number_ = 70; // the maximum number of disk tasks
                                       // running on this worker
   int current_disk_task_number_ = 0; // the number of current running disk tasks
   double disk_slot_;
