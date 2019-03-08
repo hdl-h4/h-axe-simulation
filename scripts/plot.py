@@ -65,6 +65,7 @@ class Painter:
         ax.set_xlabel(self.xlabel)
         ax.set_ylabel(self.ylabel)
         ax.set_xlim([0, size-1])
+        print("size is {}".format(size))
         ax.set_ylim([0, 1])
 
         # TODO xlim

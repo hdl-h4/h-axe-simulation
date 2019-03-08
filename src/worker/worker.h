@@ -50,6 +50,25 @@ public:
                       resource_reservation_, invalid_event_id_set_, true);
   }
 
+  void ReportCPUStatus() {
+    std::cout << "cpu reservation limit is "
+              << resource_maximum_reservation_->GetCPU() << std::endl;
+    std::cout << "cpu reservation is " << resource_reservation_->GetCPU()
+              << std::endl;
+    std::cout << "cpu capacity is " << resource_capacity_->GetCPU()
+              << std::endl;
+    std::cout << "cpu usage is " << resource_usage_->GetCPU() << std::endl;
+
+    std::cout << "memory reservation limit is "
+              << resource_maximum_reservation_->GetMemory() << std::endl;
+    std::cout << "memory reservation is " << resource_reservation_->GetMemory()
+              << std::endl;
+    std::cout << "memory capacity is " << resource_capacity_->GetMemory()
+              << std::endl;
+    std::cout << "memory usage is " << resource_usage_->GetMemory()
+              << std::endl;
+  }
+
   // subgraph finish
   void SubGraphFinish(double time, double mem) {
     DLOG(INFO) << "sg finish, release memory reservation: " << mem;

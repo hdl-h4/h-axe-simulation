@@ -96,7 +96,9 @@ protected:
     auto rand_noise =
         std::bind(std::uniform_real_distribution<double>(0, duration),
                   std::mt19937(seed));
-    return rand_noise();
+    double noise = rand_noise();
+    // std::cout << duration << ' ' << noise << std::endl;
+    return noise;
   }
 
   std::shared_ptr<ResourcePack> resource_capacity_;

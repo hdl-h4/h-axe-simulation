@@ -33,8 +33,27 @@ FIFO(std::multimap<double, ResourceRequest> &req_queue,
   ResourceRequest req = (*req_queue.begin()).second;
   worker_id = (worker_id + 1) % workers.size();
 
+  /*
+  if(req.IsCPURequest()) {
+    std::cout << "req cpu: " << req.GetResource().GetCPU() << std::endl;
+    std::cout << "req mem: " << req.GetResource().GetMemory() << std::endl <<
+  std::endl;
+    std::cout << "-----------------------------------------------------" <<
+  std::endl << std::endl;
+    for(int i=0; i< workers.size(); ++i) {
+      std::cout << "worker " << i << std::endl;
+      workers[i]->ReportCPUStatus();
+    }
+    std::cout << "-----------------------------------------------------" <<
+  std::endl << std::endl;
+  }
+  */
+
   DLOG(INFO) << "reserve on worker " << worker_id;
   while (workers.at(worker_id)->Reserve(req.GetResource())) {
+
+    // std::cout << "[!]reserve on worker " << worker_id << std::endl;
+
     DLOG(INFO) << "reserve succefully";
     req_queue.erase(req_queue.begin());
     placement_decision_.push_back({worker_id, req});
@@ -44,6 +63,22 @@ FIFO(std::multimap<double, ResourceRequest> &req_queue,
     worker_id = (worker_id + 1) % workers.size();
     req = (*req_queue.begin()).second;
     DLOG(INFO) << "reserve on worker " << worker_id;
+
+    /*
+    if(req.IsCPURequest()) {
+      std::cout << "req cpu: " << req.GetResource().GetCPU() << std::endl;
+      std::cout << "req mem: " << req.GetResource().GetMemory() << std::endl <<
+    std::endl;;
+      std::cout << "-----------------------------------------------------" <<
+    std::endl << std::endl;
+      for(int i=0; i< workers.size(); ++i) {
+        std::cout << "worker " << i << std::endl;
+        workers[i]->ReportCPUStatus();
+      }
+      std::cout << "-----------------------------------------------------" <<
+    std::endl << std::endl;
+    }
+    */
   }
   return placement_decision_;
 }
